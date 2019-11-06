@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	sdk "github.com/pokt-network/posmint/types"
+	govtypes "github.com/pokt-network/posmint/x/gov/types"
 )
 
 const (
@@ -18,7 +18,7 @@ var _ govtypes.Content = CommunityPoolSpendProposal{}
 
 func init() {
 	govtypes.RegisterProposalType(ProposalTypeCommunityPoolSpend)
-	govtypes.RegisterProposalTypeCodec(CommunityPoolSpendProposal{}, "cosmos-sdk/CommunityPoolSpendProposal")
+	govtypes.RegisterProposalTypeCodec(CommunityPoolSpendProposal{}, "posmint/CommunityPoolSpendProposal")
 }
 
 // CommunityPoolSpendProposal spends from the community pool

@@ -10,10 +10,10 @@ import (
 	"github.com/tendermint/tendermint/crypto/multisig"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/crypto/keys"
-	"github.com/cosmos/cosmos-sdk/tests"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/pokt-network/posmint/client/flags"
+	"github.com/pokt-network/posmint/crypto/keys"
+	"github.com/pokt-network/posmint/tests"
+	sdk "github.com/pokt-network/posmint/types"
 )
 
 func Test_multiSigKey_Properties(t *testing.T) {

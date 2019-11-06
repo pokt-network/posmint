@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/mint/internal/types"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/mint/internal/types"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 )

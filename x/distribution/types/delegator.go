@@ -1,7 +1,7 @@
 package types
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdk "github.com/pokt-network/posmint/types"
 )
 
 // starting info for a delegator reward period

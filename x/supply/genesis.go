@@ -1,9 +1,9 @@
 package supply
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	autypes "github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/supply/internal/types"
+	sdk "github.com/pokt-network/posmint/types"
+	autypes "github.com/pokt-network/posmint/x/auth"
+	"github.com/pokt-network/posmint/x/supply/internal/types"
 )
 
 // InitGenesis sets supply information for genesis.

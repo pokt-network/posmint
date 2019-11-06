@@ -1,6 +1,6 @@
 package types
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
+import sdk "github.com/pokt-network/posmint/types"
 
 // querier keys
 const (

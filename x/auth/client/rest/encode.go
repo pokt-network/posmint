@@ -5,9 +5,9 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/pokt-network/posmint/client/context"
+	"github.com/pokt-network/posmint/types/rest"
+	"github.com/pokt-network/posmint/x/auth/types"
 )
 
 // EncodeResp defines a tx encoding response.

@@ -3,9 +3,9 @@ package cli
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/pokt-network/posmint/client"
+	"github.com/pokt-network/posmint/codec"
+	"github.com/pokt-network/posmint/x/auth/types"
 )
 
 // GetTxCmd returns the transaction commands for this module

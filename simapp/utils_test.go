@@ -9,20 +9,20 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/pokt-network/posmint/codec"
 	"github.com/tendermint/tendermint/crypto/ed25519"
 	cmn "github.com/tendermint/tendermint/libs/common"
 
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/distribution"
-	distr "github.com/cosmos/cosmos-sdk/x/distribution"
-	"github.com/cosmos/cosmos-sdk/x/gov"
-	"github.com/cosmos/cosmos-sdk/x/mint"
-	"github.com/cosmos/cosmos-sdk/x/slashing"
-	"github.com/cosmos/cosmos-sdk/x/staking"
-	"github.com/cosmos/cosmos-sdk/x/supply"
+	"github.com/pokt-network/posmint/x/auth"
+	"github.com/pokt-network/posmint/x/distribution"
+	distr "github.com/pokt-network/posmint/x/distribution"
+	"github.com/pokt-network/posmint/x/gov"
+	"github.com/pokt-network/posmint/x/mint"
+	"github.com/pokt-network/posmint/x/slashing"
+	"github.com/pokt-network/posmint/x/staking"
+	"github.com/pokt-network/posmint/x/supply"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdk "github.com/pokt-network/posmint/types"
 )
 
 var (

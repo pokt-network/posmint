@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"strings"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	authexported "github.com/cosmos/cosmos-sdk/x/auth/exported"
-	"github.com/cosmos/cosmos-sdk/x/supply"
-	supplyexported "github.com/cosmos/cosmos-sdk/x/supply/exported"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/auth"
+	authexported "github.com/pokt-network/posmint/x/auth/exported"
+	"github.com/pokt-network/posmint/x/supply"
+	supplyexported "github.com/pokt-network/posmint/x/supply/exported"
 )
 
 // GenesisAccount is a struct for account initialization used exclusively during genesis

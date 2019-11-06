@@ -6,11 +6,11 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
-	"github.com/cosmos/cosmos-sdk/x/slashing/types"
+	"github.com/pokt-network/posmint/client/context"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/types/rest"
+	"github.com/pokt-network/posmint/x/auth/client/utils"
+	"github.com/pokt-network/posmint/x/slashing/types"
 )
 
 func registerTxRoutes(cliCtx context.CLIContext, r *mux.Router) {

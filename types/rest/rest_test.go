@@ -13,9 +13,9 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/types"
+	"github.com/pokt-network/posmint/client/context"
+	"github.com/pokt-network/posmint/codec"
+	"github.com/pokt-network/posmint/types"
 )
 
 type mockResponseWriter struct{}
@@ -169,7 +169,7 @@ func TestProcessPostResponse(t *testing.T) {
 	acc := mockAccount{addr, coins, pubKey, accNumber, sequence}
 	cdc := codec.New()
 	codec.RegisterCrypto(cdc)
-	cdc.RegisterConcrete(&mockAccount{}, "cosmos-sdk/mockAccount", nil)
+	cdc.RegisterConcrete(&mockAccount{}, "posmint/mockAccount", nil)
 	ctx = ctx.WithCodec(cdc)
 
 	// setup expected results

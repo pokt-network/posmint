@@ -9,11 +9,11 @@ import (
 	"github.com/tendermint/tendermint/libs/cli"
 	tmtypes "github.com/tendermint/tendermint/types"
 
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/server"
-	"github.com/cosmos/cosmos-sdk/x/genutil"
-	"github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"github.com/pokt-network/posmint/client"
+	"github.com/pokt-network/posmint/codec"
+	"github.com/pokt-network/posmint/server"
+	"github.com/pokt-network/posmint/x/genutil"
+	"github.com/pokt-network/posmint/x/genutil/types"
 )
 
 const flagGenTxDir = "gentx-dir"

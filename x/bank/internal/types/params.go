@@ -1,7 +1,7 @@
 package types
 
 import (
-	"github.com/cosmos/cosmos-sdk/x/params"
+	"github.com/pokt-network/posmint/x/params"
 )
 
 const (

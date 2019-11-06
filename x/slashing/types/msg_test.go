@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdk "github.com/pokt-network/posmint/types"
 )
 
 func TestMsgUnjailGetSignBytes(t *testing.T) {
@@ -14,7 +14,7 @@ func TestMsgUnjailGetSignBytes(t *testing.T) {
 	bytes := msg.GetSignBytes()
 	require.Equal(
 		t,
-		`{"type":"cosmos-sdk/MsgUnjail","value":{"address":"cosmosvaloper1v93xxeqhg9nn6"}}`,
+		`{"type":"posmint/MsgUnjail","value":{"address":"cosmosvaloper1v93xxeqhg9nn6"}}`,
 		string(bytes),
 	)
 }

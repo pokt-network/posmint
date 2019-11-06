@@ -3,9 +3,9 @@ package keeper
 import (
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
-	"github.com/cosmos/cosmos-sdk/x/staking/exported"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/distribution/types"
+	"github.com/pokt-network/posmint/x/staking/exported"
 )
 
 // register all distribution invariants

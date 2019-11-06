@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/input"
-	"github.com/cosmos/cosmos-sdk/crypto/keys"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/pokt-network/posmint/client/flags"
+	"github.com/pokt-network/posmint/client/input"
+	"github.com/pokt-network/posmint/crypto/keys"
+	sdk "github.com/pokt-network/posmint/types"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

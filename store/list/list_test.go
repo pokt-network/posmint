@@ -11,9 +11,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store/rootmulti"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/pokt-network/posmint/codec"
+	"github.com/pokt-network/posmint/store/rootmulti"
+	sdk "github.com/pokt-network/posmint/types"
 )
 
 type TestStruct struct {

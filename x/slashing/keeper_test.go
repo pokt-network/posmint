@@ -7,9 +7,9 @@ import (
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/slashing/types"
-	"github.com/cosmos/cosmos-sdk/x/staking"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/slashing/types"
+	"github.com/pokt-network/posmint/x/staking"
 )
 
 // Have to change these parameters for tests

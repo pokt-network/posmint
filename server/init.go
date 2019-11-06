@@ -3,10 +3,10 @@ package server
 import (
 	"fmt"
 
-	"github.com/cosmos/cosmos-sdk/crypto/keys"
+	"github.com/pokt-network/posmint/crypto/keys"
 
-	clkeys "github.com/cosmos/cosmos-sdk/client/keys"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	clkeys "github.com/pokt-network/posmint/client/keys"
+	sdk "github.com/pokt-network/posmint/types"
 )
 
 // GenerateCoinKey returns the address of a public key, along with the secret

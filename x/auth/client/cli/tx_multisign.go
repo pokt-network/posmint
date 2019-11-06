@@ -12,14 +12,14 @@ import (
 	"github.com/tendermint/tendermint/crypto/multisig"
 	"github.com/tendermint/tendermint/libs/cli"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/keys"
-	"github.com/cosmos/cosmos-sdk/codec"
-	crkeys "github.com/cosmos/cosmos-sdk/crypto/keys"
-	"github.com/cosmos/cosmos-sdk/version"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
-	"github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/pokt-network/posmint/client/context"
+	"github.com/pokt-network/posmint/client/flags"
+	"github.com/pokt-network/posmint/client/keys"
+	"github.com/pokt-network/posmint/codec"
+	crkeys "github.com/pokt-network/posmint/crypto/keys"
+	"github.com/pokt-network/posmint/version"
+	"github.com/pokt-network/posmint/x/auth/client/utils"
+	"github.com/pokt-network/posmint/x/auth/types"
 )
 
 // GetSignCommand returns the sign command

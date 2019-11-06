@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdk "github.com/pokt-network/posmint/types"
 )
 
 // An sdk.Tx which is its own sdk.Msg.

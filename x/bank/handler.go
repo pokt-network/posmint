@@ -3,9 +3,9 @@ package bank
 import (
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/bank/internal/keeper"
-	"github.com/cosmos/cosmos-sdk/x/bank/internal/types"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/bank/internal/keeper"
+	"github.com/pokt-network/posmint/x/bank/internal/types"
 )
 
 // NewHandler returns a handler for "bank" type messages.

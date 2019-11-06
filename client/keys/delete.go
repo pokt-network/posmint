@@ -6,8 +6,8 @@ import (
 
 	"github.com/spf13/viper"
 
-	"github.com/cosmos/cosmos-sdk/client/input"
-	"github.com/cosmos/cosmos-sdk/crypto/keys"
+	"github.com/pokt-network/posmint/client/input"
+	"github.com/pokt-network/posmint/crypto/keys"
 
 	"github.com/spf13/cobra"
 )

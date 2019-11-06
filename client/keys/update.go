@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/cosmos/cosmos-sdk/client/input"
+	"github.com/pokt-network/posmint/client/input"
 )
 
 func updateKeyCommand() *cobra.Command {

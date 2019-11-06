@@ -3,9 +3,9 @@ package common
 import (
 	"fmt"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
+	"github.com/pokt-network/posmint/client/context"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/distribution/types"
 )
 
 // QueryParams actually queries distribution params.

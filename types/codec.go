@@ -1,6 +1,6 @@
 package types
 
-import "github.com/cosmos/cosmos-sdk/codec"
+import "github.com/pokt-network/posmint/codec"
 
 // Register the sdk message type
 func RegisterCodec(cdc *codec.Codec) {

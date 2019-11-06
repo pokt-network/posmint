@@ -1,8 +1,8 @@
 package types
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/params"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/params"
 )
 
 // Default parameter namespace

@@ -3,8 +3,8 @@ package context
 import (
 	"fmt"
 
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/pokt-network/posmint/client/flags"
+	sdk "github.com/pokt-network/posmint/types"
 )
 
 // BroadcastTx broadcasts a transactions either synchronously or asynchronously
