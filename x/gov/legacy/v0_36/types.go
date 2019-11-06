@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	v034gov "github.com/cosmos/cosmos-sdk/x/gov/legacy/v0_34"
+	"github.com/pokt-network/posmint/codec"
+	sdk "github.com/pokt-network/posmint/types"
+	v034gov "github.com/pokt-network/posmint/x/gov/legacy/v0_34"
 )
 
 const (
@@ -159,6 +159,6 @@ func ValidateAbstract(codespace sdk.CodespaceType, c Content) sdk.Error {
 
 func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterInterface((*Content)(nil), nil)
-	cdc.RegisterConcrete(TextProposal{}, "cosmos-sdk/TextProposal", nil)
-	cdc.RegisterConcrete(SoftwareUpgradeProposal{}, "cosmos-sdk/SoftwareUpgradeProposal", nil)
+	cdc.RegisterConcrete(TextProposal{}, "posmint/TextProposal", nil)
+	cdc.RegisterConcrete(SoftwareUpgradeProposal{}, "posmint/SoftwareUpgradeProposal", nil)
 }

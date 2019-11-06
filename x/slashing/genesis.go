@@ -1,9 +1,9 @@
 package slashing
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/slashing/types"
-	"github.com/cosmos/cosmos-sdk/x/staking/exported"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/slashing/types"
+	"github.com/pokt-network/posmint/x/staking/exported"
 )
 
 // InitGenesis initialize default parameters

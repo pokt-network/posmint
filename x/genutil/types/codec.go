@@ -1,10 +1,10 @@
 package types
 
 import (
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/pokt-network/posmint/codec"
+	sdk "github.com/pokt-network/posmint/types"
+	authtypes "github.com/pokt-network/posmint/x/auth/types"
+	stakingtypes "github.com/pokt-network/posmint/x/staking/types"
 )
 
 // ModuleCdc defines a generic sealed codec to be used throughout this module

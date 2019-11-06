@@ -18,18 +18,18 @@ import (
 	"github.com/tendermint/tendermint/libs/common"
 	tmtypes "github.com/tendermint/tendermint/types"
 
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/codec"
-	kbkeys "github.com/cosmos/cosmos-sdk/crypto/keys"
-	"github.com/cosmos/cosmos-sdk/server"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/cosmos/cosmos-sdk/x/auth/client/utils"
+	"github.com/pokt-network/posmint/client"
+	"github.com/pokt-network/posmint/client/context"
+	"github.com/pokt-network/posmint/codec"
+	kbkeys "github.com/pokt-network/posmint/crypto/keys"
+	"github.com/pokt-network/posmint/server"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/types/module"
+	"github.com/pokt-network/posmint/x/auth/client/utils"
 
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/genutil"
-	"github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"github.com/pokt-network/posmint/x/auth"
+	"github.com/pokt-network/posmint/x/genutil"
+	"github.com/pokt-network/posmint/x/genutil/types"
 )
 
 // StakingMsgBuildingHelpers helpers for message building gen-tx command

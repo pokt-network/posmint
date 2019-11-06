@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/cosmos/cosmos-sdk/store/types"
+	"github.com/pokt-network/posmint/store/types"
 )
 
 const (

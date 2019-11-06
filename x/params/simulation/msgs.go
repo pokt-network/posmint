@@ -6,11 +6,11 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/baseapp"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/gov"
-	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/cosmos/cosmos-sdk/x/simulation"
+	"github.com/pokt-network/posmint/baseapp"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/gov"
+	"github.com/pokt-network/posmint/x/params"
+	"github.com/pokt-network/posmint/x/simulation"
 )
 
 type simParamChange struct {

@@ -7,8 +7,8 @@ import (
 
 	"github.com/tendermint/tendermint/crypto"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	v034staking "github.com/cosmos/cosmos-sdk/x/staking/legacy/v0_34"
+	sdk "github.com/pokt-network/posmint/types"
+	v034staking "github.com/pokt-network/posmint/x/staking/legacy/v0_34"
 )
 
 const (

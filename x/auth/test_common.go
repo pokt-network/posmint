@@ -7,12 +7,12 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/cosmos/cosmos-sdk/x/params/subspace"
-	"github.com/cosmos/cosmos-sdk/x/supply/exported"
+	"github.com/pokt-network/posmint/codec"
+	"github.com/pokt-network/posmint/store"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/auth/types"
+	"github.com/pokt-network/posmint/x/params/subspace"
+	"github.com/pokt-network/posmint/x/supply/exported"
 )
 
 type testInput struct {
@@ -55,7 +55,7 @@ func setupTestInput() testInput {
 	cdc := codec.New()
 	types.RegisterCodec(cdc)
 	cdc.RegisterInterface((*exported.ModuleAccountI)(nil), nil)
-	cdc.RegisterConcrete(&moduleAccount{}, "cosmos-sdk/ModuleAccount", nil)
+	cdc.RegisterConcrete(&moduleAccount{}, "posmint/ModuleAccount", nil)
 	codec.RegisterCrypto(cdc)
 
 	authCapKey := sdk.NewKVStoreKey("authCapKey")

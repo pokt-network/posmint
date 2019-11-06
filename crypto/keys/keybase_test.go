@@ -10,9 +10,9 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
 
-	"github.com/cosmos/cosmos-sdk/crypto/keys/hd"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/mintkey"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/pokt-network/posmint/crypto/keys/hd"
+	"github.com/pokt-network/posmint/crypto/keys/mintkey"
+	sdk "github.com/pokt-network/posmint/types"
 )
 
 func init() {

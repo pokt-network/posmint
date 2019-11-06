@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/cosmos/cosmos-sdk/tests"
+	"github.com/pokt-network/posmint/tests"
 )
 
 func Test_openDB(t *testing.T) {

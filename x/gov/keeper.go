@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/gov/types"
-	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/cosmos/cosmos-sdk/x/supply/exported"
+	"github.com/pokt-network/posmint/codec"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/gov/types"
+	"github.com/pokt-network/posmint/x/params"
+	"github.com/pokt-network/posmint/x/supply/exported"
 
 	"github.com/tendermint/tendermint/libs/log"
 )

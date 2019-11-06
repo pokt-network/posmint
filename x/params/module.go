@@ -6,10 +6,10 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/cosmos/cosmos-sdk/x/params/types"
+	"github.com/pokt-network/posmint/client/context"
+	"github.com/pokt-network/posmint/codec"
+	"github.com/pokt-network/posmint/types/module"
+	"github.com/pokt-network/posmint/x/params/types"
 )
 
 var (

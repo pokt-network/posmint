@@ -3,8 +3,8 @@ package slashing
 import (
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/slashing/types"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/slashing/types"
 )
 
 func NewHandler(k Keeper) sdk.Handler {

@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/pokt-network/posmint/codec"
 )
 
 func TestNewQuerier(t *testing.T) {

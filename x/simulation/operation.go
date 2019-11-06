@@ -6,8 +6,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/baseapp"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/pokt-network/posmint/baseapp"
+	sdk "github.com/pokt-network/posmint/types"
 )
 
 // Operation runs a state machine transition, and ensures the transition

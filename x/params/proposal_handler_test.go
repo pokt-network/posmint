@@ -9,12 +9,12 @@ import (
 
 	dbm "github.com/tendermint/tm-db"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/cosmos/cosmos-sdk/x/params/subspace"
-	"github.com/cosmos/cosmos-sdk/x/params/types"
+	"github.com/pokt-network/posmint/codec"
+	"github.com/pokt-network/posmint/store"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/params"
+	"github.com/pokt-network/posmint/x/params/subspace"
+	"github.com/pokt-network/posmint/x/params/types"
 )
 
 type testInput struct {

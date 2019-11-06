@@ -3,7 +3,7 @@ package types
 import (
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdk "github.com/pokt-network/posmint/types"
 )
 
 // names used as root for pool module accounts:

@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"io"
 
-	"github.com/cosmos/cosmos-sdk/store/cachekv"
-	"github.com/cosmos/cosmos-sdk/store/tracekv"
-	"github.com/cosmos/cosmos-sdk/store/types"
+	"github.com/pokt-network/posmint/store/cachekv"
+	"github.com/pokt-network/posmint/store/tracekv"
+	"github.com/pokt-network/posmint/store/types"
 )
 
 var _ types.KVStore = Store{}

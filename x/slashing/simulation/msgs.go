@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"math/rand"
 
-	"github.com/cosmos/cosmos-sdk/baseapp"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/simulation"
-	"github.com/cosmos/cosmos-sdk/x/slashing"
+	"github.com/pokt-network/posmint/baseapp"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/simulation"
+	"github.com/pokt-network/posmint/x/slashing"
 )
 
 // SimulateMsgUnjail generates a MsgUnjail with random values

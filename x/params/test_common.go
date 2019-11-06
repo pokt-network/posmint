@@ -6,9 +6,9 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/pokt-network/posmint/codec"
+	"github.com/pokt-network/posmint/store"
+	sdk "github.com/pokt-network/posmint/types"
 )
 
 type invalid struct{}

@@ -1,8 +1,8 @@
 package keeper
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/distribution/types"
 )
 
 // get the delegator withdraw address, defaulting to the delegator address

@@ -6,8 +6,8 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/tests"
+	"github.com/pokt-network/posmint/client/flags"
+	"github.com/pokt-network/posmint/tests"
 )
 
 func Test_runExportCmd(t *testing.T) {

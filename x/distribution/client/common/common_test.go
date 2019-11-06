@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/pokt-network/posmint/client/context"
+	"github.com/pokt-network/posmint/codec"
 )
 
 func TestQueryDelegationRewardsAddrValidation(t *testing.T) {

@@ -1,9 +1,9 @@
 package keeper
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/distribution/types"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/distribution/types"
+	stakingtypes "github.com/pokt-network/posmint/x/staking/types"
 )
 
 // Wrapper struct

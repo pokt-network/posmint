@@ -1,15 +1,15 @@
 package types
 
 import (
-	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/pokt-network/posmint/codec"
 )
 
 // Register concrete types on codec codec
 func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(MsgWithdrawDelegatorReward{}, "cosmos-sdk/MsgWithdrawDelegationReward", nil)
-	cdc.RegisterConcrete(MsgWithdrawValidatorCommission{}, "cosmos-sdk/MsgWithdrawValidatorCommission", nil)
-	cdc.RegisterConcrete(MsgSetWithdrawAddress{}, "cosmos-sdk/MsgModifyWithdrawAddress", nil)
-	cdc.RegisterConcrete(CommunityPoolSpendProposal{}, "cosmos-sdk/CommunityPoolSpendProposal", nil)
+	cdc.RegisterConcrete(MsgWithdrawDelegatorReward{}, "posmint/MsgWithdrawDelegationReward", nil)
+	cdc.RegisterConcrete(MsgWithdrawValidatorCommission{}, "posmint/MsgWithdrawValidatorCommission", nil)
+	cdc.RegisterConcrete(MsgSetWithdrawAddress{}, "posmint/MsgModifyWithdrawAddress", nil)
+	cdc.RegisterConcrete(CommunityPoolSpendProposal{}, "posmint/CommunityPoolSpendProposal", nil)
 }
 
 // generic sealed codec to be used throughout module

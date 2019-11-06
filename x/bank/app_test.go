@@ -3,10 +3,10 @@ package bank_test
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth"
-	"github.com/cosmos/cosmos-sdk/x/bank/internal/types"
-	"github.com/cosmos/cosmos-sdk/x/mock"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/auth"
+	"github.com/pokt-network/posmint/x/bank/internal/types"
+	"github.com/pokt-network/posmint/x/mock"
 
 	"github.com/stretchr/testify/require"
 

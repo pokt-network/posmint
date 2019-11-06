@@ -4,10 +4,10 @@ import (
 	"errors"
 	"reflect"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/pokt-network/posmint/codec"
+	sdk "github.com/pokt-network/posmint/types"
 
-	"github.com/cosmos/cosmos-sdk/store/prefix"
+	"github.com/pokt-network/posmint/store/prefix"
 )
 
 const (

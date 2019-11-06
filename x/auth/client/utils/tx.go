@@ -10,13 +10,13 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/input"
-	"github.com/cosmos/cosmos-sdk/client/keys"
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/pokt-network/posmint/client/context"
+	"github.com/pokt-network/posmint/client/flags"
+	"github.com/pokt-network/posmint/client/input"
+	"github.com/pokt-network/posmint/client/keys"
+	"github.com/pokt-network/posmint/codec"
+	sdk "github.com/pokt-network/posmint/types"
+	authtypes "github.com/pokt-network/posmint/x/auth/types"
 )
 
 // GasEstimateResponse defines a response definition for tx gas estimation.

@@ -11,14 +11,14 @@ import (
 	cfg "github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/crypto"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/module"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/cosmos/cosmos-sdk/x/staking/client/cli"
-	"github.com/cosmos/cosmos-sdk/x/staking/client/rest"
-	"github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/pokt-network/posmint/client/context"
+	"github.com/pokt-network/posmint/codec"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/types/module"
+	authtypes "github.com/pokt-network/posmint/x/auth/types"
+	"github.com/pokt-network/posmint/x/staking/client/cli"
+	"github.com/pokt-network/posmint/x/staking/client/rest"
+	"github.com/pokt-network/posmint/x/staking/types"
 )
 
 var (

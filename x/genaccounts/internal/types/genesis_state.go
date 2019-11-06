@@ -6,7 +6,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/pokt-network/posmint/codec"
 )
 
 // State to Unmarshal

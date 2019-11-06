@@ -4,11 +4,11 @@ import (
 	"crypto/rand"
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/store/dbadapter"
-	"github.com/cosmos/cosmos-sdk/store/gaskv"
-	"github.com/cosmos/cosmos-sdk/store/iavl"
-	"github.com/cosmos/cosmos-sdk/store/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/pokt-network/posmint/store/dbadapter"
+	"github.com/pokt-network/posmint/store/gaskv"
+	"github.com/pokt-network/posmint/store/iavl"
+	"github.com/pokt-network/posmint/store/types"
+	sdk "github.com/pokt-network/posmint/types"
 
 	"github.com/stretchr/testify/require"
 

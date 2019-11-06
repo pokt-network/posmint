@@ -3,9 +3,9 @@ package keeper
 import (
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/params"
-	"github.com/cosmos/cosmos-sdk/x/staking/types"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/params"
+	"github.com/pokt-network/posmint/x/staking/types"
 )
 
 // Default parameter namespace

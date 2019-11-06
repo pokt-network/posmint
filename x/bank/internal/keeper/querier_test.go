@@ -8,9 +8,9 @@ import (
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/cosmos/cosmos-sdk/x/bank/internal/types"
+	sdk "github.com/pokt-network/posmint/types"
+	authtypes "github.com/pokt-network/posmint/x/auth/types"
+	"github.com/pokt-network/posmint/x/bank/internal/types"
 )
 
 func TestBalances(t *testing.T) {

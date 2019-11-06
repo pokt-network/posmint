@@ -1,12 +1,12 @@
 package types
 
 import (
-	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/pokt-network/posmint/codec"
 )
 
 // Register concrete types on codec codec
 func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(MsgVerifyInvariant{}, "cosmos-sdk/MsgVerifyInvariant", nil)
+	cdc.RegisterConcrete(MsgVerifyInvariant{}, "posmint/MsgVerifyInvariant", nil)
 }
 
 // generic sealed codec to be used throughout module

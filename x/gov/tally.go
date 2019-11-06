@@ -1,9 +1,9 @@
 package gov
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/gov/types"
-	"github.com/cosmos/cosmos-sdk/x/staking/exported"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/gov/types"
+	"github.com/pokt-network/posmint/x/staking/exported"
 )
 
 // validatorGovInfo used for tallying

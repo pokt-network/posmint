@@ -3,7 +3,7 @@ package cachekv
 import (
 	"bytes"
 
-	"github.com/cosmos/cosmos-sdk/store/types"
+	"github.com/pokt-network/posmint/store/types"
 )
 
 // cacheMergeIterator merges a parent Iterator and a cache Iterator.

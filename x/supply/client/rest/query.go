@@ -6,9 +6,9 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/cosmos/cosmos-sdk/x/supply/internal/types"
+	"github.com/pokt-network/posmint/client/context"
+	"github.com/pokt-network/posmint/types/rest"
+	"github.com/pokt-network/posmint/x/supply/internal/types"
 )
 
 // RegisterRoutes registers staking-related REST handlers to a router

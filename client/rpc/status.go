@@ -9,11 +9,11 @@ import (
 
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/cosmos/cosmos-sdk/version"
+	"github.com/pokt-network/posmint/client/context"
+	"github.com/pokt-network/posmint/client/flags"
+	"github.com/pokt-network/posmint/codec"
+	"github.com/pokt-network/posmint/types/rest"
+	"github.com/pokt-network/posmint/version"
 
 	"github.com/tendermint/tendermint/p2p"
 )

@@ -1,11 +1,11 @@
 package store
 
 import (
-	"github.com/cosmos/cosmos-sdk/store/types"
-	stypes "github.com/cosmos/cosmos-sdk/store/types"
+	"github.com/pokt-network/posmint/store/types"
+	stypes "github.com/pokt-network/posmint/store/types"
 )
 
-// Import cosmos-sdk/types/store.go for convenience.
+// Import posmint/types/store.go for convenience.
 // nolint
 type (
 	PruningOptions   = types.PruningOptions

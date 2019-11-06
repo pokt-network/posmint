@@ -6,10 +6,10 @@ import (
 
 	"github.com/tendermint/tendermint/libs/log"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/auth/exported"
-	"github.com/cosmos/cosmos-sdk/x/bank/internal/types"
-	"github.com/cosmos/cosmos-sdk/x/params"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/auth/exported"
+	"github.com/pokt-network/posmint/x/bank/internal/types"
+	"github.com/pokt-network/posmint/x/params"
 )
 
 var _ Keeper = (*BaseKeeper)(nil)
@@ -184,7 +184,7 @@ func (keeper BaseSendKeeper) InputOutputCoins(ctx sdk.Context, inputs []types.In
 	}
 
 	for _, in := range inputs {
-		_, err :=  keeper.SubtractCoins(ctx, in.Address, in.Coins)
+		_, err := keeper.SubtractCoins(ctx, in.Address, in.Coins)
 		if err != nil {
 			return err
 		}

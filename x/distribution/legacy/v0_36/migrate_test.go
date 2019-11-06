@@ -1,8 +1,8 @@
 package v0_36
 
 import (
-	"github.com/cosmos/cosmos-sdk/types"
-	v034distr "github.com/cosmos/cosmos-sdk/x/distribution/legacy/v0_34"
+	"github.com/pokt-network/posmint/types"
+	v034distr "github.com/pokt-network/posmint/x/distribution/legacy/v0_34"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"testing"
 

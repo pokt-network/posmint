@@ -14,14 +14,14 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	rpcserver "github.com/tendermint/tendermint/rpc/lib/server"
 
-	"github.com/cosmos/cosmos-sdk/client/context"
-	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/codec"
-	keybase "github.com/cosmos/cosmos-sdk/crypto/keys"
-	"github.com/cosmos/cosmos-sdk/server"
+	"github.com/pokt-network/posmint/client/context"
+	"github.com/pokt-network/posmint/client/flags"
+	"github.com/pokt-network/posmint/codec"
+	keybase "github.com/pokt-network/posmint/crypto/keys"
+	"github.com/pokt-network/posmint/server"
 
 	// unnamed import of statik for swagger UI support
-	_ "github.com/cosmos/cosmos-sdk/client/lcd/statik"
+	_ "github.com/pokt-network/posmint/client/lcd/statik"
 )
 
 // RestServer represents the Light Client Rest server

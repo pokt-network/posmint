@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	store "github.com/cosmos/cosmos-sdk/store/types"
+	store "github.com/pokt-network/posmint/store/types"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -16,8 +16,8 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/pokt-network/posmint/codec"
+	sdk "github.com/pokt-network/posmint/types"
 )
 
 var (
@@ -42,10 +42,10 @@ func registerTestCodec(cdc *codec.Codec) {
 	sdk.RegisterCodec(cdc)
 
 	// register test types
-	cdc.RegisterConcrete(&txTest{}, "cosmos-sdk/baseapp/txTest", nil)
-	cdc.RegisterConcrete(&msgCounter{}, "cosmos-sdk/baseapp/msgCounter", nil)
-	cdc.RegisterConcrete(&msgCounter2{}, "cosmos-sdk/baseapp/msgCounter2", nil)
-	cdc.RegisterConcrete(&msgNoRoute{}, "cosmos-sdk/baseapp/msgNoRoute", nil)
+	cdc.RegisterConcrete(&txTest{}, "posmint/baseapp/txTest", nil)
+	cdc.RegisterConcrete(&msgCounter{}, "posmint/baseapp/msgCounter", nil)
+	cdc.RegisterConcrete(&msgCounter2{}, "posmint/baseapp/msgCounter2", nil)
+	cdc.RegisterConcrete(&msgNoRoute{}, "posmint/baseapp/msgNoRoute", nil)
 }
 
 // simple one store baseapp
@@ -832,7 +832,7 @@ func TestRunInvalidTransaction(t *testing.T) {
 		// new codec so we can encode the tx, but we shouldn't be able to decode
 		newCdc := codec.New()
 		registerTestCodec(newCdc)
-		newCdc.RegisterConcrete(&msgNoDecode{}, "cosmos-sdk/baseapp/msgNoDecode", nil)
+		newCdc.RegisterConcrete(&msgNoDecode{}, "posmint/baseapp/msgNoDecode", nil)
 
 		txBytes, err := newCdc.MarshalBinaryLengthPrefixed(tx)
 		require.NoError(t, err)
