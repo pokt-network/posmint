@@ -98,7 +98,7 @@ func queryStakedValidators(ctx sdk.Context, req abci.RequestQuery, k Keeper) ([]
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 
-	validators := k.GetStakedValidatorsByPower(ctx)
+	validators := k.GetStakedValidators(ctx)
 
 	start, end := client.Paginate(len(validators), params.Page, params.Limit, int(k.GetParams(ctx).MaxValidators))
 	if start < 0 || end < 0 {

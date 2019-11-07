@@ -34,7 +34,7 @@ var (
 	KeyDowntimeJailDuration        = []byte("DowntimeJailDuration")
 	KeySlashFractionDoubleSign     = []byte("SlashFractionDoubleSign")
 	KeySlashFractionDowntime       = []byte("SlashFractionDowntime")
-	DoubleSignJailEndTime          = time.Unix(253402300799, 0)
+	DoubleSignJailEndTime          = time.Unix(253402300799, 0) // forever
 	DefaultMinSignedPerWindow      = sdk.NewDecWithPrec(5, 1)
 	DefaultSlashFractionDoubleSign = sdk.NewDec(1).Quo(sdk.NewDec(20))
 	DefaultSlashFractionDowntime   = sdk.NewDec(1).Quo(sdk.NewDec(100))
@@ -118,12 +118,11 @@ func (p Params) Equal(p2 Params) bool {
 // String returns a human readable string representation of the parameters.
 func (p Params) String() string {
 	return fmt.Sprintf(`Params:
-  Unstaking Time:    %s
-  Max Validators:    %d
-  Stake Coin Denom:  %s
-  Minimum Stake:     %d
-  Base Proposer Award: %d
-
+  Unstaking Time:          %s
+  Max Validators:          %d
+  Stake Coin Denom:        %s
+  Minimum Stake:     	   %d
+  Base Proposer Award:     %d
   MaxEvidenceAge:          %s
   SignedBlocksWindow:      %d
   MinSignedPerWindow:      %s
@@ -135,7 +134,6 @@ func (p Params) String() string {
 		p.StakeDenom,
 		p.StakeMinimum,
 		p.BaseProposerAward,
-
 		p.MaxEvidenceAge,
 		p.SignedBlocksWindow, p.MinSignedPerWindow,
 		p.DowntimeJailDuration, p.SlashFractionDoubleSign,

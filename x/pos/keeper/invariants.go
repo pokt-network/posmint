@@ -40,7 +40,7 @@ func ModuleAccountInvariants(k Keeper) sdk.Invariant {
 		stakedPool := k.GetStakedTokens(ctx)
 		notStakedPool := k.GetUnstakedTokens(ctx)
 
-		k.IterateValidators(ctx, func(_ int64, validator exported.ValidatorI) bool {
+		k.IterateAndExecuteOverVals(ctx, func(_ int64, validator exported.ValidatorI) bool {
 			switch validator.GetStatus() {
 			case sdk.Bonded, sdk.Unbonding:
 				staked = staked.Add(validator.GetTokens())

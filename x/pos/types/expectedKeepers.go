@@ -37,11 +37,11 @@ type SupplyKeeper interface {
 // ValidatorSet expected properties for the set of all validators (noalias)
 type ValidatorSet interface {
 	// iterate through validators by address, execute func for each validator
-	IterateValidators(sdk.Context, func(index int64, validator stakingexported.ValidatorI) (stop bool))
+	IterateAndExecuteOverVals(sdk.Context, func(index int64, validator stakingexported.ValidatorI) (stop bool))
 	// iterate through staked validators by address, execute func for each validator
-	IterateStakedValidatorsByPower(sdk.Context, func(index int64, validator stakingexported.ValidatorI) (stop bool))
-	// iterate through the validator set of the last block by address, execute func for each validator
-	IteratePrevStateValidators(sdk.Context, func(index int64, validator stakingexported.ValidatorI) (stop bool))
+	IterateAndExecuteOverStakedVals(sdk.Context, func(index int64, validator stakingexported.ValidatorI) (stop bool))
+	// iterate through the validator set of the prevState block by address, execute func for each validator
+	IterateAndExecuteOverPrevStateVals(sdk.Context, func(index int64, validator stakingexported.ValidatorI) (stop bool))
 	// get a particular validator by address
 	Validator(sdk.Context, sdk.ValAddress) stakingexported.ValidatorI
 	// get a particular validator by consensus address
@@ -51,9 +51,9 @@ type ValidatorSet interface {
 	// slash the validator and delegators of the validator, specifying offence height, offence power, and slash fraction
 	Slash(sdk.Context, sdk.ConsAddress, int64, int64, sdk.Dec)
 	// jail a validator
-	Jail(sdk.Context, sdk.ConsAddress)
+	JailValidator(sdk.Context, sdk.ConsAddress)
 	// unjail a validator
-	Unjail(sdk.Context, sdk.ConsAddress)
+	UnjailValidator(sdk.Context, sdk.ConsAddress)
 	// MaxValidators returns the maximum amount of staked validators
 	MaxValidators(sdk.Context) uint64
 }

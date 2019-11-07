@@ -33,14 +33,14 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 func EndBlocker(ctx sdk.Context, k keeper.Keeper) []abci.ValidatorUpdate {
 	// Calculate validator set changes.
 	//
-	// NOTE: ApplyAndReturnValidatorSetUpdates has to come before
+	// NOTE: UpdateTendermintValidators has to come before
 	// UnstakeAllMatureValidators.
 	// This fixes a bug when the unstaking period is instant (is the case in
 	// some of the tests). The test expected the validator to be completely
 	// unstakeed after the Endblocker (go from Stakeed -> Unstakeing during
-	// ApplyAndReturnValidatorSetUpdates and then Unstakeing -> Unstakeed during
+	// UpdateTendermintValidators and then Unstakeing -> Unstakeed during
 	// UnstakeAllMatureValidators).
-	validatorUpdates := k.ApplyAndReturnValidatorSetUpdates(ctx)
+	validatorUpdates := k.UpdateTendermintValidators(ctx)
 	matureValidators := k.GetMatureValidators(ctx)
 	// Unstake all mature validators from the unstakeing queue.
 	k.UnstakeAllMatureValidators(ctx)
@@ -215,7 +215,7 @@ func handleMsgUnjail(ctx sdk.Context, msg types.MsgUnjail, k Keeper) sdk.Result 
 		return ErrValidatorJailed(k.Codespace()).Result()
 	}
 
-	k.Unjail(ctx, consAddr)
+	k.UnjailValidator(ctx, consAddr)
 
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(

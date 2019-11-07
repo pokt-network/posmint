@@ -4,21 +4,15 @@ import (
 	"encoding/json"
 
 	"github.com/gorilla/mux"
-	"github.com/spf13/cobra"
-	flag "github.com/spf13/pflag"
-
-	abci "github.com/tendermint/tendermint/abci/types"
-	cfg "github.com/tendermint/tendermint/config"
-	"github.com/tendermint/tendermint/crypto"
-
 	"github.com/pokt-network/posmint/client/context"
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/types/module"
-	authtypes "github.com/pokt-network/posmint/x/auth/types"
 	"github.com/pokt-network/posmint/x/pos/client/cli"
 	"github.com/pokt-network/posmint/x/pos/client/rest"
 	"github.com/pokt-network/posmint/x/pos/types"
+	"github.com/spf13/cobra"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 var (
@@ -70,27 +64,6 @@ func (AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
 // GetQueryCmd returns no root query command for the staking module.
 func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 	return cli.GetQueryCmd(StoreKey, cdc)
-}
-
-//_____________________________________
-// extra helpers
-
-// CreateValidatorMsgHelpers - used for gen-tx
-func (AppModuleBasic) CreateValidatorMsgHelpers(ipDefault string) (
-	fs *flag.FlagSet, nodeIDFlag, pubkeyFlag, amountFlag, defaultsDesc string) {
-	return cli.CreateValidatorMsgHelpers(ipDefault)
-}
-
-// PrepareFlagsForTxCreateValidator - used for gen-tx
-func (AppModuleBasic) PrepareFlagsForTxCreateValidator(config *cfg.Config, nodeID,
-	chainID string, valPubKey crypto.PubKey) {
-	cli.PrepareFlagsForTxCreateValidator(config, nodeID, chainID, valPubKey)
-}
-
-// BuildCreateValidatorMsg - used for gen-tx
-func (AppModuleBasic) BuildCreateValidatorMsg(cliCtx context.CLIContext,
-	txBldr authtypes.TxBuilder) (authtypes.TxBuilder, sdk.Msg, error) {
-	return cli.BuildCreateValidatorMsg(cliCtx, txBldr)
 }
 
 // AppModule implements an application module for the staking module.

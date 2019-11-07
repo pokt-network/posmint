@@ -31,7 +31,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, accountKeeper types.AccountKeep
 	// set the parameters from the data
 	keeper.SetParams(ctx, data.Params)
 	// set the 'previous state total power' from the data
-	keeper.SetLastTotalPower(ctx, data.LastTotalPower)
+	keeper.SetPrevStateValidatorsPower(ctx, data.PrevStateTotalPower)
 
 	for _, validator := range data.Validators {
 		// Call the creation hook if not exported
@@ -43,7 +43,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, accountKeeper types.AccountKeep
 
 		// Manually set indices for the first time
 		keeper.SetValidatorByConsAddr(ctx, validator)
-		keeper.SetStakedValByPower(ctx, validator)
+		keeper.SetStakedValidator(ctx, validator)
 
 		// Call the creation hook if not exported
 		if !data.Exported {
@@ -53,7 +53,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, accountKeeper types.AccountKeep
 
 		// update unstaking validators if necessary
 		if validator.IsUnstaking() {
-			keeper.InsertUnstakingValidator(ctx, validator)
+			keeper.SetUnstakingValidator(ctx, validator)
 		}
 
 		if validator.IsStaked() {
@@ -88,7 +88,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, accountKeeper types.AccountKeep
 
 	// don't need to run Tendermint updates if we exported
 	if data.Exported {
-		for _, lv := range data.LastValidatorPowers {
+		for _, lv := range data.PrevStateValidatorPowers {
 			// set the staked validator powers from the previous state
 			keeper.SetPrevStateValPower(ctx, lv.Address, lv.Power)
 			validator, found := keeper.GetValidator(ctx, lv.Address)
@@ -96,17 +96,17 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, accountKeeper types.AccountKeep
 				panic(fmt.Sprintf("validator %s not found", lv.Address))
 			}
 			update := validator.ABCIValidatorUpdate()
-			update.Power = lv.Power // keep the next-val-set offset, use the last power for the first block
+			update.Power = lv.Power // keep the next-val-set offset, use the prevState power for the first block
 			res = append(res, update)
 		}
 	} else {
 		// run tendermint updates
-		res = keeper.ApplyAndReturnValidatorSetUpdates(ctx)
+		res = keeper.UpdateTendermintValidators(ctx)
 	}
 
 	// slashing init genesis below todo
 
-	keeper.IterateValidators(ctx,
+	keeper.IterateAndExecuteOverVals(ctx,
 		func(index int64, validator exported.ValidatorI) bool {
 			keeper.AddPubKeyRelation(ctx, validator.GetConsPubKey())
 			return false
@@ -141,26 +141,26 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, accountKeeper types.AccountKeep
 // the keeper.
 func ExportGenesis(ctx sdk.Context, keeper Keeper) types.GenesisState {
 	params := keeper.GetParams(ctx)
-	lastTotalPower := keeper.GetLastTotalPower(ctx)
+	prevStateTotalPower := keeper.PrevStateValidatorsPower(ctx)
 	validators := keeper.GetAllValidators(ctx)
-	var lastValidatorPowers []types.LastBlockValidatorPower
-	keeper.PrevStateValPowerIterator(ctx, func(addr sdk.ValAddress, power int64) (stop bool) {
-		lastValidatorPowers = append(lastValidatorPowers, types.LastBlockValidatorPower{Address: addr, Power: power})
+	var prevStateValidatorPowers []types.PrevStateBlockValidatorPower
+	keeper.IterateAndExecuteOverPrevStateValsByPower(ctx, func(addr sdk.ValAddress, power int64) (stop bool) {
+		prevStateValidatorPowers = append(prevStateValidatorPowers, types.PrevStateBlockValidatorPower{Address: addr, Power: power})
 		return false
 	})
 
 	return types.GenesisState{
-		Params:              params,
-		LastTotalPower:      lastTotalPower,
-		LastValidatorPowers: lastValidatorPowers,
-		Validators:          validators,
-		Exported:            true,
+		Params:                   params,
+		PrevStateTotalPower:      prevStateTotalPower,
+		PrevStateValidatorPowers: prevStateValidatorPowers,
+		Validators:               validators,
+		Exported:                 true,
 	}
 }
 
 // WriteValidators returns a slice of staked genesis validators.
 func WriteValidators(ctx sdk.Context, keeper Keeper) (vals []tmtypes.GenesisValidator) {
-	keeper.IteratePrevStateValidators(ctx, func(_ int64, validator exported.ValidatorI) (stop bool) {
+	keeper.IterateAndExecuteOverPrevStateVals(ctx, func(_ int64, validator exported.ValidatorI) (stop bool) {
 		vals = append(vals, tmtypes.GenesisValidator{
 			PubKey: validator.GetConsPubKey(),
 			Power:  validator.GetConsensusPower(),

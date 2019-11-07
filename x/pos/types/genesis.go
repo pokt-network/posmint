@@ -6,18 +6,18 @@ import (
 
 // GenesisState - all staking state that must be provided at genesis
 type GenesisState struct {
-	Params              Params                          `json:"params" yaml:"params"`
-	LastTotalPower      sdk.Int                         `json:"last_total_power" yaml:"last_total_power"`
-	LastValidatorPowers []LastBlockValidatorPower       `json:"last_validator_powers" yaml:"last_validator_powers"`
-	Validators          Validators                      `json:"validators" yaml:"validators"`
-	Exported            bool                            `json:"exported" yaml:"exported"`
-	DAO                 DAOPool                         `json:"dao" yaml:"dao"`
-	SigningInfos        map[string]ValidatorSigningInfo `json:"signing_infos" yaml:"signing_infos"`
-	MissedBlocks        map[string][]MissedBlock        `json:"missed_blocks" yaml:"missed_blocks"`
+	Params                   Params                          `json:"params" yaml:"params"`
+	PrevStateTotalPower      sdk.Int                         `json:"prevState_total_power" yaml:"prevState_total_power"`
+	PrevStateValidatorPowers []PrevStateBlockValidatorPower       `json:"prevState_validator_powers" yaml:"prevState_validator_powers"`
+	Validators               Validators                      `json:"validators" yaml:"validators"`
+	Exported                 bool                            `json:"exported" yaml:"exported"`
+	DAO                      DAOPool                         `json:"dao" yaml:"dao"`
+	SigningInfos             map[string]ValidatorSigningInfo `json:"signing_infos" yaml:"signing_infos"`
+	MissedBlocks             map[string][]MissedBlock        `json:"missed_blocks" yaml:"missed_blocks"`
 }
 
-// Last validator power, needed for validator set update logic
-type LastBlockValidatorPower struct {
+// PrevState validator power, needed for validator set update logic
+type PrevStateBlockValidatorPower struct {
 	Address sdk.ValAddress
 	Power   int64
 }

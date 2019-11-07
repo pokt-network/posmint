@@ -81,22 +81,6 @@ func (k Keeper) Slash(ctx sdk.Context, consAddr sdk.ConsAddress, infractionHeigh
 	k.AfterValidatorSlashed(ctx, validator.Address, slashFactor)
 }
 
-// jail a validator
-func (k Keeper) Jail(ctx sdk.Context, consAddr sdk.ConsAddress) {
-	validator := k.mustGetValidatorByConsAddr(ctx, consAddr)
-	k.jailValidator(ctx, validator)
-	logger := k.Logger(ctx)
-	logger.Info(fmt.Sprintf("validator %s jailed", consAddr))
-}
-
-// unjail a validator
-func (k Keeper) Unjail(ctx sdk.Context, consAddr sdk.ConsAddress) {
-	validator := k.mustGetValidatorByConsAddr(ctx, consAddr)
-	k.unjailValidator(ctx, validator)
-	logger := k.Logger(ctx)
-	logger.Info(fmt.Sprintf("validator %s unjailed", consAddr))
-}
-
 // handle a validator signing two blocks at the same height
 // power: power of the double-signing validator at the height of infraction
 func (k Keeper) HandleDoubleSign(ctx sdk.Context, addr crypto.Address, infractionHeight int64, timestamp time.Time, power int64) {
@@ -170,7 +154,7 @@ func (k Keeper) HandleDoubleSign(ctx sdk.Context, addr crypto.Address, infractio
 	)
 	k.Slash(ctx, consAddr, distributionHeight, power, fraction)
 
-	// Jail validator if not already jailed
+	// JailValidator validator if not already jailed
 	// begin unstaking validator if not already unstaking (tombstone)
 	if !validator.IsJailed() {
 		ctx.EventManager().EmitEvent(
@@ -179,7 +163,7 @@ func (k Keeper) HandleDoubleSign(ctx sdk.Context, addr crypto.Address, infractio
 				sdk.NewAttribute(types.AttributeKeyJailed, consAddr.String()),
 			),
 		)
-		k.Jail(ctx, consAddr)
+		k.JailValidator(ctx, consAddr)
 	}
 
 	// Set tombstoned to be true
@@ -258,7 +242,7 @@ func (k Keeper) HandleValidatorSignature(ctx sdk.Context, addr crypto.Address, p
 				consAddr, minHeight, k.MinSignedPerWindow(ctx)))
 
 			// We need to retrieve the stake distribution which signed the block, so we subtract ValidatorUpdateDelay from the evidence height,
-			// and subtract an additional 1 since this is the LastCommit.
+			// and subtract an additional 1 since this is the PrevStateCommit.
 			// Note that this *can* result in a negative "distributionHeight" up to -ValidatorUpdateDelay-1,
 			// i.e. at the end of the pre-genesis block (none) = at the beginning of the genesis block.
 			// That's fine since this is just used to filter unstaking delegations & redelegations.
@@ -274,7 +258,7 @@ func (k Keeper) HandleValidatorSignature(ctx sdk.Context, addr crypto.Address, p
 				),
 			)
 			k.Slash(ctx, consAddr, distributionHeight, power, k.SlashFractionDowntime(ctx))
-			k.Jail(ctx, consAddr)
+			k.JailValidator(ctx, consAddr)
 
 			signInfo.JailedUntil = ctx.BlockHeader().Time.Add(k.DowntimeJailDuration(ctx))
 

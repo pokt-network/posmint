@@ -9,7 +9,7 @@ import (
 	tmtypes "github.com/tendermint/tendermint/types"
 )
 
-// set the proposer for determining distribution during endblock
+// set the proposer for determining distribution during begin block
 // and distribute rewards for the previous block
 func BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock, k Keeper) {
 	// determine the total power signing the block

@@ -12,7 +12,7 @@ import (
 
 // StakingKeeper defines the expected staking keeper (noalias)
 type StakingKeeper interface {
-	ApplyAndReturnValidatorSetUpdates(sdk.Context) (updates []abci.ValidatorUpdate)
+	UpdateTendermintValidators(sdk.Context) (updates []abci.ValidatorUpdate)
 }
 
 // AccountKeeper defines the expected account keeper (noalias)

@@ -21,9 +21,9 @@ var ( // Keys for store prefixes
 	AddrPubkeyRelationKey           = []byte{0x13} // Prefix for address-pubkey relation used in slashing
 	AllValidatorsKey                = []byte{0x21} // prefix for each key to a validator
 	AllValidatorsByConsensusAddrKey = []byte{0x22} // prefix for each key to a validator index, by pubkey
-	StakedValidatorsByPowerKey      = []byte{0x23} // prefix for each key to a staked validator index, sorted by power
-	LastValidatorsPowerKey          = []byte{0x31} // prefix for the key to the validators of the last state
-	LastTotalPowerKey               = []byte{0x32} // prefix for the total power of the last state
+	StakedValidatorsKey             = []byte{0x23} // prefix for each key to a staked validator index, sorted by power
+	PrevStateValidatorsPowerKey     = []byte{0x31} // prefix for the key to the validators of the prevState state
+	PrevStateTotalPowerKey          = []byte{0x32} // prefix for the total power of the prevState state
 	UnstakingValidatorsKey          = []byte{0x41} // prefix for unstaking validator
 	UnstakedValidatorsKey           = []byte{0x42} // prefix for unstaked validators
 )
@@ -50,13 +50,13 @@ func KeyForValidatorInStakingSet(validator Validator) []byte {
 	return getStakedValPowerRankKey(validator)
 }
 
-// generates the key for a validator in the last state
-func KeyForValidatorLastStateByPower(address sdk.ValAddress) []byte {
-	return append(LastValidatorsPowerKey, address...)
+// generates the key for a validator in the prevState state
+func KeyForValidatorPrevStateStateByPower(address sdk.ValAddress) []byte {
+	return append(PrevStateValidatorsPowerKey, address...)
 }
 
 // Removes the prefix bytes from a key to expose true address
-func AddressFromLastValidatorPowerKey(key []byte) []byte {
+func AddressFromPrevStateValidatorPowerKey(key []byte) []byte {
 	return key[1:] // remove prefix bytes
 }
 
@@ -75,7 +75,7 @@ func getStakedValPowerRankKey(validator Validator) []byte {
 	key := make([]byte, 1+powerBytesLen+sdk.AddrLen)
 
 	// generate the key for this validator by deriving it from the main key
-	key[0] = StakedValidatorsByPowerKey[0]
+	key[0] = StakedValidatorsKey[0]
 	copy(key[1:powerBytesLen+1], powerBytes)
 	operAddrInvr := sdk.CopyBytes(validator.Address)
 	for i, b := range operAddrInvr {

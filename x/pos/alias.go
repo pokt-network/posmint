@@ -95,9 +95,9 @@ var (
 	NewMultiStakingHooks               = types.NewMultiStakingHooks
 	GetValidatorKey                    = types.KeyForValByAllVals
 	GetValidatorByConsAddrKey          = types.KeyForValidatorByConsAddr
-	AddressFromLastValidatorPowerKey   = types.AddressFromLastValidatorPowerKey
+	AddressFromPrevStateValidatorPowerKey   = types.AddressFromPrevStateValidatorPowerKey
 	GetValidatorsByPowerIndexKey       = types.KeyForValidatorInStakingSet
-	GetLastValidatorPowerKey           = types.KeyForValidatorLastStateByPower
+	GetPrevStateValidatorPowerKey           = types.KeyForValidatorPrevStateStateByPower
 	ParseValidatorPowerRankKey         = types.ParseValidatorPowerRankKey
 	NewMsgCreateValidator              = types.NewMsgStake
 	DefaultParams                      = types.DefaultParams
@@ -113,11 +113,11 @@ var (
 
 	// variable aliases
 	ModuleCdc                 = types.ModuleCdc
-	LastValidatorPowerKey     = types.LastValidatorsPowerKey
-	LastTotalPowerKey         = types.LastTotalPowerKey
+	PrevStateValidatorPowerKey     = types.PrevStateValidatorsPowerKey
+	PrevStateTotalPowerKey         = types.PrevStateTotalPowerKey
 	ValidatorsKey             = types.AllValidatorsKey
 	ValidatorsByConsAddrKey   = types.AllValidatorsByConsensusAddrKey
-	ValidatorsByPowerIndexKey = types.StakedValidatorsByPowerKey
+	ValidatorsByPowerIndexKey = types.StakedValidatorsKey
 	KeyUnbondingTime          = types.KeyUnstakingTime
 	KeyMaxValidators          = types.KeyMaxValidators
 	KeyBondDenom              = types.KeyStakeDenom
@@ -127,7 +127,7 @@ type (
 	Keeper                = keeper.Keeper
 	CodeType              = types.CodeType
 	GenesisState          = types.GenesisState
-	LastValidatorPower    = types.LastBlockValidatorPower
+	PrevStateValidatorPower    = types.PrevStateBlockValidatorPower
 	MultiStakingHooks     = types.MultiPOSHooks
 	MsgCreateValidator    = types.MsgStake
 	Params                = types.Params
