@@ -10,7 +10,6 @@ import (
 
 	"github.com/pokt-network/posmint/codec"
 	authtypes "github.com/pokt-network/posmint/x/auth/types"
-	stakingtypes "github.com/pokt-network/posmint/x/staking/types"
 )
 
 // GenesisState defines the raw genesis transaction in JSON
@@ -99,12 +98,12 @@ func ValidateGenesis(genesisState GenesisState) error {
 			return errors.New(
 				"must provide genesis StdTx with exactly 1 CreateValidator message")
 		}
-
-		// TODO: abstract back to staking
-		if _, ok := msgs[0].(stakingtypes.MsgCreateValidator); !ok {
-			return fmt.Errorf(
-				"genesis transaction %v does not contain a MsgCreateValidator", i)
-		}
+		_=i
+		// TODO: abstract back to staking FIX
+		//if _, ok := msgs[0].(stakingtypes.MsgCreateValidator); !ok {
+		//	return fmt.Errorf(
+		//		"genesis transaction %v does not contain a MsgCreateValidator", i)
+		//}
 	}
 	return nil
 }

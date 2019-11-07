@@ -13,7 +13,7 @@ import (
 	authexported "github.com/pokt-network/posmint/x/auth/exported"
 	authtypes "github.com/pokt-network/posmint/x/auth/types"
 	"github.com/pokt-network/posmint/x/genutil/types"
-	stakingtypes "github.com/pokt-network/posmint/x/staking/types"
+	stakingtypes "github.com/pokt-network/posmint/x/pos/types"
 )
 
 // SetGenTxsInAppGenesisState - sets the genesis transactions in the app genesis state
@@ -47,7 +47,7 @@ func ValidateAccountInGenesis(appGenesisState map[string]json.RawMessage,
 	stakingDataBz := appGenesisState[stakingtypes.ModuleName]
 	var stakingData stakingtypes.GenesisState
 	cdc.MustUnmarshalJSON(stakingDataBz, &stakingData)
-	bondDenom := stakingData.Params.BondDenom
+	bondDenom := stakingData.Params.StakeDenom
 
 	genUtilDataBz := appGenesisState[stakingtypes.ModuleName]
 	var genesisState GenesisState

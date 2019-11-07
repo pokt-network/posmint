@@ -20,7 +20,7 @@ import (
 	authexported "github.com/pokt-network/posmint/x/auth/exported"
 	authtypes "github.com/pokt-network/posmint/x/auth/types"
 	"github.com/pokt-network/posmint/x/genutil/types"
-	stakingtypes "github.com/pokt-network/posmint/x/staking/types"
+	stakingtypes "github.com/pokt-network/posmint/x/pos/types"
 )
 
 // GenAppStateFromConfig gets the genesis app state from the config
@@ -127,11 +127,11 @@ func CollectStdTxs(cdc *codec.Codec, moniker, genTxsDir string,
 				"each genesis transaction must provide a single genesis message")
 		}
 
-		// TODO abstract out staking message validation back to staking
-		msg := msgs[0].(stakingtypes.MsgCreateValidator)
+		// TODO abstract out staking message validation back to staking FIX
+		msg := msgs[0].(stakingtypes.MsgStake)
 		// validate delegator and validator addresses and funds against the accounts in the state
-		delAddr := msg.DelegatorAddress.String()
-		valAddr := sdk.AccAddress(msg.ValidatorAddress).String()
+		delAddr := msg.Address.String()
+		valAddr := sdk.AccAddress(msg.Address).String()
 
 		delAcc, delOk := addrMap[delAddr]
 		if !delOk {
@@ -153,7 +153,7 @@ func CollectStdTxs(cdc *codec.Codec, moniker, genTxsDir string,
 		}
 
 		// exclude itself from persistent peers
-		if msg.Description.Moniker != moniker {
+		if msg.Address.String() != moniker { // todo fix
 			addressesIPs = append(addressesIPs, nodeAddrIP)
 		}
 	}

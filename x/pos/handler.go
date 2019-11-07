@@ -1,0 +1,244 @@
+package staking
+
+import (
+	"fmt"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/pos/keeper"
+	"github.com/pokt-network/posmint/x/pos/types"
+	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/tendermint/tendermint/libs/common"
+	tmtypes "github.com/tendermint/tendermint/types"
+)
+
+func NewHandler(k keeper.Keeper) sdk.Handler {
+	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
+		ctx = ctx.WithEventManager(sdk.NewEventManager())
+		switch msg := msg.(type) {
+		case types.MsgStake:
+			return handleStake(ctx, msg, k)
+		case types.MsgBeginUnstake:
+			return handleMsgBeginUnstake(ctx, msg, k)
+		case types.MsgUnjail:
+			return handleMsgUnjail(ctx, msg, k)
+		case types.MsgSend:
+			return handleMsgSend(ctx, msg, k)
+		default:
+			errMsg := fmt.Sprintf("unrecognized staking message type: %T", msg)
+			return sdk.ErrUnknownRequest(errMsg).Result()
+		}
+	}
+}
+
+// Called every block, update validator set
+func EndBlocker(ctx sdk.Context, k keeper.Keeper) []abci.ValidatorUpdate {
+	// Calculate validator set changes.
+	//
+	// NOTE: ApplyAndReturnValidatorSetUpdates has to come before
+	// UnstakeAllMatureValidators.
+	// This fixes a bug when the unstaking period is instant (is the case in
+	// some of the tests). The test expected the validator to be completely
+	// unstakeed after the Endblocker (go from Stakeed -> Unstakeing during
+	// ApplyAndReturnValidatorSetUpdates and then Unstakeing -> Unstakeed during
+	// UnstakeAllMatureValidators).
+	validatorUpdates := k.ApplyAndReturnValidatorSetUpdates(ctx)
+	matureValidators := k.GetMatureValidators(ctx)
+	// Unstake all mature validators from the unstakeing queue.
+	k.UnstakeAllMatureValidators(ctx)
+	for _, valAddr := range matureValidators {
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeCompleteUnstaking,
+				sdk.NewAttribute(types.AttributeKeyValidator, valAddr.String()),
+			),
+		)
+	}
+
+	return validatorUpdates
+}
+
+// These functions assume everything has been authenticated,
+// now we just perform action and save
+func handleStake(ctx sdk.Context, msg types.MsgStake, k keeper.Keeper) sdk.Result {
+	if _, found := k.GetValidator(ctx, msg.Address); found {
+		return stakeRegisteredValidator(ctx, msg, k)
+	} else {
+		return stakeNewValidator(ctx, msg, k)
+	}
+}
+
+func stakeNewValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keeper) sdk.Result {
+	// check to see if teh public key has already been register for that validator
+	if _, found := k.GetValidatorByConsAddr(ctx, sdk.GetConsAddress(msg.PubKey)); found {
+		return ErrValidatorPubKeyExists(k.Codespace()).Result()
+	}
+	// ensure the coin denomination is correct
+	if msg.Value.Denom != k.StakeDenom(ctx) {
+		return ErrBadDenom(k.Codespace()).Result()
+	}
+	// check the consensus params
+	if ctx.ConsensusParams() != nil {
+		tmPubKey := tmtypes.TM2PB.PubKey(msg.PubKey)
+		if !common.StringInSlice(tmPubKey.Type, ctx.ConsensusParams().Validator.PubKeyTypes) {
+			return ErrValidatorPubKeyTypeNotSupported(k.Codespace(),
+				tmPubKey.Type,
+				ctx.ConsensusParams().Validator.PubKeyTypes).Result()
+		}
+	}
+	// create validator object using the message fields
+	validator := NewValidator(msg.Address, msg.PubKey, msg.Value.Amount)
+	// check if they can stake
+	if err := k.ValidateValidatorStaking(ctx, validator, msg.Value.Amount); err != nil {
+		return err.Result()
+	}
+	// register the validator in the world state
+	k.RegisterValidator(ctx, validator)
+	// change the validator state to staked
+	err := k.StakeValidator(ctx, validator, msg.Value.Amount)
+	if err != nil {
+		return err.Result()
+	}
+	// create the event
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeCreateValidator,
+			sdk.NewAttribute(types.AttributeKeyValidator, msg.Address.String()),
+		),
+		sdk.NewEvent(
+			types.EventTypeStake,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Address.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Value.Amount.String()),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Address.String()),
+		),
+	})
+	return sdk.Result{Events: ctx.EventManager().Events()}
+}
+
+func stakeRegisteredValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keeper) sdk.Result {
+	// move coins from the msg.Address account to a (self-delegation) delegator account
+	// the validator account and global shares are updated within here
+	validator, found := k.GetValidator(ctx, msg.Address)
+	if !found {
+		return ErrNoValidatorFound(k.Codespace()).Result()
+	}
+	err := k.StakeValidator(ctx, validator, msg.Value.Amount)
+	if err != nil {
+		return err.Result()
+	}
+	// create the event
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeStake,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Address.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Value.Amount.String()),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Address.String()),
+		),
+	})
+	return sdk.Result{Events: ctx.EventManager().Events()}
+}
+
+func handleMsgBeginUnstake(ctx sdk.Context, msg types.MsgBeginUnstake, k keeper.Keeper) sdk.Result {
+	// move coins from the msg.Address account to a (self-delegation) delegator account
+	// the validator account and global shares are updated within here
+	validator, found := k.GetValidator(ctx, msg.Address)
+	if !found {
+		return ErrNoValidatorFound(k.Codespace()).Result()
+	}
+	if err := k.ValidateValidatorBeginUnstaking(ctx, validator); err != nil {
+		return err.Result()
+	}
+	if err := k.BeginUnstakingValidator(ctx, validator); err != nil {
+		return err.Result()
+	}
+	// create the event
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventTypeBeginUnstake,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Address.String()),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.Address.String()),
+		),
+	})
+	return sdk.Result{Events: ctx.EventManager().Events()}
+}
+
+// Validators must submit a transaction to unjail itself after todo
+// having been jailed (and thus unstaked) for downtime
+func handleMsgUnjail(ctx sdk.Context, msg types.MsgUnjail, k Keeper) sdk.Result {
+	validator := k.Validator(ctx, msg.ValidatorAddr)
+	if validator == nil {
+		return types.ErrNoValidatorForAddress(k.Codespace()).Result()
+	}
+
+	// cannot be unjailed if no self-delegation exists
+	selfDel := validator.GetTokens()
+	if selfDel == sdk.ZeroInt() {
+		return types.ErrMissingSelfDelegation(k.Codespace()).Result()
+	}
+
+	if validator.GetTokens().LT(sdk.NewInt(k.MinimumStake(ctx))) {
+		return types.ErrSelfDelegationTooLowToUnjail(k.Codespace()).Result()
+	}
+
+	// cannot be unjailed if not jailed
+	if !validator.IsJailed() {
+		return types.ErrValidatorNotJailed(k.Codespace()).Result()
+	}
+
+	consAddr := sdk.ConsAddress(validator.GetConsPubKey().Address())
+
+	info, found := k.GetValidatorSigningInfo(ctx, consAddr)
+	if !found {
+		return types.ErrNoValidatorForAddress(k.Codespace()).Result()
+	}
+
+	// cannot be unjailed if tombstoned
+	if info.Tombstoned {
+		return ErrValidatorJailed(k.Codespace()).Result()
+	}
+
+	// cannot be unjailed until out of jail
+	if ctx.BlockHeader().Time.Before(info.JailedUntil) {
+		return ErrValidatorJailed(k.Codespace()).Result()
+	}
+
+	k.Unjail(ctx, consAddr)
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeySender, msg.ValidatorAddr.String()),
+		),
+	)
+
+	return sdk.Result{Events: ctx.EventManager().Events()}
+}
+
+func handleMsgSend(ctx sdk.Context, msg types.MsgSend, k Keeper) sdk.Result {
+	err := k.SendCoins(ctx, msg.FromAddress, msg.ToAddress, msg.Amount)
+	if err != nil {
+		return err.Result()
+	}
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+		),
+	)
+
+	return sdk.Result{Events: ctx.EventManager().Events()}
+}
