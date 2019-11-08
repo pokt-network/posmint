@@ -3,16 +3,11 @@ package auth
 import (
 	"encoding/json"
 
-	"github.com/gorilla/mux"
-	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/pokt-network/posmint/client/context"
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/types/module"
-	"github.com/pokt-network/posmint/x/auth/client/cli"
-	"github.com/pokt-network/posmint/x/auth/client/rest"
 	"github.com/pokt-network/posmint/x/auth/types"
 )
 
@@ -21,25 +16,25 @@ var (
 	_ module.AppModuleBasic = AppModuleBasic{}
 )
 
-// app module basics object
+// AppModuleBasic app module basics object
 type AppModuleBasic struct{}
 
-// module name
+// Name module name
 func (AppModuleBasic) Name() string {
 	return types.ModuleName
 }
 
-// register module codec
+// RegisterCodec register module codec
 func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {
 	types.RegisterCodec(cdc)
 }
 
-// default genesis state
+// DefaultGenesis default genesis state
 func (AppModuleBasic) DefaultGenesis() json.RawMessage {
 	return types.ModuleCdc.MustMarshalJSON(types.DefaultGenesisState())
 }
 
-// module validate genesis
+// ValidateGenesis module validate genesis
 func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	var data types.GenesisState
 	err := types.ModuleCdc.UnmarshalJSON(bz, &data)
@@ -49,23 +44,8 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	return types.ValidateGenesis(data)
 }
 
-// register rest routes
-func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	rest.RegisterRoutes(ctx, rtr, types.StoreKey)
-}
-
-// get the root tx command of this module
-func (AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
-	return cli.GetTxCmd(cdc)
-}
-
-// get the root query command of this module
-func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	return cli.GetQueryCmd(cdc)
-}
-
+//AppModule app module object
 //___________________________
-// app module object
 type AppModule struct {
 	AppModuleBasic
 	accountKeeper AccountKeeper
@@ -79,31 +59,31 @@ func NewAppModule(accountKeeper AccountKeeper) AppModule {
 	}
 }
 
-// module name
+// Name module name
 func (AppModule) Name() string {
 	return types.ModuleName
 }
 
-// register invariants
+// RegisterInvariants register invariants
 func (AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 
-// module message route name
+// Route module message route name
 func (AppModule) Route() string { return "" }
 
-// module handler
+// NewHandler module handler
 func (AppModule) NewHandler() sdk.Handler { return nil }
 
-// module querier route name
+// QuerierRoute module querier route name
 func (AppModule) QuerierRoute() string {
 	return types.QuerierRoute
 }
 
-// module querier
+// NewQuerierHandler module querier
 func (am AppModule) NewQuerierHandler() sdk.Querier {
 	return NewQuerier(am.accountKeeper)
 }
 
-// module init-genesis
+// InitGenesis module init-genesis
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
 	var genesisState GenesisState
 	types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
@@ -111,16 +91,16 @@ func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.Va
 	return []abci.ValidatorUpdate{}
 }
 
-// module export genesis
+// ExportGenesis module export genesis
 func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
 	gs := ExportGenesis(ctx, am.accountKeeper)
 	return types.ModuleCdc.MustMarshalJSON(gs)
 }
 
-// module begin-block
+// BeginBlock module begin-block
 func (AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 
-// module end-block
+// EndBlock module end-block
 func (AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
 }
