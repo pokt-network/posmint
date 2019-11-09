@@ -52,21 +52,6 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	return ValidateGenesis(data)
 }
 
-// RegisterRESTRoutes registers the REST routes for the staking module.
-func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	rest.RegisterRoutes(ctx, rtr)
-}
-
-// GetTxCmd returns the root tx command for the staking module.
-func (AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
-	return cli.GetTxCmd(StoreKey, cdc)
-}
-
-// GetQueryCmd returns no root query command for the staking module.
-func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	return cli.GetQueryCmd(StoreKey, cdc)
-}
-
 // AppModule implements an application module for the staking module.
 type AppModule struct {
 	AppModuleBasic
@@ -122,7 +107,7 @@ func (am AppModule) NewQuerierHandler() sdk.Querier {
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
 	var genesisState GenesisState
 	ModuleCdc.MustUnmarshalJSON(data, &genesisState)
-	return InitGenesis(ctx, am.keeper, am.accountKeeper, am.supplyKeeper, genesisState)
+	return InitGenesis(ctx, am.keeper, am.supplyKeeper, genesisState)
 }
 
 // ExportGenesis returns the exported genesis state as raw bytes for the staking

@@ -21,15 +21,6 @@ type MsgStake struct {
 	Value   sdk.Coin       `json:"value" yaml:"value"`
 }
 
-// Stakes validator into the network
-func NewMsgStake(valAddr sdk.ValAddress, pubKey crypto.PubKey, stake sdk.Coin, ) MsgStake {
-	return MsgStake{
-		Address: valAddr,
-		PubKey:  pubKey,
-		Value:   stake,
-	}
-}
-
 // Return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgStake) GetSigners() []sdk.AccAddress {
 	addrs := []sdk.AccAddress{sdk.AccAddress(msg.Address)}
@@ -63,12 +54,6 @@ type MsgBeginUnstake struct {
 	Address sdk.ValAddress `json:"validator_address" yaml:"validator_address"`
 }
 
-func NewMsgBeginUnstake(valAddr sdk.ValAddress) MsgBeginUnstake {
-	return MsgBeginUnstake{
-		Address: valAddr,
-	}
-}
-
 func (msg MsgBeginUnstake) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{sdk.AccAddress(msg.Address)}
 }
@@ -93,12 +78,6 @@ func (msg MsgBeginUnstake) Type() string  { return "begin_unstaking_validator" }
 // MsgUnjail - struct for unjailing jailed validator
 type MsgUnjail struct {
 	ValidatorAddr sdk.ValAddress `json:"address" yaml:"address"` // address of the validator operator
-}
-
-func NewMsgUnjail(validatorAddr sdk.ValAddress) MsgUnjail {
-	return MsgUnjail{
-		ValidatorAddr: validatorAddr,
-	}
 }
 
 //nolint
@@ -126,14 +105,6 @@ type MsgSend struct {
 	FromAddress sdk.ValAddress
 	ToAddress   sdk.ValAddress
 	Amount      sdk.Int
-}
-
-func NewMsgSend(fromAddress, toAddress sdk.ValAddress, amount sdk.Int) MsgSend {
-	return MsgSend{
-		FromAddress: fromAddress,
-		ToAddress:   toAddress,
-		Amount:      amount,
-	}
 }
 
 //nolint

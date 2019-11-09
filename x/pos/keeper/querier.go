@@ -28,8 +28,10 @@ func NewQuerier(k Keeper) sdk.Querier {
 			return querySigningInfo(ctx, req, k)
 		case types.QuerySigningInfos:
 			return querySigningInfos(ctx, req, k)
-		case types.QueryPool:
-			return queryPool(ctx, k)
+		case types.QueryStakedPool:
+			return queryStakedPool(ctx, k)
+		case types.QueryUnstakedPool:
+			return queryUnstakedPool(ctx, k)
 		case types.QueryDAO:
 			return queryDAO(ctx, k)
 		case types.QueryParameters:
@@ -161,10 +163,23 @@ func queryValidator(ctx sdk.Context, req abci.RequestQuery, k Keeper) ([]byte, s
 	return res, nil
 }
 
-func queryPool(ctx sdk.Context, k Keeper) ([]byte, sdk.Error) {
+func queryStakedPool(ctx sdk.Context, k Keeper) ([]byte, sdk.Error) {
 	stakedTokens := k.GetStakedTokens(ctx)
 
 	pool := types.StakingPool(types.NewPool(stakedTokens))
+
+	res, err := codec.MarshalJSONIndent(types.ModuleCdc, pool)
+	if err != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
+	}
+
+	return res, nil
+}
+
+func queryUnstakedPool(ctx sdk.Context, k Keeper) ([]byte, sdk.Error) {
+	unstakedTokens := k.GetUnstakedTokens(ctx)
+
+	pool := types.StakingPool(types.NewPool(unstakedTokens))
 
 	res, err := codec.MarshalJSONIndent(types.ModuleCdc, pool)
 	if err != nil {
