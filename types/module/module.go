@@ -30,12 +30,8 @@ package module
 import (
 	"encoding/json"
 
-	"github.com/gorilla/mux"
-	"github.com/spf13/cobra"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/pokt-network/posmint/client/context"
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 )
@@ -49,11 +45,6 @@ type AppModuleBasic interface {
 	// genesis
 	DefaultGenesis() json.RawMessage
 	ValidateGenesis(json.RawMessage) error
-
-	// client functionality
-	RegisterRESTRoutes(context.CLIContext, *mux.Router)
-	GetTxCmd(*codec.Codec) *cobra.Command
-	GetQueryCmd(*codec.Codec) *cobra.Command
 }
 
 // collections of AppModuleBasic
@@ -91,31 +82,6 @@ func (bm BasicManager) ValidateGenesis(genesis map[string]json.RawMessage) error
 		}
 	}
 	return nil
-}
-
-// RegisterRestRoutes registers all module rest routes
-func (bm BasicManager) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	for _, b := range bm {
-		b.RegisterRESTRoutes(ctx, rtr)
-	}
-}
-
-// add all tx commands to the rootTxCmd
-func (bm BasicManager) AddTxCommands(rootTxCmd *cobra.Command, cdc *codec.Codec) {
-	for _, b := range bm {
-		if cmd := b.GetTxCmd(cdc); cmd != nil {
-			rootTxCmd.AddCommand(cmd)
-		}
-	}
-}
-
-// add all query commands to the rootQueryCmd
-func (bm BasicManager) AddQueryCommands(rootQueryCmd *cobra.Command, cdc *codec.Codec) {
-	for _, b := range bm {
-		if cmd := b.GetQueryCmd(cdc); cmd != nil {
-			rootQueryCmd.AddCommand(cmd)
-		}
-	}
 }
 
 //_________________________________________________________
