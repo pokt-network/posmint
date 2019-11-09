@@ -75,7 +75,7 @@ func NonNegativePowerInvariant(k Keeper) sdk.Invariant {
 		var msg string
 		var broken bool
 
-		iterator := k.StakedValsIterator(ctx)
+		iterator := k.stakedValsIterator(ctx)
 
 		for ; iterator.Valid(); iterator.Next() {
 			validator, found := k.GetValidator(ctx, iterator.Value())

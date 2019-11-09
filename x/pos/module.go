@@ -2,6 +2,7 @@ package staking
 
 import (
 	"encoding/json"
+	"github.com/pokt-network/posmint/x/pos/keeper"
 
 	"github.com/gorilla/mux"
 	"github.com/pokt-network/posmint/client/context"
@@ -16,8 +17,8 @@ import (
 )
 
 var (
-	_ module.AppModule           = AppModule{}
-	_ module.AppModuleBasic      = AppModuleBasic{}
+	_ module.AppModule      = AppModule{}
+	_ module.AppModuleBasic = AppModuleBasic{}
 )
 
 // AppModuleBasic defines the basic application module used by the staking module.
@@ -79,10 +80,10 @@ type AppModule struct {
 func NewAppModule(keeper Keeper, accountKeeper types.AccountKeeper, supplyKeeper types.SupplyKeeper) AppModule {
 
 	return AppModule{
-		AppModuleBasic:      AppModuleBasic{},
-		keeper:              keeper,
-		accountKeeper:       accountKeeper,
-		supplyKeeper:        supplyKeeper,
+		AppModuleBasic: AppModuleBasic{},
+		keeper:         keeper,
+		accountKeeper:  accountKeeper,
+		supplyKeeper:   supplyKeeper,
 	}
 }
 
@@ -116,7 +117,7 @@ func (am AppModule) NewQuerierHandler() sdk.Querier {
 	return NewQuerier(am.keeper)
 }
 
-// InitGenesis performs genesis initialization for the staking module. It returns
+// InitGenesis performs genesis initialization for the pos module. It returns
 // no validator updates.
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
 	var genesisState GenesisState
@@ -131,11 +132,13 @@ func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
 	return ModuleCdc.MustMarshalJSON(gs)
 }
 
-// BeginBlock returns the begin blocker for the staking module.
-func (AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
+// module begin-block
+func (am AppModule) BeginBlock(ctx sdk.Context, req abci.RequestBeginBlock) {
+	keeper.BeginBlocker(ctx, req, am.keeper)
+}
 
 // EndBlock returns the end blocker for the staking module. It returns no validator
 // updates.
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	return EndBlocker(ctx, am.keeper)
+	return keeper.EndBlocker(ctx, am.keeper)
 }

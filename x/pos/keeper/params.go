@@ -41,8 +41,8 @@ func (k Keeper) MinimumStake(ctx sdk.Context) (res int64) {
 	return
 }
 
-func (k Keeper) BaseProposerAward(ctx sdk.Context) (res int8) {
-	k.Paramstore.Get(ctx, types.KeyBaseProposerAward, &res)
+func (k Keeper) ProposerRewardPercentage(ctx sdk.Context) (res int8) {
+	k.Paramstore.Get(ctx, types.KeyProposerRewardPercentage, &res)
 	return
 }
 
@@ -90,17 +90,17 @@ func (k Keeper) SlashFractionDowntime(ctx sdk.Context) (res sdk.Dec) {
 // Get all parameteras as types.Params
 func (k Keeper) GetParams(ctx sdk.Context) types.Params {
 	return types.Params{
-		UnstakingTime:           k.UnStakingTime(ctx),
-		MaxValidators:           k.MaxValidators(ctx),
-		StakeDenom:              k.StakeDenom(ctx),
-		StakeMinimum:            k.MinimumStake(ctx),
-		BaseProposerAward:       k.BaseProposerAward(ctx),
-		MaxEvidenceAge:          k.MaxEvidenceAge(ctx),
-		SignedBlocksWindow:      k.SignedBlocksWindow(ctx),
-		MinSignedPerWindow:      sdk.NewDec(k.MinSignedPerWindow(ctx)),
-		DowntimeJailDuration:    k.DowntimeJailDuration(ctx),
-		SlashFractionDoubleSign: k.SlashFractionDoubleSign(ctx),
-		SlashFractionDowntime:   k.SlashFractionDowntime(ctx),
+		UnstakingTime:            k.UnStakingTime(ctx),
+		MaxValidators:            k.MaxValidators(ctx),
+		StakeDenom:               k.StakeDenom(ctx),
+		StakeMinimum:             k.MinimumStake(ctx),
+		ProposerRewardPercentage: k.ProposerRewardPercentage(ctx),
+		MaxEvidenceAge:           k.MaxEvidenceAge(ctx),
+		SignedBlocksWindow:       k.SignedBlocksWindow(ctx),
+		MinSignedPerWindow:       sdk.NewDec(k.MinSignedPerWindow(ctx)),
+		DowntimeJailDuration:     k.DowntimeJailDuration(ctx),
+		SlashFractionDoubleSign:  k.SlashFractionDoubleSign(ctx),
+		SlashFractionDowntime:    k.SlashFractionDowntime(ctx),
 	}
 }
 

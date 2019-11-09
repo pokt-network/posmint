@@ -26,6 +26,8 @@ var ( // Keys for store prefixes
 	PrevStateTotalPowerKey          = []byte{0x32} // prefix for the total power of the prevState state
 	UnstakingValidatorsKey          = []byte{0x41} // prefix for unstaking validator
 	UnstakedValidatorsKey           = []byte{0x42} // prefix for unstaked validators
+	AwardValidatorKey               = []byte{0x51} // prefix for awarding validators
+	BurnValidatorKey                = []byte{0x52} // prefix for awarding validators
 )
 
 // generates the key for the validator with address
@@ -53,6 +55,15 @@ func KeyForValidatorInStakingSet(validator Validator) []byte {
 // generates the key for a validator in the prevState state
 func KeyForValidatorPrevStateStateByPower(address sdk.ValAddress) []byte {
 	return append(PrevStateValidatorsPowerKey, address...)
+}
+
+// generates the award key for a validator in the current state
+func KeyForValidatorAward(address sdk.ValAddress) []byte {
+	return append(AwardValidatorKey, address...)
+}
+
+func KeyForValidatorBurn(address sdk.ValAddress) []byte {
+	return append(BurnValidatorKey, address...)
 }
 
 // Removes the prefix bytes from a key to expose true address

@@ -5,7 +5,6 @@ import (
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/pos/keeper"
 	"github.com/pokt-network/posmint/x/pos/types"
-	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/common"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
@@ -27,33 +26,6 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 			return sdk.ErrUnknownRequest(errMsg).Result()
 		}
 	}
-}
-
-// Called every block, update validator set
-func EndBlocker(ctx sdk.Context, k keeper.Keeper) []abci.ValidatorUpdate {
-	// Calculate validator set changes.
-	//
-	// NOTE: UpdateTendermintValidators has to come before
-	// UnstakeAllMatureValidators.
-	// This fixes a bug when the unstaking period is instant (is the case in
-	// some of the tests). The test expected the validator to be completely
-	// unstakeed after the Endblocker (go from Stakeed -> Unstakeing during
-	// UpdateTendermintValidators and then Unstakeing -> Unstakeed during
-	// UnstakeAllMatureValidators).
-	validatorUpdates := k.UpdateTendermintValidators(ctx)
-	matureValidators := k.GetMatureValidators(ctx)
-	// Unstake all mature validators from the unstakeing queue.
-	k.UnstakeAllMatureValidators(ctx)
-	for _, valAddr := range matureValidators {
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				types.EventTypeCompleteUnstaking,
-				sdk.NewAttribute(types.AttributeKeyValidator, valAddr.String()),
-			),
-		)
-	}
-
-	return validatorUpdates
 }
 
 // These functions assume everything has been authenticated,
@@ -178,45 +150,11 @@ func handleMsgBeginUnstake(ctx sdk.Context, msg types.MsgBeginUnstake, k keeper.
 // Validators must submit a transaction to unjail itself after todo
 // having been jailed (and thus unstaked) for downtime
 func handleMsgUnjail(ctx sdk.Context, msg types.MsgUnjail, k Keeper) sdk.Result {
-	validator := k.Validator(ctx, msg.ValidatorAddr)
-	if validator == nil {
-		return types.ErrNoValidatorForAddress(k.Codespace()).Result()
+	consAddr, err := validateUnjailMessage(ctx, msg, k)
+	if err != nil {
+		return err.Result()
 	}
-
-	// cannot be unjailed if no self-delegation exists
-	selfDel := validator.GetTokens()
-	if selfDel == sdk.ZeroInt() {
-		return types.ErrMissingSelfDelegation(k.Codespace()).Result()
-	}
-
-	if validator.GetTokens().LT(sdk.NewInt(k.MinimumStake(ctx))) {
-		return types.ErrSelfDelegationTooLowToUnjail(k.Codespace()).Result()
-	}
-
-	// cannot be unjailed if not jailed
-	if !validator.IsJailed() {
-		return types.ErrValidatorNotJailed(k.Codespace()).Result()
-	}
-
-	consAddr := sdk.ConsAddress(validator.GetConsPubKey().Address())
-
-	info, found := k.GetValidatorSigningInfo(ctx, consAddr)
-	if !found {
-		return types.ErrNoValidatorForAddress(k.Codespace()).Result()
-	}
-
-	// cannot be unjailed if tombstoned
-	if info.Tombstoned {
-		return ErrValidatorJailed(k.Codespace()).Result()
-	}
-
-	// cannot be unjailed until out of jail
-	if ctx.BlockHeader().Time.Before(info.JailedUntil) {
-		return ErrValidatorJailed(k.Codespace()).Result()
-	}
-
 	k.UnjailValidator(ctx, consAddr)
-
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
@@ -224,8 +162,40 @@ func handleMsgUnjail(ctx sdk.Context, msg types.MsgUnjail, k Keeper) sdk.Result 
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.ValidatorAddr.String()),
 		),
 	)
-
 	return sdk.Result{Events: ctx.EventManager().Events()}
+}
+
+func validateUnjailMessage(ctx sdk.Context, msg types.MsgUnjail, k Keeper) (consAddr sdk.ConsAddress, err sdk.Error) {
+	validator := k.Validator(ctx, msg.ValidatorAddr)
+	if validator == nil {
+		return nil, types.ErrNoValidatorForAddress(k.Codespace())
+	}
+	// cannot be unjailed if no self-delegation exists
+	selfDel := validator.GetTokens()
+	if selfDel == sdk.ZeroInt() {
+		return nil, types.ErrMissingSelfDelegation(k.Codespace())
+	}
+	if validator.GetTokens().LT(sdk.NewInt(k.MinimumStake(ctx))) {
+		return nil, types.ErrSelfDelegationTooLowToUnjail(k.Codespace())
+	}
+	// cannot be unjailed if not jailed
+	if !validator.IsJailed() {
+		return nil, types.ErrValidatorNotJailed(k.Codespace())
+	}
+	consAddr = sdk.ConsAddress(validator.GetConsPubKey().Address())
+	info, found := k.GetValidatorSigningInfo(ctx, consAddr)
+	if !found {
+		return nil, types.ErrNoValidatorForAddress(k.Codespace())
+	}
+	// cannot be unjailed if tombstoned
+	if info.Tombstoned {
+		return nil, ErrValidatorJailed(k.Codespace())
+	}
+	// cannot be unjailed until out of jail
+	if ctx.BlockHeader().Time.Before(info.JailedUntil) {
+		return nil, ErrValidatorJailed(k.Codespace())
+	}
+	return
 }
 
 func handleMsgSend(ctx sdk.Context, msg types.MsgSend, k Keeper) sdk.Result {

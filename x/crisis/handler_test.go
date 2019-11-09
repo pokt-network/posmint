@@ -84,7 +84,7 @@ package crisis_test
 //	sender := addrs[0]
 //
 //	// set the community pool to empty
-//	feePool := distrKeeper.GetFeePool(ctx)
+//	feePool := distrKeeper.getFeePool(ctx)
 //	feePool.CommunityPool = sdk.DecCoins{}
 //	distrKeeper.SetFeePool(ctx, feePool)
 //

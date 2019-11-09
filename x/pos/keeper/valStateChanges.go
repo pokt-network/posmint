@@ -74,12 +74,12 @@ func (k Keeper) UpdateTendermintValidators(ctx sdk.Context) (updates []abci.Vali
 
 // register the validator in the necessary stores in the world state
 func (k Keeper) RegisterValidator(ctx sdk.Context, validator types.Validator) {
-	k.BeforeValidatorCreated(ctx, validator.Address)
+	k.BeforeValidatorRegistered(ctx, validator.Address)
 	k.SetValidator(ctx, validator)                      // store validator here (master list)
 	k.SetValidatorByConsAddr(ctx, validator)            // store validator here too (by cons address)
 	k.SetStakedValidator(ctx, validator)                // store validator here too (curr staked)
 	k.AddPubKeyRelation(ctx, validator.GetConsPubKey()) // store relationshiop between consAddr and consPub key
-	k.AfterValidatorCreated(ctx, validator.Address)     // call after hook
+	k.AfterValidatorRegistered(ctx, validator.Address)  // call after hook
 }
 
 // validate check called before staking
@@ -145,7 +145,7 @@ func (k Keeper) BeginUnstakingValidator(ctx sdk.Context, validator types.Validat
 	// get params
 	params := k.GetParams(ctx)
 	// delete the validator from the staking set, as it is technically staked but not going to participate
-	k.DeleteValidatorFromStakingSet(ctx, validator)
+	k.deleteValidatorFromStakingSet(ctx, validator)
 	// set the status
 	validator = validator.UpdateStatus(sdk.Unbonding)
 	// set the unstaking completion time and completion height appropriately
@@ -175,7 +175,7 @@ func (k Keeper) FinishUnstakingValidator(ctx sdk.Context, validator types.Valida
 	// call the before hook
 	k.BeforeValidatorUnstaked(ctx, validator.ConsAddress(), validator.Address)
 	// delete the validator from the unstaking queue
-	k.DeleteUnstakingValidator(ctx, validator)
+	k.deleteUnstakingValidator(ctx, validator)
 	// amount unstaked = stakedTokens
 	amount := sdk.NewInt(validator.StakedTokens.Int64())
 	// removed the staked tokens field from validator structure
@@ -209,7 +209,7 @@ func (k Keeper) ForceValidatorUnstake(ctx sdk.Context, validator types.Validator
 	// call the before unstaked hook
 	k.BeforeValidatorUnstaked(ctx, validator.ConsAddress(), validator.Address)
 	// delete the validator from staking set as they are unstaked
-	k.DeleteValidatorFromStakingSet(ctx, validator)
+	k.deleteValidatorFromStakingSet(ctx, validator)
 	// amount unstaked = stakedTokens
 	err := k.burnStakedTokens(ctx, validator.StakedTokens)
 	if err != nil {
@@ -247,7 +247,7 @@ func (k Keeper) JailValidator(ctx sdk.Context, addr sdk.ConsAddress) {
 	}
 	validator.Jailed = true
 	k.SetValidator(ctx, validator)
-	k.DeleteValidatorFromStakingSet(ctx, validator)
+	k.deleteValidatorFromStakingSet(ctx, validator)
 	logger := k.Logger(ctx)
 	logger.Info(fmt.Sprintf("validator %s jailed", addr))
 }

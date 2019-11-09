@@ -23,19 +23,19 @@ const (
 
 // nolint - Keys for parameter access
 var (
-	KeyUnstakingTime               = []byte("UnstakingTime")
-	KeyMaxValidators               = []byte("MaxValidators")
-	KeyStakeDenom                  = []byte("StakeDenom")
-	KeyStakeMinimum                = []byte("StakeMinimum")
-	KeyBaseProposerAward           = []byte("BaseProposerAward")
-	KeyMaxEvidenceAge              = []byte("MaxEvidenceAge")
-	KeySignedBlocksWindow          = []byte("SignedBlocksWindow")
-	KeyMinSignedPerWindow          = []byte("MinSignedPerWindow")
-	KeyDowntimeJailDuration        = []byte("DowntimeJailDuration")
-	KeySlashFractionDoubleSign     = []byte("SlashFractionDoubleSign")
-	KeySlashFractionDowntime       = []byte("SlashFractionDowntime")
-	DoubleSignJailEndTime          = time.Unix(253402300799, 0) // forever
-	DefaultMinSignedPerWindow      = sdk.NewDecWithPrec(5, 1)
+	KeyUnstakingTime            = []byte("UnstakingTime")
+	KeyMaxValidators            = []byte("MaxValidators")
+	KeyStakeDenom               = []byte("StakeDenom")
+	KeyStakeMinimum             = []byte("StakeMinimum")
+	KeyProposerRewardPercentage = []byte("ProposerRewardPercentage")
+	KeyMaxEvidenceAge           = []byte("MaxEvidenceAge")
+	KeySignedBlocksWindow       = []byte("SignedBlocksWindow")
+	KeyMinSignedPerWindow       = []byte("MinSignedPerWindow")
+	KeyDowntimeJailDuration     = []byte("DowntimeJailDuration")
+	KeySlashFractionDoubleSign  = []byte("SlashFractionDoubleSign")
+	KeySlashFractionDowntime    = []byte("SlashFractionDowntime")
+	DoubleSignJailEndTime       = time.Unix(253402300799, 0) // forever
+	DefaultMinSignedPerWindow   = sdk.NewDecWithPrec(5, 1)
 	DefaultSlashFractionDoubleSign = sdk.NewDec(1).Quo(sdk.NewDec(20))
 	DefaultSlashFractionDowntime   = sdk.NewDec(1).Quo(sdk.NewDec(100))
 )
@@ -44,11 +44,11 @@ var _ params.ParamSet = (*Params)(nil)
 
 // Params defines the high level settings for pos module
 type Params struct {
-	UnstakingTime     time.Duration `json:"unstaking_time" yaml:"unstaking_time"`           // duration of unstaking
-	MaxValidators     uint64        `json:"max_validators" yaml:"max_validators"`           // maximum number of validators
-	StakeDenom        string        `json:"stake_denom" yaml:"stake_denom"`                 // bondable coin denomination
-	StakeMinimum      int64         `json:"stake_minimum" yaml:"stake_minimum"`             // minimum amount needed to stake
-	BaseProposerAward int8          `json:"base_proposer_award" yaml:"base_proposer_award"` // minimum award for the proposer
+	UnstakingTime            time.Duration `json:"unstaking_time" yaml:"unstaking_time"`           // duration of unstaking
+	MaxValidators            uint64        `json:"max_validators" yaml:"max_validators"`           // maximum number of validators
+	StakeDenom               string        `json:"stake_denom" yaml:"stake_denom"`                 // bondable coin denomination
+	StakeMinimum             int64         `json:"stake_minimum" yaml:"stake_minimum"`             // minimum amount needed to stake
+	ProposerRewardPercentage int8          `json:"base_proposer_award" yaml:"base_proposer_award"` // minimum award for the proposer
 	// slashing params
 	MaxEvidenceAge          time.Duration `json:"max_evidence_age" yaml:"max_evidence_age"`
 	SignedBlocksWindow      int64         `json:"signed_blocks_window" yaml:"signed_blocks_window"`
@@ -77,17 +77,17 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
-		UnstakingTime:           DefaultUnstakingTime,
-		MaxValidators:           DefaultMaxValidators,
-		StakeMinimum:            DefaultMinStake,
-		StakeDenom:              sdk.DefaultBondDenom,
-		BaseProposerAward:       DefaultBaseProposerAwardPercentage,
-		MaxEvidenceAge:          DefaultMaxEvidenceAge,
-		SignedBlocksWindow:      DefaultSignedBlocksWindow,
-		MinSignedPerWindow:      DefaultMinSignedPerWindow,
-		DowntimeJailDuration:    DefaultDowntimeJailDuration,
-		SlashFractionDoubleSign: DefaultSlashFractionDoubleSign,
-		SlashFractionDowntime:   DefaultSlashFractionDowntime,
+		UnstakingTime:            DefaultUnstakingTime,
+		MaxValidators:            DefaultMaxValidators,
+		StakeMinimum:             DefaultMinStake,
+		StakeDenom:               sdk.DefaultBondDenom,
+		ProposerRewardPercentage: DefaultBaseProposerAwardPercentage,
+		MaxEvidenceAge:           DefaultMaxEvidenceAge,
+		SignedBlocksWindow:       DefaultSignedBlocksWindow,
+		MinSignedPerWindow:       DefaultMinSignedPerWindow,
+		DowntimeJailDuration:     DefaultDowntimeJailDuration,
+		SlashFractionDoubleSign:  DefaultSlashFractionDoubleSign,
+		SlashFractionDowntime:    DefaultSlashFractionDowntime,
 	}
 }
 
@@ -102,7 +102,7 @@ func (p Params) Validate() error {
 	if p.StakeMinimum < DefaultMinStake {
 		return fmt.Errorf("staking parameter StakeMimimum must be a positive integer")
 	}
-	if p.BaseProposerAward < 0 || p.BaseProposerAward > 100 {
+	if p.ProposerRewardPercentage < 0 || p.ProposerRewardPercentage > 100 {
 		return fmt.Errorf("base proposer award is a percentage and must be between 0 and 100")
 	}
 	return nil
@@ -133,7 +133,7 @@ func (p Params) String() string {
 		p.MaxValidators,
 		p.StakeDenom,
 		p.StakeMinimum,
-		p.BaseProposerAward,
+		p.ProposerRewardPercentage,
 		p.MaxEvidenceAge,
 		p.SignedBlocksWindow, p.MinSignedPerWindow,
 		p.DowntimeJailDuration, p.SlashFractionDoubleSign,

@@ -8,7 +8,7 @@ import (
 )
 
 // get the staked validators from the previous state
-func (k Keeper) GetValsFromPrevState(ctx sdk.Context) (validators []types.Validator) {
+func (k Keeper) getValsFromPrevState(ctx sdk.Context) (validators []types.Validator) {
 	store := ctx.KVStore(k.storeKey)
 	maxValidators := k.MaxValidators(ctx)
 	validators = make([]types.Validator, maxValidators)
@@ -46,7 +46,7 @@ func (k Keeper) SetPrevStateValidatorsPower(ctx sdk.Context, power sdk.Int) {
 }
 
 // returns an iterator for the consensus validators in the prevState block
-func (k Keeper) PrevStateValidatorsIterator(ctx sdk.Context) (iterator sdk.Iterator) {
+func (k Keeper) prevStateValidatorsIterator(ctx sdk.Context) (iterator sdk.Iterator) {
 	store := ctx.KVStore(k.storeKey)
 	iterator = sdk.KVStorePrefixIterator(store, types.PrevStateValidatorsPowerKey)
 	return iterator
@@ -71,7 +71,7 @@ func (k Keeper) IterateAndExecuteOverPrevStateValsByPower(
 // iterate through the active validator set and perform the provided function
 func (k Keeper) IterateAndExecuteOverPrevStateVals(
 	ctx sdk.Context, fn func(index int64, validator exported.ValidatorI) (stop bool)) {
-	iterator := k.PrevStateValidatorsIterator(ctx)
+	iterator := k.prevStateValidatorsIterator(ctx)
 	defer iterator.Close()
 	i := int64(0)
 	for ; iterator.Valid(); iterator.Next() {

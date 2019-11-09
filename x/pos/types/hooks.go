@@ -11,16 +11,16 @@ func NewMultiStakingHooks(hooks ...POSHooks) MultiPOSHooks {
 	return hooks
 }
 
-func (h MultiPOSHooks) BeforeValidatorCreated(ctx sdk.Context, valAddr sdk.ValAddress) {
+func (h MultiPOSHooks) BeforeValidatorRegistered(ctx sdk.Context, valAddr sdk.ValAddress) {
 	for i := range h {
-		h[i].BeforeValidatorCreated(ctx, valAddr)
+		h[i].BeforeValidatorRegistered(ctx, valAddr)
 	}
 }
 
 // nolint
-func (h MultiPOSHooks) AfterValidatorCreated(ctx sdk.Context, valAddr sdk.ValAddress) {
+func (h MultiPOSHooks) AfterValidatorRegistered(ctx sdk.Context, valAddr sdk.ValAddress) {
 	for i := range h {
-		h[i].AfterValidatorCreated(ctx, valAddr)
+		h[i].AfterValidatorRegistered(ctx, valAddr)
 	}
 }
 

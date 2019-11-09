@@ -74,7 +74,7 @@ func (k Keeper) Validator(ctx sdk.Context, address sdk.ValAddress) exported.Vali
 }
 
 // wrapper for GetValidatorByConsAddress call
-func (k Keeper) ValidatorByConsAddr(ctx sdk.Context, addr sdk.ConsAddress) exported.ValidatorI {
+func (k Keeper) validatorByConsAddr(ctx sdk.Context, addr sdk.ConsAddress) exported.ValidatorI {
 	val, found := k.GetValidatorByConsAddr(ctx, addr)
 	if !found {
 		return nil

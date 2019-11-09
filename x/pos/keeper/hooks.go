@@ -8,15 +8,15 @@ import (
 // Implements POSHooks interface
 var _ types.POSHooks = Keeper{}
 
-func (k Keeper) BeforeValidatorCreated(ctx sdk.Context, valAddr sdk.ValAddress) {
+func (k Keeper) BeforeValidatorRegistered(ctx sdk.Context, valAddr sdk.ValAddress) {
 	if k.hooks != nil {
-		k.hooks.BeforeValidatorCreated(ctx, valAddr)
+		k.hooks.BeforeValidatorRegistered(ctx, valAddr)
 	}
 }
 
-func (k Keeper) AfterValidatorCreated(ctx sdk.Context, valAddr sdk.ValAddress) {
+func (k Keeper) AfterValidatorRegistered(ctx sdk.Context, valAddr sdk.ValAddress) {
 	if k.hooks != nil {
-		k.hooks.AfterValidatorCreated(ctx, valAddr)
+		k.hooks.AfterValidatorRegistered(ctx, valAddr)
 	}
 }
 

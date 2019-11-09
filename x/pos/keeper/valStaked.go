@@ -16,14 +16,14 @@ func (k Keeper) SetStakedValidator(ctx sdk.Context, validator types.Validator) {
 }
 
 // delete validator from staked set
-func (k Keeper) DeleteValidatorFromStakingSet(ctx sdk.Context, validator types.Validator) {
+func (k Keeper) deleteValidatorFromStakingSet(ctx sdk.Context, validator types.Validator) {
 	store := ctx.KVStore(k.storeKey)
 	store.Delete(types.KeyForValidatorInStakingSet(validator))
 }
 
 // Update the staked tokens of an existing validator, update the validators power index key
-func (k Keeper) RemoveValidatorTokens(ctx sdk.Context, v types.Validator, tokensToRemove sdk.Int) types.Validator {
-	k.DeleteValidatorFromStakingSet(ctx, v)
+func (k Keeper) removeValidatorTokens(ctx sdk.Context, v types.Validator, tokensToRemove sdk.Int) types.Validator {
+	k.deleteValidatorFromStakingSet(ctx, v)
 	v = v.RemoveTokens(tokensToRemove)
 	k.SetValidator(ctx, v)
 	k.SetStakedValidator(ctx, v)
@@ -31,10 +31,10 @@ func (k Keeper) RemoveValidatorTokens(ctx sdk.Context, v types.Validator, tokens
 }
 
 // get the current staked validators sorted by power-rank
-func (k Keeper) GetStakedValidators(ctx sdk.Context) types.Validators {
+func (k Keeper) getStakedValidators(ctx sdk.Context) types.Validators {
 	maxValidators := k.MaxValidators(ctx)
 	validators := make([]types.Validator, maxValidators)
-	iterator := k.StakedValsIterator(ctx)
+	iterator := k.stakedValsIterator(ctx)
 	defer iterator.Close()
 	i := 0
 	for ; iterator.Valid() && i < int(maxValidators); iterator.Next() {
@@ -49,7 +49,7 @@ func (k Keeper) GetStakedValidators(ctx sdk.Context) types.Validators {
 }
 
 // returns an iterator for the current staked validators
-func (k Keeper) StakedValsIterator(ctx sdk.Context) sdk.Iterator {
+func (k Keeper) stakedValsIterator(ctx sdk.Context) sdk.Iterator {
 	store := ctx.KVStore(k.storeKey)
 	return sdk.KVStoreReversePrefixIterator(store, types.StakedValidatorsKey)
 }

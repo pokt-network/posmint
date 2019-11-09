@@ -73,7 +73,7 @@ func queryUnstakingValidators(ctx sdk.Context, req abci.RequestQuery, k Keeper) 
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 
-	validators := k.GetAllUnstakingValidators(ctx)
+	validators := k.getAllUnstakingValidators(ctx)
 
 	start, end := client.Paginate(len(validators), params.Page, params.Limit, int(k.GetParams(ctx).MaxValidators))
 	if start < 0 || end < 0 {
@@ -98,7 +98,7 @@ func queryStakedValidators(ctx sdk.Context, req abci.RequestQuery, k Keeper) ([]
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 
-	validators := k.GetStakedValidators(ctx)
+	validators := k.getStakedValidators(ctx)
 
 	start, end := client.Paginate(len(validators), params.Page, params.Limit, int(k.GetParams(ctx).MaxValidators))
 	if start < 0 || end < 0 {
@@ -123,7 +123,7 @@ func queryUnstakedValidators(ctx sdk.Context, req abci.RequestQuery, k Keeper) (
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 
-	validators := k.GetAllUnstakedValidators(ctx)
+	validators := k.getAllUnstakedValidators(ctx)
 
 	start, end := client.Paginate(len(validators), params.Page, params.Limit, int(k.GetParams(ctx).MaxValidators))
 	if start < 0 || end < 0 {
@@ -229,7 +229,7 @@ func querySigningInfos(ctx sdk.Context, req abci.RequestQuery, k Keeper) ([]byte
 
 	var signingInfos []types.ValidatorSigningInfo
 
-	k.IterateValidatorSigningInfos(ctx, func(consAddr sdk.ConsAddress, info types.ValidatorSigningInfo) (stop bool) {
+	k.IterateAndExecuteOverValSigningInfo(ctx, func(consAddr sdk.ConsAddress, info types.ValidatorSigningInfo) (stop bool) {
 		signingInfos = append(signingInfos, info)
 		return false
 	})

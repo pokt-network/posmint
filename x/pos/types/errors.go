@@ -31,6 +31,8 @@ const (
 	CodeInvalidStatus         CodeType = 110
 	CodeMinimumStake          CodeType = 111
 	CodeNotEnoughCoins        CodeType = 112
+	CodeValidatorTombstoned   CodeType = 113
+	CodeCantHandleEvidence    CodeType = 114
 )
 
 //validator
@@ -46,6 +48,14 @@ func ErrNoValidatorFound(codespace sdk.CodespaceType) sdk.Error {
 
 func ErrNotEnoughCoins(codespace sdk.CodespaceType) sdk.Error {
 	return sdk.NewError(codespace, CodeNotEnoughCoins, "validator does not have enough coins in their account")
+}
+
+func ErrValidatorTombstoned(codespace sdk.CodespaceType) sdk.Error {
+	return sdk.NewError(codespace, CodeValidatorTombstoned, "Warning: validator is already tombstoned")
+}
+
+func ErrCantHandleEvidence(codespace sdk.CodespaceType) sdk.Error {
+	return sdk.NewError(codespace, CodeCantHandleEvidence, "Warning: the DS evidence is unable to be handled")
 }
 
 func ErrMinimumStake(codespace sdk.CodespaceType) sdk.Error {
