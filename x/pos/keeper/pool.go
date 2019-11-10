@@ -3,8 +3,8 @@ package keeper
 import (
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/auth"
-	"github.com/pokt-network/posmint/x/supply/exported"
 	"github.com/pokt-network/posmint/x/pos/types"
+	"github.com/pokt-network/posmint/x/supply/exported"
 )
 
 // StakedRatio the fraction of the staking tokens which are currently staked

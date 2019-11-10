@@ -25,14 +25,14 @@ func (k Keeper) StakeTx(ctx sdk.Context, address sdk.ValAddress, amount sdk.Int)
 func (k Keeper) UnstakeTx(address sdk.ValAddress) error {
 	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(auth.GetTxEncoder(k.cdc))
 	cliCtx := context.NewCLIContext().WithCodec(k.cdc)
-	msg := types.MsgBeginUnstake{Address: address,}
+	msg := types.MsgBeginUnstake{Address: address}
 	return auth.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 }
 
 func (k Keeper) UnjailTx(ctx sdk.Context, address sdk.ValAddress) error {
 	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(auth.GetTxEncoder(k.cdc))
 	cliCtx := context.NewCLIContext().WithCodec(k.cdc)
-	msg := types.MsgUnjail{ValidatorAddr: address,}
+	msg := types.MsgUnjail{ValidatorAddr: address}
 	return auth.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 }
 

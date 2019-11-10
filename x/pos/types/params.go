@@ -23,19 +23,19 @@ const (
 
 // nolint - Keys for parameter access
 var (
-	KeyUnstakingTime            = []byte("UnstakingTime")
-	KeyMaxValidators            = []byte("MaxValidators")
-	KeyStakeDenom               = []byte("StakeDenom")
-	KeyStakeMinimum             = []byte("StakeMinimum")
-	KeyProposerRewardPercentage = []byte("ProposerRewardPercentage")
-	KeyMaxEvidenceAge           = []byte("MaxEvidenceAge")
-	KeySignedBlocksWindow       = []byte("SignedBlocksWindow")
-	KeyMinSignedPerWindow       = []byte("MinSignedPerWindow")
-	KeyDowntimeJailDuration     = []byte("DowntimeJailDuration")
-	KeySlashFractionDoubleSign  = []byte("SlashFractionDoubleSign")
-	KeySlashFractionDowntime    = []byte("SlashFractionDowntime")
-	DoubleSignJailEndTime       = time.Unix(253402300799, 0) // forever
-	DefaultMinSignedPerWindow   = sdk.NewDecWithPrec(5, 1)
+	KeyUnstakingTime               = []byte("UnstakingTime")
+	KeyMaxValidators               = []byte("MaxValidators")
+	KeyStakeDenom                  = []byte("StakeDenom")
+	KeyStakeMinimum                = []byte("StakeMinimum")
+	KeyProposerRewardPercentage    = []byte("ProposerRewardPercentage")
+	KeyMaxEvidenceAge              = []byte("MaxEvidenceAge")
+	KeySignedBlocksWindow          = []byte("SignedBlocksWindow")
+	KeyMinSignedPerWindow          = []byte("MinSignedPerWindow")
+	KeyDowntimeJailDuration        = []byte("DowntimeJailDuration")
+	KeySlashFractionDoubleSign     = []byte("SlashFractionDoubleSign")
+	KeySlashFractionDowntime       = []byte("SlashFractionDowntime")
+	DoubleSignJailEndTime          = time.Unix(253402300799, 0) // forever
+	DefaultMinSignedPerWindow      = sdk.NewDecWithPrec(5, 1)
 	DefaultSlashFractionDoubleSign = sdk.NewDec(1).Quo(sdk.NewDec(20))
 	DefaultSlashFractionDowntime   = sdk.NewDec(1).Quo(sdk.NewDec(100))
 )

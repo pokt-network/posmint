@@ -311,7 +311,7 @@ func (k Keeper) burnValidators(ctx sdk.Context) {
 		address := sdk.ValAddress{}
 		k.cdc.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &severity)
 		k.cdc.MustUnmarshalBinaryLengthPrefixed(iterator.Key(), address)
-		val:=k.mustGetValidator(ctx, address)
+		val := k.mustGetValidator(ctx, address)
 		k.slash(ctx, sdk.ConsAddress(address), ctx.BlockHeight(), val.ConsensusPower(), severity)
 		// remove from the burn store
 		store.Delete(iterator.Key())

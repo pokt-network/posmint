@@ -25,7 +25,7 @@ func newCachedValidator(val types.Validator, marshalled string) cachedValidator 
 	}
 }
 
-func (k Keeper) validatorCaching(value []byte, addr sdk.ValAddress) types.Validator{
+func (k Keeper) validatorCaching(value []byte, addr sdk.ValAddress) types.Validator {
 	// If these amino encoded bytes are in the cache, return the cached validator
 	strValue := string(value)
 	if val, ok := k.validatorCache[strValue]; ok {

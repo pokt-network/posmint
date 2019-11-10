@@ -13,7 +13,7 @@ const (
 	StakedPoolName = "staked_tokens_pool"
 )
 
-type Pool struct{
+type Pool struct {
 	Tokens sdk.Int
 }
 

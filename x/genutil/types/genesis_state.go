@@ -98,7 +98,7 @@ func ValidateGenesis(genesisState GenesisState) error {
 			return errors.New(
 				"must provide genesis StdTx with exactly 1 CreateValidator message")
 		}
-		_=i
+		_ = i
 		// TODO: abstract back to staking FIX
 		//if _, ok := msgs[0].(stakingtypes.MsgCreateValidator); !ok {
 		//	return fmt.Errorf(

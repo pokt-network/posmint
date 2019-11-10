@@ -2,6 +2,7 @@ package staking
 
 import (
 	"fmt"
+	"github.com/pokt-network/posmint/x/pos/keeper"
 	"time"
 
 	sdk "github.com/pokt-network/posmint/types"
@@ -13,7 +14,7 @@ import (
 // InitGenesis sets up the module based on the genesis state
 // First TM block is at height 1, so state updates applied from
 // genesis.json are in block 0.
-func InitGenesis(ctx sdk.Context, keeper Keeper, supplyKeeper types.SupplyKeeper, data types.GenesisState) (res []abci.ValidatorUpdate) {
+func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, supplyKeeper types.SupplyKeeper, data types.GenesisState) (res []abci.ValidatorUpdate) {
 	stakedTokens := sdk.ZeroInt()
 	ctx = ctx.WithBlockHeight(1 - sdk.ValidatorUpdateDelay)
 	// set the parameters from the data
@@ -120,7 +121,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, supplyKeeper types.SupplyKeeper
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
-func ExportGenesis(ctx sdk.Context, keeper Keeper) types.GenesisState {
+func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) types.GenesisState {
 	params := keeper.GetParams(ctx)
 	prevStateTotalPower := keeper.PrevStateValidatorsPower(ctx)
 	validators := keeper.GetAllValidators(ctx)

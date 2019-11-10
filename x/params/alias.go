@@ -24,26 +24,26 @@ const (
 
 var (
 	// functions aliases
-	NewSubspace                = subspace.NewSubspace
-	NewKeyTable                = subspace.NewKeyTable
-	DefaultTestComponents      = subspace.DefaultTestComponents
-	RegisterCodec              = types.RegisterCodec
-	ErrUnknownSubspace         = types.ErrUnknownSubspace
-	ErrSettingParameter        = types.ErrSettingParameter
-	ErrEmptyChanges            = types.ErrEmptyChanges
-	ErrEmptySubspace           = types.ErrEmptySubspace
-	ErrEmptyKey                = types.ErrEmptyKey
-	ErrEmptyValue              = types.ErrEmptyValue
+	NewSubspace           = subspace.NewSubspace
+	NewKeyTable           = subspace.NewKeyTable
+	DefaultTestComponents = subspace.DefaultTestComponents
+	RegisterCodec         = types.RegisterCodec
+	ErrUnknownSubspace    = types.ErrUnknownSubspace
+	ErrSettingParameter   = types.ErrSettingParameter
+	ErrEmptyChanges       = types.ErrEmptyChanges
+	ErrEmptySubspace      = types.ErrEmptySubspace
+	ErrEmptyKey           = types.ErrEmptyKey
+	ErrEmptyValue         = types.ErrEmptyValue
 
 	// variable aliases
 	ModuleCdc = types.ModuleCdc
 )
 
 type (
-	ParamSetPair            = subspace.ParamSetPair
-	ParamSetPairs           = subspace.ParamSetPairs
-	ParamSet                = subspace.ParamSet
-	Subspace                = subspace.Subspace
-	ReadOnlySubspace        = subspace.ReadOnlySubspace
-	KeyTable                = subspace.KeyTable
+	ParamSetPair     = subspace.ParamSetPair
+	ParamSetPairs    = subspace.ParamSetPairs
+	ParamSet         = subspace.ParamSet
+	Subspace         = subspace.Subspace
+	ReadOnlySubspace = subspace.ReadOnlySubspace
+	KeyTable         = subspace.KeyTable
 )

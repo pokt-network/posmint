@@ -7,6 +7,7 @@ import (
 	"github.com/pokt-network/posmint/x/pos/types"
 	"github.com/tendermint/go-amino"
 )
+
 // award coins to an address (will be called at the beginning of the next block)
 func (k Keeper) AwardCoinsTo(ctx sdk.Context, amount sdk.Int, address sdk.ValAddress) {
 	award, _ := k.getValidatorAward(ctx, address)

@@ -41,23 +41,23 @@ func handleStake(ctx sdk.Context, msg types.MsgStake, k keeper.Keeper) sdk.Resul
 func stakeNewValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keeper) sdk.Result {
 	// check to see if teh public key has already been register for that validator
 	if _, found := k.GetValidatorByConsAddr(ctx, sdk.GetConsAddress(msg.PubKey)); found {
-		return ErrValidatorPubKeyExists(k.Codespace()).Result()
+		return types.ErrValidatorPubKeyExists(k.Codespace()).Result()
 	}
 	// ensure the coin denomination is correct
 	if msg.Value.Denom != k.StakeDenom(ctx) {
-		return ErrBadDenom(k.Codespace()).Result()
+		return types.ErrBadDenom(k.Codespace()).Result()
 	}
 	// check the consensus params
 	if ctx.ConsensusParams() != nil {
 		tmPubKey := tmtypes.TM2PB.PubKey(msg.PubKey)
 		if !common.StringInSlice(tmPubKey.Type, ctx.ConsensusParams().Validator.PubKeyTypes) {
-			return ErrValidatorPubKeyTypeNotSupported(k.Codespace(),
+			return types.ErrValidatorPubKeyTypeNotSupported(k.Codespace(),
 				tmPubKey.Type,
 				ctx.ConsensusParams().Validator.PubKeyTypes).Result()
 		}
 	}
 	// create validator object using the message fields
-	validator := NewValidator(msg.Address, msg.PubKey, msg.Value.Amount)
+	validator := types.NewValidator(msg.Address, msg.PubKey, msg.Value.Amount)
 	// check if they can stake
 	if err := k.ValidateValidatorStaking(ctx, validator, msg.Value.Amount); err != nil {
 		return err.Result()
@@ -95,7 +95,7 @@ func stakeRegisteredValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keep
 	// the validator account and global shares are updated within here
 	validator, found := k.GetValidator(ctx, msg.Address)
 	if !found {
-		return ErrNoValidatorFound(k.Codespace()).Result()
+		return types.ErrNoValidatorFound(k.Codespace()).Result()
 	}
 	err := k.StakeValidator(ctx, validator, msg.Value.Amount)
 	if err != nil {
@@ -123,7 +123,7 @@ func handleMsgBeginUnstake(ctx sdk.Context, msg types.MsgBeginUnstake, k keeper.
 	// the validator account and global shares are updated within here
 	validator, found := k.GetValidator(ctx, msg.Address)
 	if !found {
-		return ErrNoValidatorFound(k.Codespace()).Result()
+		return types.ErrNoValidatorFound(k.Codespace()).Result()
 	}
 	if err := k.ValidateValidatorBeginUnstaking(ctx, validator); err != nil {
 		return err.Result()
@@ -149,7 +149,7 @@ func handleMsgBeginUnstake(ctx sdk.Context, msg types.MsgBeginUnstake, k keeper.
 
 // Validators must submit a transaction to unjail itself after todo
 // having been jailed (and thus unstaked) for downtime
-func handleMsgUnjail(ctx sdk.Context, msg types.MsgUnjail, k Keeper) sdk.Result {
+func handleMsgUnjail(ctx sdk.Context, msg types.MsgUnjail, k keeper.Keeper) sdk.Result {
 	consAddr, err := validateUnjailMessage(ctx, msg, k)
 	if err != nil {
 		return err.Result()
@@ -165,7 +165,7 @@ func handleMsgUnjail(ctx sdk.Context, msg types.MsgUnjail, k Keeper) sdk.Result 
 	return sdk.Result{Events: ctx.EventManager().Events()}
 }
 
-func validateUnjailMessage(ctx sdk.Context, msg types.MsgUnjail, k Keeper) (consAddr sdk.ConsAddress, err sdk.Error) {
+func validateUnjailMessage(ctx sdk.Context, msg types.MsgUnjail, k keeper.Keeper) (consAddr sdk.ConsAddress, err sdk.Error) {
 	validator := k.Validator(ctx, msg.ValidatorAddr)
 	if validator == nil {
 		return nil, types.ErrNoValidatorForAddress(k.Codespace())
@@ -189,16 +189,16 @@ func validateUnjailMessage(ctx sdk.Context, msg types.MsgUnjail, k Keeper) (cons
 	}
 	// cannot be unjailed if tombstoned
 	if info.Tombstoned {
-		return nil, ErrValidatorJailed(k.Codespace())
+		return nil, types.ErrValidatorJailed(k.Codespace())
 	}
 	// cannot be unjailed until out of jail
 	if ctx.BlockHeader().Time.Before(info.JailedUntil) {
-		return nil, ErrValidatorJailed(k.Codespace())
+		return nil, types.ErrValidatorJailed(k.Codespace())
 	}
 	return
 }
 
-func handleMsgSend(ctx sdk.Context, msg types.MsgSend, k Keeper) sdk.Result {
+func handleMsgSend(ctx sdk.Context, msg types.MsgSend, k keeper.Keeper) sdk.Result {
 	err := k.SendCoins(ctx, msg.FromAddress, msg.ToAddress, msg.Amount)
 	if err != nil {
 		return err.Result()
