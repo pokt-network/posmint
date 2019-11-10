@@ -17,20 +17,6 @@ func RegisterInvariants(ir sdk.InvariantRegistry, k Keeper) {
 		NonNegativePowerInvariant(k))
 }
 
-// AllInvariants runs all invariants of the staking module.
-func AllInvariants(k Keeper) sdk.Invariant {
-
-	return func(ctx sdk.Context) (string, bool) {
-		res, stop := ModuleAccountInvariants(k)(ctx)
-		if stop {
-			return res, stop
-		}
-
-		res, stop = NonNegativePowerInvariant(k)(ctx)
-		return res, stop
-	}
-}
-
 // ModuleAccountInvariants checks that the staked ModuleAccounts pools
 // reflects the tokens actively staked and not staked
 func ModuleAccountInvariants(k Keeper) sdk.Invariant {

@@ -125,15 +125,15 @@ func GetValidatorSigningInfoAddress(key []byte) (v sdk.ConsAddress) {
 }
 
 // generates the prefix key for missing val who missed block through consensus addr
-func GetValidatorMissedBlockBitArrayPrefixKey(v sdk.ConsAddress) []byte {
+func GetValMissedBlockPrefixKey(v sdk.ConsAddress) []byte {
 	return append(ValidatorMissedBlockBitArrayKey, v.Bytes()...)
 }
 
 // generates the key for missing val who missed block through consensus addr
-func GetValidatorMissedBlockBitArrayKey(v sdk.ConsAddress, i int64) []byte {
+func GetValMissedBlockKey(v sdk.ConsAddress, i int64) []byte {
 	b := make([]byte, 8)
 	binary.LittleEndian.PutUint64(b, uint64(i))
-	return append(GetValidatorMissedBlockBitArrayPrefixKey(v), b...)
+	return append(GetValMissedBlockPrefixKey(v), b...)
 }
 
 // generates pubkey relation key used to get the pubkey from the address

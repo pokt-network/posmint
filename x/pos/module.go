@@ -1,4 +1,4 @@
-package staking
+package pos
 
 import (
 	"encoding/json"
@@ -58,7 +58,6 @@ type AppModule struct {
 
 // NewAppModule creates a new AppModule object
 func NewAppModule(keeper keeper.Keeper, accountKeeper types.AccountKeeper, supplyKeeper types.SupplyKeeper) AppModule {
-
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		keeper:         keeper,

@@ -4,12 +4,7 @@ import (
 	sdk "github.com/pokt-network/posmint/types"
 )
 
-// combine multiple staking hooks, all hook functions are run in array sequence
 type MultiPOSHooks []POSHooks
-
-func NewMultiStakingHooks(hooks ...POSHooks) MultiPOSHooks {
-	return hooks
-}
 
 func (h MultiPOSHooks) BeforeValidatorRegistered(ctx sdk.Context, valAddr sdk.ValAddress) {
 	for i := range h {

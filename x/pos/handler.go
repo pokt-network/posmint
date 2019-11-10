@@ -1,4 +1,4 @@
-package staking
+package pos
 
 import (
 	"fmt"
