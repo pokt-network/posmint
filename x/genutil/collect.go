@@ -1,3 +1,12 @@
+/*
+Package genutil contains a variety of genesis utility functionality
+for usage within a blockchain application. Namely:
+ - Genesis transactions related (gentx)
+    - commands for collection and creation of gentxs
+	- initchain processing of gentxs
+ - Genesis file validation
+ - Tendermint related initialization
+*/
 package genutil
 
 // DONTCOVER
@@ -25,7 +34,7 @@ import (
 
 // GenAppStateFromConfig gets the genesis app state from the config
 func GenAppStateFromConfig(cdc *codec.Codec, config *cfg.Config,
-	initCfg InitConfig, genDoc tmtypes.GenesisDoc,
+	initCfg types.InitConfig, genDoc tmtypes.GenesisDoc,
 	genAccIterator types.GenesisAccountsIterator,
 ) (appState json.RawMessage, err error) {
 
@@ -45,7 +54,7 @@ func GenAppStateFromConfig(cdc *codec.Codec, config *cfg.Config,
 	}
 
 	// create the app state
-	appGenesisState, err := GenesisStateFromGenDoc(cdc, genDoc)
+	appGenesisState, err := types.GenesisStateFromGenDoc(cdc, genDoc)
 	if err != nil {
 		return appState, err
 	}

@@ -20,7 +20,7 @@ import (
 func SetGenTxsInAppGenesisState(cdc *codec.Codec, appGenesisState map[string]json.RawMessage,
 	genTxs []authtypes.StdTx) (map[string]json.RawMessage, error) {
 
-	genesisState := GetGenesisStateFromAppState(cdc, appGenesisState)
+	genesisState := types.GetGenesisStateFromAppState(cdc, appGenesisState)
 	// convert all the GenTxs to JSON
 	var genTxsBz []json.RawMessage
 	for _, genTx := range genTxs {
@@ -32,7 +32,7 @@ func SetGenTxsInAppGenesisState(cdc *codec.Codec, appGenesisState map[string]jso
 	}
 
 	genesisState.GenTxs = genTxsBz
-	return SetGenesisStateInAppState(cdc, appGenesisState, genesisState), nil
+	return types.SetGenesisStateInAppState(cdc, appGenesisState, genesisState), nil
 }
 
 // ValidateAccountInGenesis checks that the provided key has sufficient
@@ -50,7 +50,7 @@ func ValidateAccountInGenesis(appGenesisState map[string]json.RawMessage,
 	bondDenom := stakingData.Params.StakeDenom
 
 	genUtilDataBz := appGenesisState[stakingtypes.ModuleName]
-	var genesisState GenesisState
+	var genesisState types.GenesisState
 	cdc.MustUnmarshalJSON(genUtilDataBz, &genesisState)
 
 	var err error
@@ -91,7 +91,7 @@ type deliverTxfn func(abci.RequestDeliverTx) abci.ResponseDeliverTx
 
 // DeliverGenTxs - deliver a genesis transaction
 func DeliverGenTxs(ctx sdk.Context, cdc *codec.Codec, genTxs []json.RawMessage,
-	stakingKeeper types.StakingKeeper, deliverTx deliverTxfn) []abci.ValidatorUpdate {
+	stakingKeeper types.PosKeeper, deliverTx deliverTxfn) []abci.ValidatorUpdate {
 
 	for _, genTx := range genTxs {
 		var tx authtypes.StdTx

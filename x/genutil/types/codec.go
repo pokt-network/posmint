@@ -4,7 +4,7 @@ import (
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	authtypes "github.com/pokt-network/posmint/x/auth/types"
-	stakingtypes "github.com/pokt-network/posmint/x/pos/types"
+	postypes "github.com/pokt-network/posmint/x/pos/types"
 )
 
 // ModuleCdc defines a generic sealed codec to be used throughout this module
@@ -14,7 +14,7 @@ var ModuleCdc *codec.Codec
 // required for genesis transactions
 func init() {
 	ModuleCdc = codec.New()
-	stakingtypes.RegisterCodec(ModuleCdc)
+	postypes.RegisterCodec(ModuleCdc)
 	authtypes.RegisterCodec(ModuleCdc)
 	sdk.RegisterCodec(ModuleCdc)
 	codec.RegisterCrypto(ModuleCdc)

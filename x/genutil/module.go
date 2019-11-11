@@ -25,7 +25,7 @@ type AppModuleBasic struct{}
 
 // module name
 func (AppModuleBasic) Name() string {
-	return ModuleName
+	return types.ModuleName
 }
 
 // register module codec
@@ -33,17 +33,17 @@ func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {}
 
 // default genesis state
 func (AppModuleBasic) DefaultGenesis() json.RawMessage {
-	return ModuleCdc.MustMarshalJSON(GenesisState{})
+	return types.ModuleCdc.MustMarshalJSON(types.GenesisState{})
 }
 
 // module validate genesis
 func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
-	var data GenesisState
-	err := ModuleCdc.UnmarshalJSON(bz, &data)
+	var data types.GenesisState
+	err := types.ModuleCdc.UnmarshalJSON(bz, &data)
 	if err != nil {
 		return err
 	}
-	return ValidateGenesis(data)
+	return types.ValidateGenesis(data)
 }
 
 // register rest routes
@@ -60,13 +60,13 @@ func (AppModuleBasic) GetQueryCmd(_ *codec.Codec) *cobra.Command { return nil }
 type AppModule struct {
 	AppModuleBasic
 	accountKeeper types.AccountKeeper
-	stakingKeeper types.StakingKeeper
+	stakingKeeper types.PosKeeper
 	deliverTx     deliverTxfn
 }
 
 // NewAppModule creates a new AppModule object
 func NewAppModule(accountKeeper types.AccountKeeper,
-	stakingKeeper types.StakingKeeper, deliverTx deliverTxfn) module.AppModule {
+	stakingKeeper types.PosKeeper, deliverTx deliverTxfn) module.AppModule {
 
 	return module.NewGenesisOnlyAppModule(AppModule{
 		AppModuleBasic: AppModuleBasic{},
@@ -78,9 +78,9 @@ func NewAppModule(accountKeeper types.AccountKeeper,
 
 // module init-genesis
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
-	var genesisState GenesisState
-	ModuleCdc.MustUnmarshalJSON(data, &genesisState)
-	return InitGenesis(ctx, ModuleCdc, am.stakingKeeper, am.deliverTx, genesisState)
+	var genesisState types.GenesisState
+	types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
+	return InitGenesis(ctx, types.ModuleCdc, am.stakingKeeper, am.deliverTx, genesisState)
 }
 
 // module export genesis

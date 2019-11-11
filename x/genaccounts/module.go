@@ -3,17 +3,13 @@ package genaccounts
 import (
 	"encoding/json"
 
-	"github.com/gorilla/mux"
-	"github.com/spf13/cobra"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/pokt-network/posmint/client/context"
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/types/module"
 	"github.com/pokt-network/posmint/x/auth/exported"
-	"github.com/pokt-network/posmint/x/genaccounts/internal/types"
+	"github.com/pokt-network/posmint/x/genaccounts/types"
 )
 
 var (
@@ -26,7 +22,7 @@ type AppModuleBasic struct{}
 
 // module name
 func (AppModuleBasic) Name() string {
-	return ModuleName
+	return types.ModuleName
 }
 
 // register module codec
@@ -34,27 +30,18 @@ func (AppModuleBasic) RegisterCodec(cdc *codec.Codec) {}
 
 // default genesis state
 func (AppModuleBasic) DefaultGenesis() json.RawMessage {
-	return ModuleCdc.MustMarshalJSON(GenesisState{})
+	return types.ModuleCdc.MustMarshalJSON(types.GenesisState{})
 }
 
 // module validate genesis
 func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
-	var data GenesisState
-	err := ModuleCdc.UnmarshalJSON(bz, &data)
+	var data types.GenesisState
+	err := types.ModuleCdc.UnmarshalJSON(bz, &data)
 	if err != nil {
 		return err
 	}
-	return ValidateGenesis(data)
+	return types.ValidateGenesis(data)
 }
-
-// register rest routes
-func (AppModuleBasic) RegisterRESTRoutes(_ context.CLIContext, _ *mux.Router) {}
-
-// get the root tx command of this module
-func (AppModuleBasic) GetTxCmd(_ *codec.Codec) *cobra.Command { return nil }
-
-// get the root query command of this module
-func (AppModuleBasic) GetQueryCmd(_ *codec.Codec) *cobra.Command { return nil }
 
 // extra function from sdk.AppModuleBasic
 // iterate the genesis accounts and perform an operation at each of them
@@ -62,7 +49,7 @@ func (AppModuleBasic) GetQueryCmd(_ *codec.Codec) *cobra.Command { return nil }
 func (AppModuleBasic) IterateGenesisAccounts(cdc *codec.Codec, appGenesis map[string]json.RawMessage,
 	iterateFn func(exported.Account) (stop bool)) {
 
-	genesisState := GetGenesisStateFromAppState(cdc, appGenesis)
+	genesisState := types.GetGenesisStateFromAppState(cdc, appGenesis)
 	for _, genAcc := range genesisState {
 		acc := genAcc.ToAccount()
 		if iterateFn(acc) {
@@ -89,14 +76,14 @@ func NewAppModule(accountKeeper types.AccountKeeper) module.AppModule {
 
 // module init-genesis
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
-	var genesisState GenesisState
-	ModuleCdc.MustUnmarshalJSON(data, &genesisState)
-	InitGenesis(ctx, ModuleCdc, am.accountKeeper, genesisState)
+	var genesisState types.GenesisState
+	types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
+	InitGenesis(ctx, types.ModuleCdc, am.accountKeeper, genesisState)
 	return []abci.ValidatorUpdate{}
 }
 
 // module export genesis
 func (am AppModule) ExportGenesis(ctx sdk.Context) json.RawMessage {
 	gs := ExportGenesis(ctx, am.accountKeeper)
-	return ModuleCdc.MustMarshalJSON(gs)
+	return types.ModuleCdc.MustMarshalJSON(gs)
 }
