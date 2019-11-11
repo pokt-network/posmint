@@ -10,9 +10,9 @@ import (
 	authexported "github.com/pokt-network/posmint/x/auth/exported"
 )
 
-// StakingKeeper defines the expected staking keeper (noalias)
-type StakingKeeper interface {
-	ApplyAndReturnValidatorSetUpdates(sdk.Context) (updates []abci.ValidatorUpdate)
+// PosKeeper defines the expected staking keeper (noalias)
+type PosKeeper interface {
+	UpdateTendermintValidators(sdk.Context) (updates []abci.ValidatorUpdate)
 }
 
 // AccountKeeper defines the expected account keeper (noalias)

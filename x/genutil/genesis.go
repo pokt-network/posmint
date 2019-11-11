@@ -9,8 +9,8 @@ import (
 )
 
 // InitGenesis - initialize accounts and deliver genesis transactions
-func InitGenesis(ctx sdk.Context, cdc *codec.Codec, stakingKeeper types.StakingKeeper,
-	deliverTx deliverTxfn, genesisState GenesisState) []abci.ValidatorUpdate {
+func InitGenesis(ctx sdk.Context, cdc *codec.Codec, stakingKeeper types.PosKeeper,
+	deliverTx deliverTxfn, genesisState types.GenesisState) []abci.ValidatorUpdate {
 
 	var validators []abci.ValidatorUpdate
 	if len(genesisState.GenTxs) > 0 {

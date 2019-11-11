@@ -13,14 +13,14 @@ import (
 	authexported "github.com/pokt-network/posmint/x/auth/exported"
 	authtypes "github.com/pokt-network/posmint/x/auth/types"
 	"github.com/pokt-network/posmint/x/genutil/types"
-	stakingtypes "github.com/pokt-network/posmint/x/staking/types"
+	stakingtypes "github.com/pokt-network/posmint/x/pos/types"
 )
 
 // SetGenTxsInAppGenesisState - sets the genesis transactions in the app genesis state
 func SetGenTxsInAppGenesisState(cdc *codec.Codec, appGenesisState map[string]json.RawMessage,
 	genTxs []authtypes.StdTx) (map[string]json.RawMessage, error) {
 
-	genesisState := GetGenesisStateFromAppState(cdc, appGenesisState)
+	genesisState := types.GetGenesisStateFromAppState(cdc, appGenesisState)
 	// convert all the GenTxs to JSON
 	var genTxsBz []json.RawMessage
 	for _, genTx := range genTxs {
@@ -32,7 +32,7 @@ func SetGenTxsInAppGenesisState(cdc *codec.Codec, appGenesisState map[string]jso
 	}
 
 	genesisState.GenTxs = genTxsBz
-	return SetGenesisStateInAppState(cdc, appGenesisState, genesisState), nil
+	return types.SetGenesisStateInAppState(cdc, appGenesisState, genesisState), nil
 }
 
 // ValidateAccountInGenesis checks that the provided key has sufficient
@@ -47,10 +47,10 @@ func ValidateAccountInGenesis(appGenesisState map[string]json.RawMessage,
 	stakingDataBz := appGenesisState[stakingtypes.ModuleName]
 	var stakingData stakingtypes.GenesisState
 	cdc.MustUnmarshalJSON(stakingDataBz, &stakingData)
-	bondDenom := stakingData.Params.BondDenom
+	bondDenom := stakingData.Params.StakeDenom
 
 	genUtilDataBz := appGenesisState[stakingtypes.ModuleName]
-	var genesisState GenesisState
+	var genesisState types.GenesisState
 	cdc.MustUnmarshalJSON(genUtilDataBz, &genesisState)
 
 	var err error
@@ -91,7 +91,7 @@ type deliverTxfn func(abci.RequestDeliverTx) abci.ResponseDeliverTx
 
 // DeliverGenTxs - deliver a genesis transaction
 func DeliverGenTxs(ctx sdk.Context, cdc *codec.Codec, genTxs []json.RawMessage,
-	stakingKeeper types.StakingKeeper, deliverTx deliverTxfn) []abci.ValidatorUpdate {
+	stakingKeeper types.PosKeeper, deliverTx deliverTxfn) []abci.ValidatorUpdate {
 
 	for _, genTx := range genTxs {
 		var tx authtypes.StdTx
@@ -102,5 +102,5 @@ func DeliverGenTxs(ctx sdk.Context, cdc *codec.Codec, genTxs []json.RawMessage,
 			panic(res.Log)
 		}
 	}
-	return stakingKeeper.ApplyAndReturnValidatorSetUpdates(ctx)
+	return stakingKeeper.UpdateTendermintValidators(ctx)
 }

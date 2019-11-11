@@ -1,14 +1,22 @@
+/*
+Package genaccounts contains specialized functionality for initializing
+accounts from genesis including:
+ - genesis account validation,
+ - initchain processing of genesis accounts,
+ - export processing (to genesis) of accounts,
+ - server command for adding accounts to the genesis file.
+*/
+
 package genaccounts
 
 import (
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	authexported "github.com/pokt-network/posmint/x/auth/exported"
-	"github.com/pokt-network/posmint/x/genaccounts/internal/types"
+	"github.com/pokt-network/posmint/x/genaccounts/types"
 )
-
 // InitGenesis initializes accounts and deliver genesis transactions
-func InitGenesis(ctx sdk.Context, _ *codec.Codec, accountKeeper types.AccountKeeper, genesisState GenesisState) {
+func InitGenesis(ctx sdk.Context, _ *codec.Codec, accountKeeper types.AccountKeeper, genesisState types.GenesisState) {
 	genesisState.Sanitize()
 
 	// load the accounts
@@ -20,13 +28,13 @@ func InitGenesis(ctx sdk.Context, _ *codec.Codec, accountKeeper types.AccountKee
 }
 
 // ExportGenesis exports genesis for all accounts
-func ExportGenesis(ctx sdk.Context, accountKeeper types.AccountKeeper) GenesisState {
+func ExportGenesis(ctx sdk.Context, accountKeeper types.AccountKeeper) types.GenesisState {
 
 	// iterate to get the accounts
-	accounts := []GenesisAccount{}
+	var accounts []types.GenesisAccount
 	accountKeeper.IterateAccounts(ctx,
 		func(acc authexported.Account) (stop bool) {
-			account, err := NewGenesisAccountI(acc)
+			account, err := types.NewGenesisAccountI(acc)
 			if err != nil {
 				panic(err)
 			}

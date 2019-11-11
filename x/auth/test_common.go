@@ -1,4 +1,4 @@
-// nolint
+// Package auth nolint
 package auth
 
 import (
