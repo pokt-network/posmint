@@ -3,7 +3,6 @@ package context
 import (
 	"fmt"
 
-	"github.com/pokt-network/posmint/client/flags"
 	sdk "github.com/pokt-network/posmint/types"
 )
 
@@ -13,13 +12,13 @@ import (
 // defined.
 func (ctx CLIContext) BroadcastTx(txBytes []byte) (res sdk.TxResponse, err error) {
 	switch ctx.BroadcastMode {
-	case flags.BroadcastSync:
+	case BroadcastSync:
 		res, err = ctx.BroadcastTxSync(txBytes)
 
-	case flags.BroadcastAsync:
+	case BroadcastAsync:
 		res, err = ctx.BroadcastTxAsync(txBytes)
 
-	case flags.BroadcastBlock:
+	case BroadcastBlock:
 		res, err = ctx.BroadcastTxCommit(txBytes)
 
 	default:
@@ -81,3 +80,11 @@ func (ctx CLIContext) BroadcastTxAsync(txBytes []byte) (sdk.TxResponse, error) {
 	res, err := node.BroadcastTxAsync(txBytes)
 	return sdk.NewResponseFormatBroadcastTx(res), err
 }
+
+type BroadcastType int
+
+const (
+	BroadcastSync BroadcastType = iota + 1
+	BroadcastAsync
+	BroadcastBlock
+)
