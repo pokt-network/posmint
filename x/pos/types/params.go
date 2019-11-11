@@ -135,8 +135,10 @@ func (p Params) String() string {
 		p.StakeMinimum,
 		p.ProposerRewardPercentage,
 		p.MaxEvidenceAge,
-		p.SignedBlocksWindow, p.MinSignedPerWindow,
-		p.DowntimeJailDuration, p.SlashFractionDoubleSign,
+		p.SignedBlocksWindow,
+		p.MinSignedPerWindow,
+		p.DowntimeJailDuration,
+		p.SlashFractionDoubleSign,
 		p.SlashFractionDowntime)
 }
 

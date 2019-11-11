@@ -64,8 +64,8 @@ func (v Validator) PotentialConsensusPower() int64 {
 	return sdk.TokensToConsensusPower(v.StakedTokens)
 }
 
-// RemoveTokens removes tokens from a validator
-func (v Validator) RemoveTokens(tokens sdk.Int) Validator {
+// RemoveStakedTokens removes tokens from a validator
+func (v Validator) RemoveStakedTokens(tokens sdk.Int) Validator {
 	if tokens.IsNegative() {
 		panic(fmt.Sprintf("should not happen: trying to remove negative tokens %v", tokens))
 	}
@@ -76,8 +76,8 @@ func (v Validator) RemoveTokens(tokens sdk.Int) Validator {
 	return v
 }
 
-// AddTokens tokens to staked field for a validator
-func (v Validator) AddTokens(tokens sdk.Int) Validator {
+// AddStakedTokens tokens to staked field for a validator
+func (v Validator) AddStakedTokens(tokens sdk.Int) Validator {
 	if tokens.IsNegative() {
 		panic(fmt.Sprintf("should not happen: trying to add negative tokens %v", tokens))
 	}

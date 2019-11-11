@@ -12,7 +12,7 @@ const (
 	QueryStakedValidators    = "staked_validators"
 	QueryUnstakedValidators  = "unstaked_validators"
 	QueryStakedPool          = "stakedPool"
-	QueryUnstakedPool        = "unstakedPool  "
+	QueryUnstakedPool        = "unstakedPool"
 	QueryDAO                 = "dao"
 	QueryParameters          = "parameters"
 	QuerySigningInfo         = "signingInfo"

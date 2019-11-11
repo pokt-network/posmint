@@ -24,7 +24,7 @@ func (k Keeper) deleteValidatorFromStakingSet(ctx sdk.Context, validator types.V
 // Update the staked tokens of an existing validator, update the validators power index key
 func (k Keeper) removeValidatorTokens(ctx sdk.Context, v types.Validator, tokensToRemove sdk.Int) types.Validator {
 	k.deleteValidatorFromStakingSet(ctx, v)
-	v = v.RemoveTokens(tokensToRemove)
+	v = v.RemoveStakedTokens(tokensToRemove)
 	k.SetValidator(ctx, v)
 	k.SetStakedValidator(ctx, v)
 	return v
