@@ -59,7 +59,7 @@ func (ctx CLIContext) WithFromName(name string) CLIContext {
 // WithFromAddress returns a copy of the context with an updated from account
 // address.
 func (ctx CLIContext) WithFromAddress(addr sdk.ValAddress) CLIContext {
-	ctx.FromAddress = addr
+	ctx.FromAddress = sdk.AccAddress(addr)
 	return ctx
 }
 
