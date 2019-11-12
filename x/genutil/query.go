@@ -1,7 +1,7 @@
 package genutil
 
 import (
-	"github.com/pokt-network/posmint/client/context"
+	"github.com/pokt-network/posmint/context"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/genutil/types"
 )

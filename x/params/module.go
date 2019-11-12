@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 
-	"github.com/pokt-network/posmint/client/context"
+	"github.com/pokt-network/posmint/context"
 	"github.com/pokt-network/posmint/codec"
 	"github.com/pokt-network/posmint/types/module"
 	"github.com/pokt-network/posmint/x/params/types"

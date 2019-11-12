@@ -28,7 +28,7 @@ func GenesisTx(ctx *server.Context, cdc *codec.Codec, mbm module.BasicManager, s
 	genAccIterator types.GenesisAccountsIterator, amountStaked string, nodeIDString, valPubKeyString, keybaseDirectory,
 	defaultNodeHome, defaultCLIHome string) error {
 	config := ctx.Config
-	config.SetRoot(viper.GetString(client.FlagHome))
+	config.SetRoot(viper.GetString(context.FlagHome))
 	nodeID, valPubKey, err := InitializeNodeValidatorFiles(ctx.Config)
 	if err != nil {
 		return err
@@ -59,19 +59,19 @@ func GenesisTx(ctx *server.Context, cdc *codec.Codec, mbm module.BasicManager, s
 		return err
 	}
 
-	kb, err := client.NewKeyBaseFromDir(keybaseDirectory)
+	kb, err := context.NewKeyBaseFromDir(keybaseDirectory)
 	if err != nil {
 		return err
 	}
 
-	name := viper.GetString(client.FlagName)
+	name := viper.GetString(context.FlagName)
 	key, err := kb.Get(name)
 	if err != nil {
 		return err
 	}
 
 	// Set flags for creating gentx
-	viper.Set(client.FlagHome, viper.GetString(flagClientHome))
+	viper.Set(context.FlagHome, viper.GetString(flagClientHome))
 	PrepareFlagsForTxCreateValidator(config, nodeID, genDoc.ChainID, valPubKey)
 
 	// Fetch the amount of coins staked
@@ -86,7 +86,7 @@ func GenesisTx(ctx *server.Context, cdc *codec.Codec, mbm module.BasicManager, s
 	}
 
 	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(auth.GetTxEncoder(cdc))
-	cliCtx := client.NewCLIContext().WithCodec(cdc)
+	cliCtx := context.NewCLIContext().WithCodec(cdc)
 
 	// create a 'create-validator' message
 	txBldr, msg, err := smbh.BuildCreateValidatorMsg(cliCtx, txBldr)
@@ -125,7 +125,7 @@ func GenesisTx(ctx *server.Context, cdc *codec.Codec, mbm module.BasicManager, s
 	}
 
 	// Fetch output file name
-	outputDocument := viper.GetString(client.FlagOutputDocument)
+	outputDocument := viper.GetString(context.FlagOutputDocument)
 	if outputDocument == "" {
 		outputDocument, err = makeOutputFilepath(config.RootDir, nodeID)
 		if err != nil {
@@ -221,7 +221,7 @@ func CollectGenTx(ctx *server.Context, cdc *codec.Codec,
 	genAccIterator types.GenesisAccountsIterator, defaultNodeHome, genTxsDir string) error {
 	config := ctx.Config
 	config.SetRoot(viper.GetString(cli.HomeFlag))
-	name := viper.GetString(client.FlagName)
+	name := viper.GetString(context.FlagName)
 	nodeID, valPubKey, err := InitializeNodeValidatorFiles(config)
 	if err != nil {
 		return err

@@ -2,9 +2,8 @@ package keeper
 
 import (
 	"fmt"
+	"github.com/pokt-network/posmint/context"
 	abci "github.com/tendermint/tendermint/abci/types"
-
-	"github.com/pokt-network/posmint/client"
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/pos/types"
@@ -52,7 +51,7 @@ func queryValidators(ctx sdk.Context, req abci.RequestQuery, k Keeper) ([]byte, 
 
 	validators := k.GetAllValidators(ctx)
 
-	start, end := client.Paginate(len(validators), params.Page, params.Limit, int(k.GetParams(ctx).MaxValidators))
+	start, end := context.Paginate(len(validators), params.Page, params.Limit, int(k.GetParams(ctx).MaxValidators))
 	if start < 0 || end < 0 {
 		validators = []types.Validator{}
 	} else {
@@ -77,7 +76,7 @@ func queryUnstakingValidators(ctx sdk.Context, req abci.RequestQuery, k Keeper) 
 
 	validators := k.getAllUnstakingValidators(ctx)
 
-	start, end := client.Paginate(len(validators), params.Page, params.Limit, int(k.GetParams(ctx).MaxValidators))
+	start, end := context.Paginate(len(validators), params.Page, params.Limit, int(k.GetParams(ctx).MaxValidators))
 	if start < 0 || end < 0 {
 		validators = []types.Validator{}
 	} else {
@@ -102,7 +101,7 @@ func queryStakedValidators(ctx sdk.Context, req abci.RequestQuery, k Keeper) ([]
 
 	validators := k.getStakedValidators(ctx)
 
-	start, end := client.Paginate(len(validators), params.Page, params.Limit, int(k.GetParams(ctx).MaxValidators))
+	start, end := context.Paginate(len(validators), params.Page, params.Limit, int(k.GetParams(ctx).MaxValidators))
 	if start < 0 || end < 0 {
 		validators = []types.Validator{}
 	} else {
@@ -127,7 +126,7 @@ func queryUnstakedValidators(ctx sdk.Context, req abci.RequestQuery, k Keeper) (
 
 	validators := k.getAllUnstakedValidators(ctx)
 
-	start, end := client.Paginate(len(validators), params.Page, params.Limit, int(k.GetParams(ctx).MaxValidators))
+	start, end := context.Paginate(len(validators), params.Page, params.Limit, int(k.GetParams(ctx).MaxValidators))
 	if start < 0 || end < 0 {
 		validators = []types.Validator{}
 	} else {
@@ -249,7 +248,7 @@ func querySigningInfos(ctx sdk.Context, req abci.RequestQuery, k Keeper) ([]byte
 		return false
 	})
 
-	start, end := client.Paginate(len(signingInfos), params.Page, params.Limit, int(k.MaxValidators(ctx)))
+	start, end := context.Paginate(len(signingInfos), params.Page, params.Limit, int(k.MaxValidators(ctx)))
 	if start < 0 || end < 0 {
 		signingInfos = []types.ValidatorSigningInfo{}
 	} else {

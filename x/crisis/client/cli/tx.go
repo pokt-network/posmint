@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/pokt-network/posmint/client"
-	"github.com/pokt-network/posmint/client/context"
+	"github.com/pokt-network/posmint/context"
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/auth"
@@ -40,10 +40,10 @@ func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 		Short:                      "Crisis transactions subcommands",
 		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
-		RunE:                       client.ValidateCmd,
+		RunE:                       context.ValidateCmd,
 	}
 
-	txCmd.AddCommand(client.PostCommands(
+	txCmd.AddCommand(context.PostCommands(
 		GetCmdInvariantBroken(cdc),
 	)...)
 	return txCmd

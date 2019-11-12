@@ -2,14 +2,15 @@ package supply
 
 import (
 	"encoding/json"
+	"github.com/tendermint/tendermint/node"
 
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/pokt-network/posmint/client/context"
 	"github.com/pokt-network/posmint/codec"
+	"github.com/pokt-network/posmint/context"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/types/module"
 	"github.com/pokt-network/posmint/x/supply/client/cli"
@@ -68,6 +69,7 @@ type AppModule struct {
 	AppModuleBasic
 	keeper Keeper
 	ak     types.AccountKeeper
+	node   *node.Node
 }
 
 // NewAppModule creates a new AppModule object
@@ -82,6 +84,10 @@ func NewAppModule(keeper Keeper, ak types.AccountKeeper) AppModule {
 // module name
 func (AppModule) Name() string {
 	return ModuleName
+}
+
+func (am AppModule) GetTendermintNode() *node.Node {
+	return am.node
 }
 
 // register invariants

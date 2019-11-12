@@ -1,4 +1,4 @@
-package client
+package context
 
 // Paginate returns the correct starting and ending index for a paginated query,
 // given that client provides a desired page and limit of objects and the handler

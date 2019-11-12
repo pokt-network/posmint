@@ -2,14 +2,17 @@ package pos
 
 import (
 	"fmt"
-	"github.com/pokt-network/posmint/client/context"
 	"github.com/pokt-network/posmint/codec"
+	"github.com/pokt-network/posmint/context"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/pos/types"
+
+	rpcclient "github.com/tendermint/tendermint/rpc/client"
+	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
-func QueryValidator(cdc *codec.Codec, addr sdk.ValAddress) (types.Validator, error) {
-	cliCtx := context.NewCLIContext().WithCodec(cdc)
+func (am AppModule) QueryValidator(cdc *codec.Codec, addr sdk.ValAddress, height int64) (types.Validator, error) {
+	cliCtx := context.NewCLIContext(am.node).WithCodec(cdc).WithHeight(height)
 	res, _, err := cliCtx.QueryStore(types.KeyForValByAllVals(addr), types.StoreKey)
 	if err != nil {
 		return types.Validator{}, err
@@ -20,8 +23,8 @@ func QueryValidator(cdc *codec.Codec, addr sdk.ValAddress) (types.Validator, err
 	return types.MustUnmarshalValidator(cdc, res), nil
 }
 
-func QueryValidators(cdc *codec.Codec) (types.Validators, error) {
-	cliCtx := context.NewCLIContext().WithCodec(cdc)
+func (am AppModule) QueryValidators(cdc *codec.Codec, height int64) (types.Validators, error) {
+	cliCtx := context.NewCLIContext(am.node).WithCodec(cdc).WithHeight(height)
 	resKVs, _, err := cliCtx.QuerySubspace(types.AllValidatorsKey, types.StoreKey)
 	if err != nil {
 		return types.Validators{}, err
@@ -33,8 +36,8 @@ func QueryValidators(cdc *codec.Codec) (types.Validators, error) {
 	return validators, nil
 }
 
-func QueryStakedValidators(cdc *codec.Codec) (types.Validators, error) {
-	cliCtx := context.NewCLIContext().WithCodec(cdc)
+func (am AppModule) QueryStakedValidators(cdc *codec.Codec, height int64) (types.Validators, error) {
+	cliCtx := context.NewCLIContext(am.node).WithCodec(cdc).WithHeight(height)
 	resKVs, _, err := cliCtx.QuerySubspace(types.StakedValidatorsKey, types.StoreKey)
 	if err != nil {
 		return types.Validators{}, err
@@ -46,8 +49,8 @@ func QueryStakedValidators(cdc *codec.Codec) (types.Validators, error) {
 	return validators, nil
 }
 
-func QueryUnstakedValidators(cdc *codec.Codec) (types.Validators, error) {
-	cliCtx := context.NewCLIContext().WithCodec(cdc)
+func (am AppModule) QueryUnstakedValidators(cdc *codec.Codec, height int64) (types.Validators, error) {
+	cliCtx := context.NewCLIContext(am.node).WithCodec(cdc).WithHeight(height)
 	resKVs, _, err := cliCtx.QuerySubspace(types.UnstakedValidatorsKey, types.StoreKey)
 	if err != nil {
 		return types.Validators{}, err
@@ -59,8 +62,8 @@ func QueryUnstakedValidators(cdc *codec.Codec) (types.Validators, error) {
 	return validators, nil
 }
 
-func QueryUnstakingValidators(cdc *codec.Codec) (types.Validators, error) {
-	cliCtx := context.NewCLIContext().WithCodec(cdc)
+func (am AppModule) QueryUnstakingValidators(cdc *codec.Codec, height int64) (types.Validators, error) {
+	cliCtx := context.NewCLIContext(am.node).WithCodec(cdc).WithHeight(height)
 	resKVs, _, err := cliCtx.QuerySubspace(types.UnstakingValidatorsKey, types.StoreKey)
 	if err != nil {
 		return types.Validators{}, err
@@ -72,8 +75,8 @@ func QueryUnstakingValidators(cdc *codec.Codec) (types.Validators, error) {
 	return validators, nil
 }
 
-func QuerySigningInfo(cdc *codec.Codec, ctx sdk.Context, consAddr sdk.ConsAddress) (types.ValidatorSigningInfo, error) {
-	cliCtx := context.NewCLIContext().WithCodec(cdc)
+func (am AppModule) QuerySigningInfo(cdc *codec.Codec, height int64, ctx sdk.Context, consAddr sdk.ConsAddress) (types.ValidatorSigningInfo, error) {
+	cliCtx := context.NewCLIContext(am.node).WithCodec(cdc).WithHeight(height)
 	key := types.GetValidatorSigningInfoKey(consAddr)
 	res, _, err := cliCtx.QueryStore(key, types.StoreKey)
 	if err != nil {
@@ -84,11 +87,11 @@ func QuerySigningInfo(cdc *codec.Codec, ctx sdk.Context, consAddr sdk.ConsAddres
 	}
 	var signingInfo types.ValidatorSigningInfo
 	cdc.MustUnmarshalBinaryLengthPrefixed(res, &signingInfo)
-	return types.ValidatorSigningInfo{}, cliCtx.PrintOutput(signingInfo)
+	return types.ValidatorSigningInfo{}, nil
 }
 
-func QuerySupply(cdc *codec.Codec) (stakedCoins sdk.Int, unstakedCoins sdk.Int, err error) {
-	cliCtx := context.NewCLIContext().WithCodec(cdc)
+func (am AppModule) QuerySupply(cdc *codec.Codec, height int64) (stakedCoins sdk.Int, unstakedCoins sdk.Int, err error) {
+	cliCtx := context.NewCLIContext(am.node).WithCodec(cdc).WithHeight(height)
 	stakedPoolBytes, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/stakedPool", types.StoreKey), nil)
 	if err != nil {
 		return sdk.Int{}, sdk.Int{}, err
@@ -108,8 +111,8 @@ func QuerySupply(cdc *codec.Codec) (stakedCoins sdk.Int, unstakedCoins sdk.Int, 
 	return stakedPool.Tokens, unstakedPool.Tokens, nil
 }
 
-func QueryDAO(cdc *codec.Codec) (daoCoins sdk.Int, err error) {
-	cliCtx := context.NewCLIContext().WithCodec(cdc)
+func (am AppModule) QueryDAO(cdc *codec.Codec, height int64) (daoCoins sdk.Int, err error) {
+	cliCtx := context.NewCLIContext(am.node).WithCodec(cdc).WithHeight(height)
 	daoPoolBytes, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/dao", types.StoreKey), nil)
 	if err != nil {
 		return sdk.Int{}, err
@@ -121,8 +124,8 @@ func QueryDAO(cdc *codec.Codec) (daoCoins sdk.Int, err error) {
 	return daoPool.Tokens, err
 }
 
-func QueryPOSParams(cdc *codec.Codec) (types.Params, error) {
-	cliCtx := context.NewCLIContext().WithCodec(cdc)
+func (am AppModule) QueryPOSParams(cdc *codec.Codec, height int64) (types.Params, error) {
+	cliCtx := context.NewCLIContext(am.node).WithCodec(cdc).WithHeight(height)
 	route := fmt.Sprintf("custom/%s/%s", types.StoreKey, types.QueryParameters)
 	bz, _, err := cliCtx.QueryWithData(route, nil)
 	if err != nil {
@@ -131,4 +134,34 @@ func QueryPOSParams(cdc *codec.Codec) (types.Params, error) {
 	var params types.Params
 	cdc.MustUnmarshalJSON(bz, &params)
 	return params, nil
+}
+
+func (am AppModule) QueryBlock(height *int64) ([]byte, error) {
+	res, err := rpcclient.NewLocal(am.node).Block(height)
+	if err != nil {
+		return nil, err
+	}
+
+	return codec.Cdc.MarshalJSONIndent(res, "", "  ")
+}
+
+// get the current blockchain height
+func (am AppModule) QueryChainHeight() (int64, error) {
+	client:= rpcclient.NewLocal(am.node)
+
+	status, err := client.Status()
+	if err != nil {
+		return -1, err
+	}
+
+	height := status.SyncInfo.LatestBlockHeight
+	return height, nil
+}
+
+func (am AppModule) QueryNodeStatus() (*ctypes.ResultStatus, error) {
+	res, err := rpcclient.NewLocal(am.GetTendermintNode()).Status()
+	if err != nil {
+		return nil, nil
+	}
+	return res, nil
 }

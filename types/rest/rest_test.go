@@ -13,7 +13,7 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 
-	"github.com/pokt-network/posmint/client/context"
+	"github.com/pokt-network/posmint/context"
 	"github.com/pokt-network/posmint/codec"
 	"github.com/pokt-network/posmint/types"
 )

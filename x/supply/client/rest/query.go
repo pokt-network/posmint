@@ -6,7 +6,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/pokt-network/posmint/client/context"
+	"github.com/pokt-network/posmint/context"
 	"github.com/pokt-network/posmint/types/rest"
 	"github.com/pokt-network/posmint/x/supply/internal/types"
 )

@@ -1,19 +1,13 @@
 package auth
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
 	"io/ioutil"
 	"os"
 
 	//"github.com/pkg/errors"
-	"github.com/pokt-network/posmint/client/context"
-	"github.com/pokt-network/posmint/client/flags"
-	"github.com/pokt-network/posmint/client/input"
-	"github.com/pokt-network/posmint/client/keys"
-	"github.com/spf13/viper"
-
+	"github.com/pokt-network/posmint/context"
 	sdk "github.com/pokt-network/posmint/types"
 
 	"encoding/hex"
@@ -43,10 +37,6 @@ func (gr GasEstimateResponse) String() string {
 // to STDOUT in a fully offline manner. Otherwise, the tx will be signed and
 // broadcasted.
 func GenerateOrBroadcastMsgs(cliCtx context.CLIContext, txBldr authtypes.TxBuilder, msgs []sdk.Msg) error {
-	if cliCtx.GenerateOnly {
-		return PrintUnsignedStdTx(txBldr, cliCtx, msgs)
-	}
-
 	return CompleteAndBroadcastTxCLI(txBldr, cliCtx, msgs)
 }
 
@@ -61,49 +51,7 @@ func CompleteAndBroadcastTxCLI(txBldr authtypes.TxBuilder, cliCtx context.CLICon
 		return err
 	}
 
-	fromName := cliCtx.GetFromName()
-
-	if txBldr.SimulateAndExecute() || cliCtx.Simulate {
-		txBldr, err = EnrichWithGas(txBldr, cliCtx, msgs)
-		if err != nil {
-			return err
-		}
-
-		gasEst := GasEstimateResponse{GasEstimate: txBldr.Gas()}
-		_, _ = fmt.Fprintf(os.Stderr, "%s\n", gasEst.String())
-	}
-
-	if cliCtx.Simulate {
-		return nil
-	}
-
-	if !cliCtx.SkipConfirm {
-		stdSignMsg, err := txBldr.BuildSignMsg(msgs)
-		if err != nil {
-			return err
-		}
-
-		var json []byte
-		if viper.GetBool(flags.FlagIndentResponse) {
-			json, err = cliCtx.Codec.MarshalJSONIndent(stdSignMsg, "", "  ")
-			if err != nil {
-				panic(err)
-			}
-		} else {
-			json = cliCtx.Codec.MustMarshalJSON(stdSignMsg)
-		}
-
-		_, _ = fmt.Fprintf(os.Stderr, "%s\n\n", json)
-
-		buf := bufio.NewReader(os.Stdin)
-		ok, err := input.GetConfirmation("confirm transaction before signing and broadcasting", buf)
-		if err != nil || !ok {
-			_, _ = fmt.Fprintf(os.Stderr, "%s\n", "cancelled transaction")
-			return err
-		}
-	}
-
-	passphrase, err := keys.GetPassphrase(fromName)
+	passphrase, err := keys.GetPassphrase(fromName) // todo
 	if err != nil {
 		return err
 	}
@@ -115,12 +63,12 @@ func CompleteAndBroadcastTxCLI(txBldr authtypes.TxBuilder, cliCtx context.CLICon
 	}
 
 	// broadcast to a Tendermint node
-	res, err := cliCtx.BroadcastTx(txBytes)
+	_, err = cliCtx.BroadcastTx(txBytes)
 	if err != nil {
 		return err
 	}
 
-	return cliCtx.PrintOutput(res)
+	return nil
 }
 
 // EnrichWithGas calculates the gas estimate that would be consumed by the

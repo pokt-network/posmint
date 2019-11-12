@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/pokt-network/posmint/client"
-	"github.com/pokt-network/posmint/client/context"
+	"github.com/pokt-network/posmint/context"
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/version"
@@ -21,10 +21,10 @@ func GetQueryCmd(cdc *codec.Codec) *cobra.Command {
 		Short:                      "Querying commands for the supply module",
 		DisableFlagParsing:         true,
 		SuggestionsMinimumDistance: 2,
-		RunE:                       client.ValidateCmd,
+		RunE:                       context.ValidateCmd,
 	}
 
-	supplyQueryCmd.AddCommand(client.GetCommands(
+	supplyQueryCmd.AddCommand(context.GetCommands(
 		GetCmdQueryTotalSupply(cdc),
 	)...)
 

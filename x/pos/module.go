@@ -3,6 +3,7 @@ package pos
 import (
 	"encoding/json"
 	"github.com/pokt-network/posmint/x/pos/keeper"
+	"github.com/tendermint/tendermint/node"
 
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
@@ -51,6 +52,7 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 type AppModule struct {
 	AppModuleBasic
 
+	node          *node.Node
 	keeper        keeper.Keeper
 	accountKeeper types.AccountKeeper
 	supplyKeeper  types.SupplyKeeper
@@ -74,6 +76,10 @@ func (AppModule) Name() string {
 // RegisterInvariants registers the staking module invariants.
 func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {
 	keeper.RegisterInvariants(ir, am.keeper)
+}
+
+func (am AppModule) GetTendermintNode() *node.Node {
+	return am.node
 }
 
 // Route returns the message routing key for the staking module.

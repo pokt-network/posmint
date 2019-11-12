@@ -14,8 +14,8 @@ import (
 
 	"github.com/tendermint/tendermint/types"
 
-	"github.com/pokt-network/posmint/client/context"
 	"github.com/pokt-network/posmint/codec"
+	"github.com/pokt-network/posmint/context"
 	sdk "github.com/pokt-network/posmint/types"
 )
 
@@ -239,35 +239,6 @@ func ParseQueryHeightOrReturnBadRequest(w http.ResponseWriter, cliCtx context.CL
 	return cliCtx, true
 }
 
-// PostProcessResponseBare post processes a body similar to PostProcessResponse
-// except it does not wrap the body and inject the height.
-func PostProcessResponseBare(w http.ResponseWriter, cliCtx context.CLIContext, body interface{}) {
-	var (
-		resp []byte
-		err  error
-	)
-
-	switch body.(type) {
-	case []byte:
-		resp = body.([]byte)
-
-	default:
-		if cliCtx.Indent {
-			resp, err = cliCtx.Codec.MarshalJSONIndent(body, "", "  ")
-		} else {
-			resp, err = cliCtx.Codec.MarshalJSON(body)
-		}
-
-		if err != nil {
-			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	_, _ = w.Write(resp)
-}
-
 // PostProcessResponse performs post processing for a REST response. The result
 // returned to clients will contain two fields, the height at which the resource
 // was queried at and the original result.
@@ -285,11 +256,8 @@ func PostProcessResponse(w http.ResponseWriter, cliCtx context.CLIContext, resp 
 
 	default:
 		var err error
-		if cliCtx.Indent {
-			result, err = cliCtx.Codec.MarshalJSONIndent(resp, "", "  ")
-		} else {
-			result, err = cliCtx.Codec.MarshalJSON(resp)
-		}
+
+		result, err = cliCtx.Codec.MarshalJSON(resp)
 
 		if err != nil {
 			WriteErrorResponse(w, http.StatusInternalServerError, err.Error())
@@ -304,11 +272,7 @@ func PostProcessResponse(w http.ResponseWriter, cliCtx context.CLIContext, resp 
 		err    error
 	)
 
-	if cliCtx.Indent {
-		output, err = cliCtx.Codec.MarshalJSONIndent(wrappedResp, "", "  ")
-	} else {
-		output, err = cliCtx.Codec.MarshalJSON(wrappedResp)
-	}
+	output, err = cliCtx.Codec.MarshalJSON(wrappedResp)
 
 	if err != nil {
 		WriteErrorResponse(w, http.StatusInternalServerError, err.Error())

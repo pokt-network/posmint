@@ -1,5 +1,4 @@
 package context
-
 import (
 	"fmt"
 	"github.com/pkg/errors"
@@ -8,16 +7,6 @@ import (
 	cmn "github.com/tendermint/tendermint/libs/common"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
 )
-
-// GetNode returns an RPC client. If the context's client is not defined, an
-// error is returned.
-func (ctx CLIContext) GetNode() (rpcclient.Client, error) {
-	if ctx.Client == nil {
-		return nil, errors.New("no client defined")
-	}
-
-	return ctx.Client, nil
-}
 
 // Query performs a query to a Tendermint node with the provided path.
 // It returns the result and height of the query upon success or an error if
@@ -51,16 +40,6 @@ func (ctx CLIContext) QuerySubspace(subspace []byte, storeName string) (res []sd
 
 	ctx.Codec.MustUnmarshalBinaryLengthPrefixed(resRaw, &res)
 	return
-}
-
-// GetFromAddress returns the from address from the context's name.
-func (ctx CLIContext) GetFromAddress() sdk.AccAddress {
-	return ctx.FromAddress
-}
-
-// GetFromName returns the key name for the current context.
-func (ctx CLIContext) GetFromName() string {
-	return ctx.FromName
 }
 
 // query performs a query to a Tendermint node with the provided store name

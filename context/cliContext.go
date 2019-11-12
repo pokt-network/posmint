@@ -1,10 +1,11 @@
 package context
 
 import (
+	"errors"
 	"github.com/pokt-network/posmint/codec"
 	cryptokeys "github.com/pokt-network/posmint/crypto/keys"
 	sdk "github.com/pokt-network/posmint/types"
-	tndmt "github.com/tendermint/tendermint/node"
+	"github.com/tendermint/tendermint/node"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
 )
 
@@ -24,14 +25,9 @@ type CLIContext struct {
 // NewCLIContext returns a new initialized CLIContext with parameters from the
 // command line using Viper. It takes a key name or address and populates the FromName and
 // FromAddress field accordingly.
-func NewCLIContext(fromAddress sdk.AccAddress, fromName string, height int64, node *tndmt.Node) CLIContext { // todo figure out node input
-	var rpc rpcclient.Client
-	rpc = rpcclient.NewLocal(node)
+func NewCLIContext(node *node.Node) CLIContext {
 	return CLIContext{
-		Client:      rpc,
-		FromAddress: fromAddress,
-		FromName:    fromName,
-		Height:      height,
+		Client: rpcclient.NewLocal(node),
 	}
 }
 
@@ -62,7 +58,7 @@ func (ctx CLIContext) WithFromName(name string) CLIContext {
 
 // WithFromAddress returns a copy of the context with an updated from account
 // address.
-func (ctx CLIContext) WithFromAddress(addr sdk.AccAddress) CLIContext {
+func (ctx CLIContext) WithFromAddress(addr sdk.ValAddress) CLIContext {
 	ctx.FromAddress = addr
 	return ctx
 }
@@ -71,4 +67,24 @@ func (ctx CLIContext) WithFromAddress(addr sdk.AccAddress) CLIContext {
 func (ctx CLIContext) WithHeight(height int64) CLIContext {
 	ctx.Height = height
 	return ctx
+}
+
+// GetFromAddress returns the from address from the context's name.
+func (ctx CLIContext) GetFromAddress() sdk.AccAddress {
+	return ctx.FromAddress
+}
+
+// GetFromName returns the key name for the current context.
+func (ctx CLIContext) GetFromName() string {
+	return ctx.FromName
+}
+
+// GetNode returns an RPC client. If the context's client is not defined, an
+// error is returned.
+func (ctx CLIContext) GetNode() (rpcclient.Client, error) {
+	if ctx.Client == nil {
+		return nil, errors.New("no client defined")
+	}
+
+	return ctx.Client, nil
 }

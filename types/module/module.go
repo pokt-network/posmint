@@ -29,6 +29,7 @@ package module
 
 import (
 	"encoding/json"
+	"github.com/tendermint/tendermint/node"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
@@ -99,6 +100,8 @@ type AppModule interface {
 	// registers
 	RegisterInvariants(sdk.InvariantRegistry)
 
+	GetTendermintNode() *node.Node // return tendermint Node
+
 	// routes
 	Route() string
 	NewHandler() sdk.Handler
@@ -121,6 +124,8 @@ func NewGenesisOnlyAppModule(amg AppModuleGenesis) AppModule {
 		AppModuleGenesis: amg,
 	}
 }
+
+func (GenesisOnlyAppModule) GetTendermintNode() *node.Node { return nil }
 
 // register invariants
 func (GenesisOnlyAppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
