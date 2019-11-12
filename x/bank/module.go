@@ -3,17 +3,15 @@ package bank
 import (
 	"encoding/json"
 
-	"github.com/gorilla/mux"
-	"github.com/spf13/cobra"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 
+<<<<<<< HEAD
 	"github.com/pokt-network/posmint/context"
+=======
+>>>>>>> master
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/types/module"
-	"github.com/pokt-network/posmint/x/bank/client/cli"
-	"github.com/pokt-network/posmint/x/bank/client/rest"
 	"github.com/pokt-network/posmint/x/bank/internal/keeper"
 	"github.com/pokt-network/posmint/x/bank/internal/types"
 )
@@ -46,19 +44,6 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	}
 	return ValidateGenesis(data)
 }
-
-// register rest routes
-func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	rest.RegisterRoutes(ctx, rtr)
-}
-
-// get the root tx command of this module
-func (AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
-	return cli.GetTxCmd(cdc)
-}
-
-// get the root query command of this module
-func (AppModuleBasic) GetQueryCmd(_ *codec.Codec) *cobra.Command { return nil }
 
 //___________________________
 // app module

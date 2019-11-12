@@ -4,17 +4,11 @@ import (
 	"encoding/json"
 	"github.com/tendermint/tendermint/node"
 
-	"github.com/gorilla/mux"
-	"github.com/spf13/cobra"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/pokt-network/posmint/codec"
-	"github.com/pokt-network/posmint/context"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/types/module"
-	"github.com/pokt-network/posmint/x/supply/client/cli"
-	"github.com/pokt-network/posmint/x/supply/client/rest"
 	"github.com/pokt-network/posmint/x/supply/internal/types"
 )
 
@@ -49,19 +43,6 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 		return err
 	}
 	return ValidateGenesis(data)
-}
-
-// register rest routes
-func (AppModuleBasic) RegisterRESTRoutes(ctx context.CLIContext, rtr *mux.Router) {
-	rest.RegisterRoutes(ctx, rtr)
-}
-
-// get the root tx command of this module
-func (AppModuleBasic) GetTxCmd(_ *codec.Codec) *cobra.Command { return nil }
-
-// get the root query command of this module
-func (AppModuleBasic) GetQueryCmd(cdc *codec.Codec) *cobra.Command {
-	return cli.GetQueryCmd(cdc)
 }
 
 // app module

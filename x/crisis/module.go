@@ -3,16 +3,15 @@ package crisis
 import (
 	"encoding/json"
 
-	"github.com/gorilla/mux"
-	"github.com/spf13/cobra"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 
+<<<<<<< HEAD
 	"github.com/pokt-network/posmint/context"
+=======
+>>>>>>> master
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/types/module"
-	"github.com/pokt-network/posmint/x/crisis/client/cli"
 	"github.com/pokt-network/posmint/x/crisis/internal/keeper"
 	"github.com/pokt-network/posmint/x/crisis/internal/types"
 )
@@ -49,17 +48,6 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 	}
 	return types.ValidateGenesis(data)
 }
-
-// RegisterRESTRoutes registers no REST routes for the crisis module.
-func (AppModuleBasic) RegisterRESTRoutes(_ context.CLIContext, _ *mux.Router) {}
-
-// GetTxCmd returns the root tx command for the crisis module.
-func (AppModuleBasic) GetTxCmd(cdc *codec.Codec) *cobra.Command {
-	return cli.GetTxCmd(cdc)
-}
-
-// GetQueryCmd returns no root query command for the crisis module.
-func (AppModuleBasic) GetQueryCmd(_ *codec.Codec) *cobra.Command { return nil }
 
 // AppModule implements an application module for the crisis module.
 type AppModule struct {

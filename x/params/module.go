@@ -3,10 +3,6 @@ package params
 import (
 	"encoding/json"
 
-	"github.com/gorilla/mux"
-	"github.com/spf13/cobra"
-
-	"github.com/pokt-network/posmint/context"
 	"github.com/pokt-network/posmint/codec"
 	"github.com/pokt-network/posmint/types/module"
 	"github.com/pokt-network/posmint/x/params/types"
@@ -36,12 +32,3 @@ func (AppModuleBasic) DefaultGenesis() json.RawMessage { return nil }
 
 // module validate genesis
 func (AppModuleBasic) ValidateGenesis(_ json.RawMessage) error { return nil }
-
-// register rest routes
-func (AppModuleBasic) RegisterRESTRoutes(_ context.CLIContext, _ *mux.Router) {}
-
-// get the root tx command of this module
-func (AppModuleBasic) GetTxCmd(_ *codec.Codec) *cobra.Command { return nil }
-
-// get the root query command of this module
-func (AppModuleBasic) GetQueryCmd(_ *codec.Codec) *cobra.Command { return nil }

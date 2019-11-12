@@ -11,6 +11,8 @@ import (
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
+// todo query balance
+
 func (am AppModule) QueryValidator(cdc *codec.Codec, addr sdk.ValAddress, height int64) (types.Validator, error) {
 	cliCtx := context.NewCLIContext(am.node).WithCodec(cdc).WithHeight(height)
 	res, _, err := cliCtx.QueryStore(types.KeyForValByAllVals(addr), types.StoreKey)
