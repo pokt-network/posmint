@@ -3,6 +3,7 @@
 package rest
 
 import (
+	"github.com/tendermint/tendermint/node"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -156,7 +157,7 @@ func TestProcessPostResponse(t *testing.T) {
 	}
 
 	// setup
-	ctx := context.NewCLIContext()
+	ctx := context.NewCLIContext(&node.Node{})
 	height := int64(194423)
 
 	privKey := secp256k1.GenPrivKey()
@@ -201,10 +202,6 @@ func TestProcessPostResponse(t *testing.T) {
 // runs PostProcessResponse on the objects regular interface and on
 // the marshalled struct.
 func runPostProcessResponse(t *testing.T, ctx context.CLIContext, obj interface{}, expectedBody []byte, indent bool) {
-	if indent {
-		ctx.Indent = indent
-	}
-
 	// test using regular struct
 	w := httptest.NewRecorder()
 	PostProcessResponse(w, ctx, obj)

@@ -12,7 +12,7 @@ import (
 	crkeys "github.com/pokt-network/posmint/crypto/keys"
 	sdk "github.com/pokt-network/posmint/types"
 )
-
+// todo broken
 // TxBuilder implements a transaction context created in SDK modules.
 type TxBuilder struct {
 	txEncoder          sdk.TxEncoder

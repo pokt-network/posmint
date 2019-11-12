@@ -22,7 +22,7 @@ import (
 
 	"github.com/pokt-network/posmint/x/auth/types"
 )
-
+// todo broken should this be here? how do we get rid of circular dep if in Context module?
 // GasEstimateResponse defines a response definition for tx gas estimation.
 type GasEstimateResponse struct {
 	GasEstimate uint64 `json:"gas_estimate" yaml:"gas_estimate"`
