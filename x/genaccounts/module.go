@@ -2,6 +2,7 @@ package genaccounts
 
 import (
 	"encoding/json"
+	"github.com/tendermint/tendermint/node"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
@@ -63,6 +64,7 @@ func (AppModuleBasic) IterateGenesisAccounts(cdc *codec.Codec, appGenesis map[st
 type AppModule struct {
 	AppModuleBasic
 	accountKeeper types.AccountKeeper
+	node          *node.Node
 }
 
 // NewAppModule creates a new AppModule object
@@ -80,6 +82,9 @@ func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.Va
 	types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
 	InitGenesis(ctx, types.ModuleCdc, am.accountKeeper, genesisState)
 	return []abci.ValidatorUpdate{}
+}
+func (am AppModule) GetTendermintNode() *node.Node {
+	return am.node
 }
 
 // module export genesis

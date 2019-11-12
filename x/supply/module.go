@@ -54,11 +54,12 @@ type AppModule struct {
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(keeper Keeper, ak types.AccountKeeper) AppModule {
+func NewAppModule(keeper Keeper, ak types.AccountKeeper, node *node.Node) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		keeper:         keeper,
 		ak:             ak,
+		node:           node,
 	}
 }
 

@@ -2,14 +2,15 @@ package genutil
 
 import (
 	"encoding/json"
+	"github.com/tendermint/tendermint/node"
 
 	"github.com/gorilla/mux"
 	"github.com/spf13/cobra"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/pokt-network/posmint/context"
 	"github.com/pokt-network/posmint/codec"
+	"github.com/pokt-network/posmint/context"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/types/module"
 	"github.com/pokt-network/posmint/x/genutil/types"
@@ -61,6 +62,7 @@ type AppModule struct {
 	AppModuleBasic
 	accountKeeper types.AccountKeeper
 	stakingKeeper types.PosKeeper
+	node          *node.Node
 	deliverTx     deliverTxfn
 }
 
@@ -81,6 +83,10 @@ func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.Va
 	var genesisState types.GenesisState
 	types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
 	return InitGenesis(ctx, types.ModuleCdc, am.stakingKeeper, am.deliverTx, genesisState)
+}
+
+func (am AppModule) GetTendermintNode() *node.Node {
+	return am.node
 }
 
 // module export genesis

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"github.com/tendermint/tendermint/node"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
@@ -49,13 +50,15 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 type AppModule struct {
 	AppModuleBasic
 	accountKeeper AccountKeeper
+	node          *node.Node
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(accountKeeper AccountKeeper) AppModule {
+func NewAppModule(accountKeeper AccountKeeper, node *node.Node) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		accountKeeper:  accountKeeper,
+		node:           node,
 	}
 }
 
@@ -81,6 +84,10 @@ func (AppModule) QuerierRoute() string {
 // NewQuerierHandler module querier
 func (am AppModule) NewQuerierHandler() sdk.Querier {
 	return NewQuerier(am.accountKeeper)
+}
+
+func (am AppModule) GetTendermintNode() *node.Node {
+	return am.node
 }
 
 // InitGenesis module init-genesis

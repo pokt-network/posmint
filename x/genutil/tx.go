@@ -7,6 +7,7 @@ import (
 	"github.com/Workiva/go-datastructures/threadsafe/err"
 	"github.com/pokt-network/posmint/client"
 	"github.com/pokt-network/posmint/codec"
+	"github.com/pokt-network/posmint/context"
 	"github.com/pokt-network/posmint/crypto/keys"
 	"github.com/pokt-network/posmint/server"
 	sdk "github.com/pokt-network/posmint/types"
@@ -23,7 +24,7 @@ import (
 	"os"
 	"path/filepath"
 )
-
+// todo
 func GenesisTx(ctx *server.Context, cdc *codec.Codec, mbm module.BasicManager, smbh StakingMsgBuildingHelpers,
 	genAccIterator types.GenesisAccountsIterator, amountStaked string, nodeIDString, valPubKeyString, keybaseDirectory,
 	defaultNodeHome, defaultCLIHome string) error {

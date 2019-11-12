@@ -8,7 +8,7 @@ import (
 	"github.com/pokt-network/posmint/x/genaccounts/types"
 	"github.com/pokt-network/posmint/x/genutil"
 )
-
+// todo
 func AddGenesisAccount(ctx *server.Context, cdc *codec.Codec, addr sdk.AccAddress, coins, vestingAmt sdk.Coins,
 	dataDirectory string, vestingStart, vestingEnd int64) error {
 	config := ctx.Config
