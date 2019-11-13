@@ -113,15 +113,3 @@ type ValidatorWithBalance struct {
 	UnstakingCompletionTime time.Time      `json:"unstaking_time" yaml:"unstaking_time"` // if unstaking, min time for the validator to complete unstaking
 	Balance                 sdk.Int
 }
-
-func ValidatorToValidatorWithBalance(val Validator) ValidatorWithBalance{
-	return ValidatorWithBalance{
-		Address:                 val,
-		ConsPubKey:              nil,
-		Jailed:                  false,
-		Status:                  0,
-		StakedTokens:            sdk.Int{},
-		UnstakingCompletionTime: time.Time{},
-		Balance:                 sdk.Int{},
-	}
-}
