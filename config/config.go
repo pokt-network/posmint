@@ -6,13 +6,13 @@ import (
 	"os"
 )
 
-type Context struct {
-	Config      *cfg.Config
+type Config struct {
+	TmConfig    *cfg.Config
 	Logger      log.Logger
 	TraceWriter string
 }
 
-func NewDefaultConfig() *Context {
+func NewDefaultConfig() *Config {
 	return NewConfig(
 		cfg.DefaultConfig(),
 		log.NewTMLogger(log.NewSyncWriter(os.Stdout)),
@@ -20,6 +20,6 @@ func NewDefaultConfig() *Context {
 	)
 }
 
-func NewConfig(config *cfg.Config, logger log.Logger, traceWriterPath string) *Context {
-	return &Context{config, logger, traceWriterPath}
+func NewConfig(config *cfg.Config, logger log.Logger, traceWriterPath string) *Config {
+	return &Config{config, logger, traceWriterPath}
 }

@@ -15,19 +15,19 @@ import (
 	"path/filepath"
 )
 
-func NewClient(ctx Context, appCreator AppCreator) (*node.Node, error) {
-	config := ctx.Config
+func NewClient(cfg Config, appCreator AppCreator) (*node.Node, error) {
+	config := cfg.TmConfig
 	home := config.RootDir
 	db, err := openDB(home)
 	if err != nil {
 		return nil, err
 	}
 
-	traceWriter, err := openTraceWriter(ctx.TraceWriter)
+	traceWriter, err := openTraceWriter(cfg.TraceWriter)
 	if err != nil {
 		return nil, err
 	}
-	app := appCreator(ctx.Logger, db, traceWriter)
+	app := appCreator(cfg.Logger, db, traceWriter)
 
 	nodeKey, err := p2p.LoadOrGenNodeKey(config.NodeKeyFile())
 	if err != nil {
@@ -45,7 +45,7 @@ func NewClient(ctx Context, appCreator AppCreator) (*node.Node, error) {
 		node.DefaultGenesisDocProviderFunc(config),
 		node.DefaultDBProvider,
 		node.DefaultMetricsProvider(config.Instrumentation),
-		ctx.Logger.With("module", "node"),
+		cfg.Logger.With("module", "node"),
 	)
 	if err != nil {
 		return nil, err

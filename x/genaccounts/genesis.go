@@ -15,6 +15,7 @@ import (
 	authexported "github.com/pokt-network/posmint/x/auth/exported"
 	"github.com/pokt-network/posmint/x/genaccounts/types"
 )
+
 // InitGenesis initializes accounts and deliver genesis transactions
 func InitGenesis(ctx sdk.Context, _ *codec.Codec, accountKeeper types.AccountKeeper, genesisState types.GenesisState) {
 	genesisState.Sanitize()

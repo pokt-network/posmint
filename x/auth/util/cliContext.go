@@ -174,6 +174,7 @@ const (
 	BroadcastAsync
 	BroadcastBlock
 )
+
 // ---------------------------------------------------------------------------------------------------------------------
 // Query performs a query to a Tendermint node with the provided path.
 // It returns the result and height of the query upon success or an error if

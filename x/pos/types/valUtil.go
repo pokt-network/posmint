@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
+	"github.com/tendermint/tendermint/crypto"
 	"strings"
 	"time"
 )
@@ -100,4 +101,27 @@ func (v *Validator) UnmarshalJSON(data []byte) error {
 		UnstakingCompletionTime: bv.UnstakingCompletionTime,
 	}
 	return nil
+}
+
+// convienence so that the user can see all of the node params + the non staked coins balance
+type ValidatorWithBalance struct {
+	Address                 sdk.ValAddress `json:"address" yaml:"address"`               // address of the validator; bech encoded in JSON
+	ConsPubKey              crypto.PubKey  `json:"cons_pubkey" yaml:"cons_pubkey"`       // the consensus public key of the validator; bech encoded in JSON
+	Jailed                  bool           `json:"jailed" yaml:"jailed"`                 // has the validator been jailed from bonded status?
+	Status                  sdk.BondStatus `json:"status" yaml:"status"`                 // validator status (bonded/unbonding/unbonded)
+	StakedTokens            sdk.Int        `json:"Tokens" yaml:"Tokens"`                 // tokens staked in the network
+	UnstakingCompletionTime time.Time      `json:"unstaking_time" yaml:"unstaking_time"` // if unstaking, min time for the validator to complete unstaking
+	Balance                 sdk.Int
+}
+
+func ValidatorToValidatorWithBalance(val Validator) ValidatorWithBalance{
+	return ValidatorWithBalance{
+		Address:                 val,
+		ConsPubKey:              nil,
+		Jailed:                  false,
+		Status:                  0,
+		StakedTokens:            sdk.Int{},
+		UnstakingCompletionTime: time.Time{},
+		Balance:                 sdk.Int{},
+	}
 }

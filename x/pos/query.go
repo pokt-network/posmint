@@ -149,7 +149,7 @@ func (am AppModule) QueryBlock(height *int64) ([]byte, error) {
 
 // get the current blockchain height
 func (am AppModule) QueryChainHeight() (int64, error) {
-	client:= rpcclient.NewLocal(am.node)
+	client := rpcclient.NewLocal(am.node)
 
 	status, err := client.Status()
 	if err != nil {
