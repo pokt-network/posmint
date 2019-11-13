@@ -2,7 +2,9 @@ package config
 
 import (
 	sdk "github.com/pokt-network/posmint/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 	cfg "github.com/tendermint/tendermint/config"
+	"github.com/tendermint/tendermint/libs/log"
 	"github.com/tendermint/tendermint/node"
 	"github.com/tendermint/tendermint/p2p"
 	pvm "github.com/tendermint/tendermint/privval"
@@ -54,6 +56,12 @@ func NewClient(ctx Context, appCreator AppCreator) (*node.Node, error) {
 	}
 	return tmNode, nil
 }
+
+type (
+	// AppCreator is a function that allows us to lazily initialize an
+	// application using various configurations.
+	AppCreator func(log.Logger, dbm.DB, io.Writer) abci.Application
+)
 
 func openDB(rootDir string) (dbm.DB, error) {
 	dataDir := filepath.Join(rootDir, "data")
