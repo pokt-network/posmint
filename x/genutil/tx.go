@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pokt-network/posmint/codec"
-	"github.com/pokt-network/posmint/context"
+	"github.com/pokt-network/posmint/config"
 	"github.com/pokt-network/posmint/crypto/keys"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/types/module"
@@ -24,10 +24,10 @@ import (
 )
 
 // todo broken
-func (am AppModule) GenesisTx(ctx *config.Context, cdc *codec.Codec, mbm module.BasicManager, genAccIterator types.GenesisAccountsIterator, homeDir, fromAddr, amountStaked, nodeIDString, valPubKeyString, keybaseDirectory string) error {
-	config := ctx.Config
+func (am AppModule) GenesisTx(cfg *config.Config, cdc *codec.Codec, mbm module.BasicManager, genAccIterator types.GenesisAccountsIterator, homeDir, fromAddr, amountStaked, nodeIDString, valPubKeyString, keybaseDirectory string) error {
+	config := cfg.Config
 	config.SetRoot(homeDir)
-	nodeID, valPubKey, err := InitializeNodeValidatorFiles(ctx.Config)
+	nodeID, valPubKey, err := InitializeNodeValidatorFiles(cfg.Config)
 	if err != nil {
 		return err
 	}
@@ -98,16 +98,12 @@ func (am AppModule) GenesisTx(ctx *config.Context, cdc *codec.Codec, mbm module.
 
 	if info.GetType() == keys.TypeOffline || info.GetType() == keys.TypeMulti {
 		fmt.Println("Offline key passed in. Use `tx sign` command to sign:")
-		return util.PrintUnsignedStdTx(txBldr, cliCtx, []sdk.Msg{msg})
+		return nil
 	}
 
 	// write the unsigned transaction to the buffer
 	w := bytes.NewBuffer([]byte{})
 	cliCtx = cliCtx.WithOutput(w)
-
-	if err = util.PrintUnsignedStdTx(txBldr, cliCtx, []sdk.Msg{msg}); err != nil {
-		return err
-	}
 
 	// read the transaction
 	stdTx, err := readUnsignedGenTxFile(cdc, w)
@@ -138,7 +134,7 @@ func (am AppModule) GenesisTx(ctx *config.Context, cdc *codec.Codec, mbm module.
 	return nil
 }
 
-func Init(ctx *config.Context, cdc *codec.Codec, mbm module.BasicManager,
+func Init(ctx *config.Config, cdc *codec.Codec, mbm module.BasicManager,
 	homeDirectory, chainID string, overwrite bool) error {
 	config := ctx.Config
 	config.SetRoot(homeDirectory)
@@ -186,7 +182,7 @@ func Init(ctx *config.Context, cdc *codec.Codec, mbm module.BasicManager,
 	return displayInfo(cdc, toPrint)
 }
 
-func ValidateGen(ctx *config.Context, cdc *codec.Codec, mbm module.BasicManager) error {
+func ValidateGen(ctx *config.Config, cdc *codec.Codec, mbm module.BasicManager) error {
 	// Load default if passed no args, otherwise load passed file
 	var genesis string
 	genesis = ctx.Config.GenesisFile()
@@ -214,7 +210,7 @@ func ValidateGen(ctx *config.Context, cdc *codec.Codec, mbm module.BasicManager)
 	return nil
 }
 
-func CollectGenTx(ctx *config.Context, cdc *codec.Codec,
+func CollectGenTx(ctx *config.Config, cdc *codec.Codec,
 	genAccIterator types.GenesisAccountsIterator, defaultNodeHome, genTxsDir string) error {
 	config := ctx.Config
 	config.SetRoot(viper.GetString(cli.HomeFlag))

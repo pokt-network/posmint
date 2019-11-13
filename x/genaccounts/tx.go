@@ -3,16 +3,16 @@ package genaccounts
 import (
 	"fmt"
 	"github.com/pokt-network/posmint/codec"
-	"github.com/pokt-network/posmint/context"
+	"github.com/pokt-network/posmint/config"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/genaccounts/types"
 	"github.com/pokt-network/posmint/x/genutil"
 	genTypes "github.com/pokt-network/posmint/x/genutil/types"
 )
 
-func (am AppModule) AddGenesisAccount(ctx *config.Context, cdc *codec.Codec, addr sdk.AccAddress, coins, vestingAmt sdk.Coins,
+func (am AppModule) AddGenesisAccount(ctx *config.Config, cdc *codec.Codec, addr sdk.AccAddress, coins, vestingAmt sdk.Coins,
 	dataDirectory string, vestingStart, vestingEnd int64) error {
-	config := ctx.Config
+	config := ctx.TmConfig
 	config.SetRoot(dataDirectory)
 	genAcc := types.NewGenesisAccountRaw(addr, coins, vestingAmt, vestingStart, vestingEnd, "", "")
 	if err := genAcc.Validate(); err != nil {

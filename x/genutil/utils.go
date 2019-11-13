@@ -2,7 +2,7 @@ package genutil
 
 import (
 	"encoding/json"
-	"github.com/pokt-network/posmint/context"
+	"github.com/pokt-network/posmint/config"
 	"path/filepath"
 	"time"
 

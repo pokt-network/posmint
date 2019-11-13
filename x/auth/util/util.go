@@ -93,22 +93,6 @@ func CalculateGas(
 	return estimate, adjusted, nil
 }
 
-// PrintUnsignedStdTx builds an unsigned StdTx and prints it to os.Stdout.
-func PrintUnsignedStdTx(txBldr authtypes.TxBuilder, cliCtx CLIContext, msgs []sdk.Msg) error {
-	stdTx, err := buildUnsignedStdTxOffline(txBldr, cliCtx, msgs)
-	if err != nil {
-		return err
-	}
-
-	json, err := cliCtx.Codec.MarshalJSON(stdTx)
-	if err != nil {
-		return err
-	}
-
-	_, _ = fmt.Fprintf(cliCtx.Output, "%s\n", json)
-	return nil
-}
-
 // SignStdTx appends a signature to a StdTx and returns a copy of it. If appendSig
 // is false, it replaces the signatures already attached with the new signature.
 // Don't perform online validation or lookups if offline is true.
