@@ -10,7 +10,7 @@ import (
 	genTypes "github.com/pokt-network/posmint/x/genutil/types"
 )
 
-func (am AppModule) AddGenesisAccount(ctx *context.Context, cdc *codec.Codec, addr sdk.AccAddress, coins, vestingAmt sdk.Coins,
+func (am AppModule) AddGenesisAccount(ctx *config.Context, cdc *codec.Codec, addr sdk.AccAddress, coins, vestingAmt sdk.Coins,
 	dataDirectory string, vestingStart, vestingEnd int64) error {
 	config := ctx.Config
 	config.SetRoot(dataDirectory)

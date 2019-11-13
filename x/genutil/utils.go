@@ -55,7 +55,7 @@ func InitializeNodeValidatorFiles(config *cfg.Config,
 	}
 
 	nodeID = string(nodeKey.ID())
-	context.UpgradeOldPrivValFile(config)
+	config.UpgradeOldPrivValFile(config)
 
 	pvKeyFile := config.PrivValidatorKeyFile()
 	if err := common.EnsureDir(filepath.Dir(pvKeyFile), 0777); err != nil {

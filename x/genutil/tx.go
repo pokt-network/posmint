@@ -24,7 +24,7 @@ import (
 )
 
 // todo broken
-func (am AppModule) GenesisTx(ctx *context.Context, cdc *codec.Codec, mbm module.BasicManager, genAccIterator types.GenesisAccountsIterator, homeDir, fromAddr, amountStaked, nodeIDString, valPubKeyString, keybaseDirectory string) error {
+func (am AppModule) GenesisTx(ctx *config.Context, cdc *codec.Codec, mbm module.BasicManager, genAccIterator types.GenesisAccountsIterator, homeDir, fromAddr, amountStaked, nodeIDString, valPubKeyString, keybaseDirectory string) error {
 	config := ctx.Config
 	config.SetRoot(homeDir)
 	nodeID, valPubKey, err := InitializeNodeValidatorFiles(ctx.Config)
@@ -68,7 +68,7 @@ func (am AppModule) GenesisTx(ctx *context.Context, cdc *codec.Codec, mbm module
 	}
 
 	// Set flags for creating gentx
-	viper.Set(context.FlagHome, viper.GetString(flagClientHome))
+	viper.Set(config.FlagHome, viper.GetString(flagClientHome))
 	PrepareFlagsForTxCreateValidator(config, nodeID, genDoc.ChainID, valPubKey)
 
 	// Fetch the amount of coins staked
@@ -122,7 +122,7 @@ func (am AppModule) GenesisTx(ctx *context.Context, cdc *codec.Codec, mbm module
 	}
 
 	// Fetch output file name
-	outputDocument := viper.GetString(context.FlagOutputDocument)
+	outputDocument := viper.GetString(config.FlagOutputDocument)
 	if outputDocument == "" {
 		outputDocument, err = makeOutputFilepath(config.RootDir, nodeID)
 		if err != nil {
@@ -138,7 +138,7 @@ func (am AppModule) GenesisTx(ctx *context.Context, cdc *codec.Codec, mbm module
 	return nil
 }
 
-func Init(ctx *context.Context, cdc *codec.Codec, mbm module.BasicManager,
+func Init(ctx *config.Context, cdc *codec.Codec, mbm module.BasicManager,
 	homeDirectory, chainID string, overwrite bool) error {
 	config := ctx.Config
 	config.SetRoot(homeDirectory)
@@ -186,7 +186,7 @@ func Init(ctx *context.Context, cdc *codec.Codec, mbm module.BasicManager,
 	return displayInfo(cdc, toPrint)
 }
 
-func ValidateGen(ctx *context.Context, cdc *codec.Codec, mbm module.BasicManager) error {
+func ValidateGen(ctx *config.Context, cdc *codec.Codec, mbm module.BasicManager) error {
 	// Load default if passed no args, otherwise load passed file
 	var genesis string
 	genesis = ctx.Config.GenesisFile()
@@ -214,11 +214,11 @@ func ValidateGen(ctx *context.Context, cdc *codec.Codec, mbm module.BasicManager
 	return nil
 }
 
-func CollectGenTx(ctx *context.Context, cdc *codec.Codec,
+func CollectGenTx(ctx *config.Context, cdc *codec.Codec,
 	genAccIterator types.GenesisAccountsIterator, defaultNodeHome, genTxsDir string) error {
 	config := ctx.Config
 	config.SetRoot(viper.GetString(cli.HomeFlag))
-	name := viper.GetString(context.FlagName)
+	name := viper.GetString(config.FlagName)
 	nodeID, valPubKey, err := InitializeNodeValidatorFiles(config)
 	if err != nil {
 		return err

@@ -1,4 +1,4 @@
-package context
+package config
 
 import (
 	cfg "github.com/tendermint/tendermint/config"
@@ -12,14 +12,14 @@ type Context struct {
 	TraceWriter string
 }
 
-func NewDefaultContext() *Context {
-	return NewContext(
+func NewDefaultConfig() *Context {
+	return NewConfig(
 		cfg.DefaultConfig(),
 		log.NewTMLogger(log.NewSyncWriter(os.Stdout)),
 		"", // todo broken
 	)
 }
 
-func NewContext(config *cfg.Config, logger log.Logger, traceWriterPath string) *Context {
+func NewConfig(config *cfg.Config, logger log.Logger, traceWriterPath string) *Context {
 	return &Context{config, logger, traceWriterPath}
 }
