@@ -1,13 +1,13 @@
 package genutil
 
 import (
-	"github.com/pokt-network/posmint/context"
 	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/auth/util"
 	"github.com/pokt-network/posmint/x/genutil/types"
 )
 
 func (am AppModule) QueryGenesisTxs() ([]sdk.Tx, error) {
-	cliCtx := context.NewCLIContext(am.node)
+	cliCtx := util.NewCLIContext(am.node)
 	resultGenesis, err := cliCtx.Client.Genesis()
 	if err != nil {
 		return nil, err

@@ -2,6 +2,7 @@ package genutil
 
 import (
 	"encoding/json"
+	"github.com/pokt-network/posmint/x/auth/util"
 	"github.com/tendermint/tendermint/node"
 
 	"github.com/gorilla/mux"
@@ -10,7 +11,6 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/pokt-network/posmint/codec"
-	"github.com/pokt-network/posmint/context"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/types/module"
 	"github.com/pokt-network/posmint/x/genutil/types"
@@ -48,7 +48,7 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 }
 
 // register rest routes
-func (AppModuleBasic) RegisterRESTRoutes(_ context.CLIContext, _ *mux.Router) {}
+func (AppModuleBasic) RegisterRESTRoutes(_ util.CLIContext, _ *mux.Router) {}
 
 // get the root tx command of this module
 func (AppModuleBasic) GetTxCmd(_ *codec.Codec) *cobra.Command { return nil }

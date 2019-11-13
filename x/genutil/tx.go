@@ -83,7 +83,7 @@ func (am AppModule) GenesisTx(ctx *context.Context, cdc *codec.Codec, mbm module
 	}
 
 	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(util.GetTxEncoder(cdc))
-	cliCtx := context.NewCLIContext(am.node).WithCodec(cdc)
+	cliCtx := util.NewCLIContext(am.node).WithCodec(cdc)
 
 	// create a 'create-validator' message
 	txBldr, msg, err := smbh.BuildCreateValidatorMsg(cliCtx, txBldr)

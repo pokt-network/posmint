@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/pokt-network/posmint/x/auth/util"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -15,7 +16,6 @@ import (
 	"github.com/tendermint/tendermint/types"
 
 	"github.com/pokt-network/posmint/codec"
-	"github.com/pokt-network/posmint/context"
 	sdk "github.com/pokt-network/posmint/types"
 )
 
@@ -215,7 +215,7 @@ func ParseFloat64OrReturnBadRequest(w http.ResponseWriter, s string, defaultIfEm
 
 // ParseQueryHeightOrReturnBadRequest sets the height to execute a query if set by the http request.
 // It returns false if there was an error parsing the height.
-func ParseQueryHeightOrReturnBadRequest(w http.ResponseWriter, cliCtx context.CLIContext, r *http.Request) (context.CLIContext, bool) {
+func ParseQueryHeightOrReturnBadRequest(w http.ResponseWriter, cliCtx util.CLIContext, r *http.Request) (util.CLIContext, bool) {
 	heightStr := r.FormValue("height")
 	if heightStr != "" {
 		height, err := strconv.ParseInt(heightStr, 10, 64)
@@ -242,7 +242,7 @@ func ParseQueryHeightOrReturnBadRequest(w http.ResponseWriter, cliCtx context.CL
 // PostProcessResponse performs post processing for a REST response. The result
 // returned to clients will contain two fields, the height at which the resource
 // was queried at and the original result.
-func PostProcessResponse(w http.ResponseWriter, cliCtx context.CLIContext, resp interface{}) {
+func PostProcessResponse(w http.ResponseWriter, cliCtx util.CLIContext, resp interface{}) {
 	var result []byte
 
 	if cliCtx.Height < 0 {

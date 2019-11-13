@@ -7,8 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 
-	//"github.com/pkg/errors"
-	"github.com/pokt-network/posmint/context"
 	sdk "github.com/pokt-network/posmint/types"
 
 	"encoding/hex"
@@ -37,7 +35,7 @@ func (gr GasEstimateResponse) String() string {
 // the provided context has generate-only enabled, the tx will only be printed
 // to STDOUT in a fully offline manner. Otherwise, the tx will be signed and
 // broadcasted.
-func GenerateOrBroadcastMsgs(cliCtx context.CLIContext, txBldr authtypes.TxBuilder, msgs []sdk.Msg) error {
+func GenerateOrBroadcastMsgs(cliCtx CLIContext, txBldr authtypes.TxBuilder, msgs []sdk.Msg) error {
 	return CompleteAndBroadcastTxCLI(txBldr, cliCtx, msgs)
 }
 
@@ -46,7 +44,7 @@ func GenerateOrBroadcastMsgs(cliCtx context.CLIContext, txBldr authtypes.TxBuild
 // QueryContext. It ensures that the account exists, has a proper number and
 // sequence set. In addition, it builds and signs a transaction with the
 // supplied messages. Finally, it broadcasts the signed transaction to a node.
-func CompleteAndBroadcastTxCLI(txBldr authtypes.TxBuilder, cliCtx context.CLIContext, msgs []sdk.Msg) error {
+func CompleteAndBroadcastTxCLI(txBldr authtypes.TxBuilder, cliCtx CLIContext, msgs []sdk.Msg) error {
 	txBldr, err := PrepareTxBuilder(txBldr, cliCtx)
 	if err != nil {
 		return err
@@ -96,7 +94,7 @@ func CalculateGas(
 }
 
 // PrintUnsignedStdTx builds an unsigned StdTx and prints it to os.Stdout.
-func PrintUnsignedStdTx(txBldr authtypes.TxBuilder, cliCtx context.CLIContext, msgs []sdk.Msg) error {
+func PrintUnsignedStdTx(txBldr authtypes.TxBuilder, cliCtx CLIContext, msgs []sdk.Msg) error {
 	stdTx, err := buildUnsignedStdTxOffline(txBldr, cliCtx, msgs)
 	if err != nil {
 		return err
@@ -115,7 +113,7 @@ func PrintUnsignedStdTx(txBldr authtypes.TxBuilder, cliCtx context.CLIContext, m
 // is false, it replaces the signatures already attached with the new signature.
 // Don't perform online validation or lookups if offline is true.
 func SignStdTx(
-	txBldr authtypes.TxBuilder, cliCtx context.CLIContext, name string,
+	txBldr authtypes.TxBuilder, cliCtx CLIContext, name string,
 	stdTx authtypes.StdTx, appendSig bool, offline bool,
 ) (authtypes.StdTx, error) {
 
@@ -151,7 +149,7 @@ func SignStdTx(
 // SignStdTxWithSignerAddress attaches a signature to a StdTx and returns a copy of a it.
 // Don't perform online validation or lookups if offline is true, else
 // populate account and sequence numbers from a foreign account.
-func SignStdTxWithSignerAddress(txBldr authtypes.TxBuilder, cliCtx context.CLIContext,
+func SignStdTxWithSignerAddress(txBldr authtypes.TxBuilder, cliCtx CLIContext,
 	addr sdk.AccAddress, name string, stdTx authtypes.StdTx,
 	offline bool) (signedStdTx authtypes.StdTx, err error) {
 
@@ -197,7 +195,7 @@ func ReadStdTxFromFile(cdc *codec.Codec, filename string) (stdTx authtypes.StdTx
 }
 
 func populateAccountFromState(
-	txBldr authtypes.TxBuilder, cliCtx context.CLIContext, addr sdk.AccAddress,
+	txBldr authtypes.TxBuilder, cliCtx CLIContext, addr sdk.AccAddress,
 ) (authtypes.TxBuilder, error) {
 
 	num, seq, err := authtypes.NewAccountRetriever(cliCtx).GetAccountNumberSequence(addr)
@@ -221,7 +219,7 @@ func GetTxEncoder(cdc *codec.Codec) (encoder sdk.TxEncoder) {
 
 // nolint
 // SimulateMsgs simulates the transaction and returns the gas estimate and the adjusted value.
-func simulateMsgs(txBldr authtypes.TxBuilder, cliCtx context.CLIContext, msgs []sdk.Msg) (estimated, adjusted uint64, err error) {
+func simulateMsgs(txBldr authtypes.TxBuilder, cliCtx CLIContext, msgs []sdk.Msg) (estimated, adjusted uint64, err error) {
 	txBytes, err := txBldr.BuildTxForSim(msgs)
 	if err != nil {
 		return
@@ -245,7 +243,7 @@ func parseQueryResponse(cdc *codec.Codec, rawRes []byte) (uint64, error) {
 }
 
 // PrepareTxBuilder populates a TxBuilder in preparation for the build of a Tx.
-func PrepareTxBuilder(txBldr authtypes.TxBuilder, cliCtx context.CLIContext) (authtypes.TxBuilder, error) {
+func PrepareTxBuilder(txBldr authtypes.TxBuilder, cliCtx CLIContext) (authtypes.TxBuilder, error) {
 	from := cliCtx.GetFromAddress()
 
 	accGetter := authtypes.NewAccountRetriever(cliCtx)
@@ -273,7 +271,7 @@ func PrepareTxBuilder(txBldr authtypes.TxBuilder, cliCtx context.CLIContext) (au
 	return txBldr, nil
 }
 
-func buildUnsignedStdTxOffline(txBldr authtypes.TxBuilder, cliCtx context.CLIContext, msgs []sdk.Msg) (stdTx authtypes.StdTx, err error) {
+func buildUnsignedStdTxOffline(txBldr authtypes.TxBuilder, cliCtx CLIContext, msgs []sdk.Msg) (stdTx authtypes.StdTx, err error) {
 	stdSignMsg, err := txBldr.BuildSignMsg(msgs)
 	if err != nil {
 		return stdTx, nil
@@ -296,7 +294,7 @@ func isTxSigner(user sdk.AccAddress, signers []sdk.AccAddress) bool {
 // "{eventAttribute}.{attributeKey} = '{attributeValue}'". Each event is
 // concatenated with an 'AND' operand. It returns a slice of Info object
 // containing txs and metadata. An error is returned if the query fails.
-func QueryTxsByEvents(cliCtx context.CLIContext, events []string, page, limit int) (*sdk.SearchTxsResult, error) {
+func QueryTxsByEvents(cliCtx CLIContext, events []string, page, limit int) (*sdk.SearchTxsResult, error) {
 	if len(events) == 0 {
 		return nil, errors.New("must declare at least one event to search")
 	}
@@ -339,7 +337,7 @@ func QueryTxsByEvents(cliCtx context.CLIContext, events []string, page, limit in
 
 // QueryTx queries for a single transaction by a hash string in hex format. An
 // error is returned if the transaction does not exist or cannot be queried.
-func QueryTx(cliCtx context.CLIContext, hashHexStr string) (sdk.TxResponse, error) {
+func QueryTx(cliCtx CLIContext, hashHexStr string) (sdk.TxResponse, error) {
 	hash, err := hex.DecodeString(hashHexStr)
 	if err != nil {
 		return sdk.TxResponse{}, err
@@ -383,11 +381,11 @@ func formatTxResults(cdc *codec.Codec, resTxs []*ctypes.ResultTx, resBlocks map[
 }
 
 // ValidateTxResult performs transaction verification.
-func ValidateTxResult(cliCtx context.CLIContext, resTx *ctypes.ResultTx) error {
+func ValidateTxResult(cliCtx CLIContext, resTx *ctypes.ResultTx) error {
 	return nil
 }
 
-func getBlocksForTxResults(cliCtx context.CLIContext, resTxs []*ctypes.ResultTx) (map[int64]*ctypes.ResultBlock, error) {
+func getBlocksForTxResults(cliCtx CLIContext, resTxs []*ctypes.ResultTx) (map[int64]*ctypes.ResultBlock, error) {
 	node, err := cliCtx.GetNode()
 	if err != nil {
 		return nil, err
