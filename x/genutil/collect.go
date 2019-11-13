@@ -154,15 +154,15 @@ func CollectStdTxs(cdc *codec.Codec, moniker, genTxsDir string,
 				"account %v not in genesis.json: %+v", valAddr, addrMap)
 		}
 
-		if delAcc.GetCoins().AmountOf(msg.Value.Denom).LT(msg.Value.Amount) {
+		if delAcc.GetCoins().AmountOf(msg.Value).LT(msg.Value) {
 			return appGenTxs, persistentPeers, fmt.Errorf(
 				"insufficient fund for delegation %v: %v < %v",
-				delAcc.GetAddress(), delAcc.GetCoins().AmountOf(msg.Value.Denom), msg.Value.Amount,
+				delAcc.GetAddress(), delAcc.GetCoins().AmountOf(msg.Value), msg.Value,
 			)
 		}
 
 		// exclude itself from persistent peers
-		if msg.Address.String() != moniker { // todo fix
+		if msg.Address.String() != moniker { // todo broken
 			addressesIPs = append(addressesIPs, nodeAddrIP)
 		}
 	}

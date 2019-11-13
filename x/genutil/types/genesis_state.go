@@ -69,9 +69,7 @@ func GenesisStateFromGenDoc(cdc *codec.Codec, genDoc tmtypes.GenesisDoc,
 // for the application.
 //
 // NOTE: The pubkey input is this machines pubkey.
-func GenesisStateFromGenFile(cdc *codec.Codec, genFile string,
-) (genesisState map[string]json.RawMessage, genDoc *tmtypes.GenesisDoc, err error) {
-
+func GenesisStateFromGenFile(cdc *codec.Codec, genFile string, ) (genesisState map[string]json.RawMessage, genDoc *tmtypes.GenesisDoc, err error) {
 	if !common.FileExists(genFile) {
 		return genesisState, genDoc,
 			fmt.Errorf("%s does not exist, run `init` first", genFile)
@@ -99,7 +97,7 @@ func ValidateGenesis(genesisState GenesisState) error {
 				"must provide genesis StdTx with exactly 1 CreateValidator message")
 		}
 		_ = i
-		// TODO: abstract back to staking FIX
+		// TODO: abstract back to staking **broken
 		//if _, ok := msgs[0].(stakingtypes.MsgCreateValidator); !ok {
 		//	return fmt.Errorf(
 		//		"genesis transaction %v does not contain a MsgCreateValidator", i)

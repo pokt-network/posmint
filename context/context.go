@@ -16,7 +16,7 @@ func NewDefaultContext() *Context {
 	return NewContext(
 		cfg.DefaultConfig(),
 		log.NewTMLogger(log.NewSyncWriter(os.Stdout)),
-		"", // todo
+		"", // todo broken
 	)
 }
 

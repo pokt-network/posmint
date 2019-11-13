@@ -12,7 +12,8 @@ import (
 	crkeys "github.com/pokt-network/posmint/crypto/keys"
 	sdk "github.com/pokt-network/posmint/types"
 )
-// todo broken
+
+// todo broken need keybase
 // TxBuilder implements a transaction context created in SDK modules.
 type TxBuilder struct {
 	txEncoder          sdk.TxEncoder
@@ -30,10 +31,8 @@ type TxBuilder struct {
 
 // NewTxBuilder returns a new initialized TxBuilder.
 func NewTxBuilder(
-	txEncoder sdk.TxEncoder, accNumber, seq, gas uint64, gasAdj float64,
-	simulateAndExecute bool, chainID, memo string, fees sdk.Coins, gasPrices sdk.DecCoins,
-) TxBuilder {
-
+	txEncoder sdk.TxEncoder, accNumber, seq, gas uint64, gasAdj float64, simulateAndExecute bool, chainID,
+	memo string, fees sdk.Coins, gasPrices sdk.DecCoins) TxBuilder {
 	return TxBuilder{
 		txEncoder:          txEncoder,
 		keybase:            nil,

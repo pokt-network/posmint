@@ -43,10 +43,6 @@ func stakeNewValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keeper) sdk
 	if _, found := k.GetValidatorByConsAddr(ctx, sdk.GetConsAddress(msg.PubKey)); found {
 		return types.ErrValidatorPubKeyExists(k.Codespace()).Result()
 	}
-	// ensure the coin denomination is correct
-	if msg.Value.Denom != k.StakeDenom(ctx) {
-		return types.ErrBadDenom(k.Codespace()).Result()
-	}
 	// check the consensus params
 	if ctx.ConsensusParams() != nil {
 		tmPubKey := tmtypes.TM2PB.PubKey(msg.PubKey)
@@ -57,15 +53,15 @@ func stakeNewValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keeper) sdk
 		}
 	}
 	// create validator object using the message fields
-	validator := types.NewValidator(msg.Address, msg.PubKey, msg.Value.Amount)
+	validator := types.NewValidator(msg.Address, msg.PubKey, msg.Value)
 	// check if they can stake
-	if err := k.ValidateValidatorStaking(ctx, validator, msg.Value.Amount); err != nil {
+	if err := k.ValidateValidatorStaking(ctx, validator, msg.Value); err != nil {
 		return err.Result()
 	}
 	// register the validator in the world state
 	k.RegisterValidator(ctx, validator)
 	// change the validator state to staked
-	err := k.StakeValidator(ctx, validator, msg.Value.Amount)
+	err := k.StakeValidator(ctx, validator, msg.Value)
 	if err != nil {
 		return err.Result()
 	}
@@ -79,7 +75,7 @@ func stakeNewValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keeper) sdk
 			types.EventTypeStake,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Address.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Value.Amount.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Value.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
@@ -97,7 +93,7 @@ func stakeRegisteredValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keep
 	if !found {
 		return types.ErrNoValidatorFound(k.Codespace()).Result()
 	}
-	err := k.StakeValidator(ctx, validator, msg.Value.Amount)
+	err := k.StakeValidator(ctx, validator, msg.Value)
 	if err != nil {
 		return err.Result()
 	}
@@ -107,7 +103,7 @@ func stakeRegisteredValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keep
 			types.EventTypeStake,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
 			sdk.NewAttribute(sdk.AttributeKeySender, msg.Address.String()),
-			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Value.Amount.String()),
+			sdk.NewAttribute(sdk.AttributeKeyAmount, msg.Value.String()),
 		),
 		sdk.NewEvent(
 			sdk.EventTypeMessage,

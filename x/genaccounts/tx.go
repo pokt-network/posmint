@@ -3,13 +3,14 @@ package genaccounts
 import (
 	"fmt"
 	"github.com/pokt-network/posmint/codec"
-	"github.com/pokt-network/posmint/server"
+	"github.com/pokt-network/posmint/context"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/genaccounts/types"
 	"github.com/pokt-network/posmint/x/genutil"
+	genTypes "github.com/pokt-network/posmint/x/genutil/types"
 )
-// todo
-func AddGenesisAccount(ctx *server.Context, cdc *codec.Codec, addr sdk.AccAddress, coins, vestingAmt sdk.Coins,
+
+func (am AppModule) AddGenesisAccount(ctx *context.Context, cdc *codec.Codec, addr sdk.AccAddress, coins, vestingAmt sdk.Coins,
 	dataDirectory string, vestingStart, vestingEnd int64) error {
 	config := ctx.Config
 	config.SetRoot(dataDirectory)
@@ -20,7 +21,7 @@ func AddGenesisAccount(ctx *server.Context, cdc *codec.Codec, addr sdk.AccAddres
 
 	// retrieve the app state
 	genFile := config.GenesisFile()
-	appState, genDoc, err := genutil.GenesisStateFromGenFile(cdc, genFile)
+	appState, genDoc, err := genTypes.GenesisStateFromGenFile(cdc, genFile)
 	if err != nil {
 		return err
 	}

@@ -2,6 +2,7 @@ package genutil
 
 import (
 	"encoding/json"
+	"github.com/pokt-network/posmint/context"
 	"path/filepath"
 	"time"
 
@@ -11,8 +12,6 @@ import (
 	"github.com/tendermint/tendermint/p2p"
 	"github.com/tendermint/tendermint/privval"
 	tmtypes "github.com/tendermint/tendermint/types"
-
-	"github.com/pokt-network/posmint/server"
 )
 
 // ExportGenesisFile creates and writes the genesis configuration to disk. An
@@ -56,7 +55,7 @@ func InitializeNodeValidatorFiles(config *cfg.Config,
 	}
 
 	nodeID = string(nodeKey.ID())
-	server.UpgradeOldPrivValFile(config)
+	context.UpgradeOldPrivValFile(config)
 
 	pvKeyFile := config.PrivValidatorKeyFile()
 	if err := common.EnsureDir(filepath.Dir(pvKeyFile), 0777); err != nil {

@@ -1,8 +1,9 @@
-package auth
+package util
 
 import (
 	"bytes"
 	"fmt"
+	"github.com/pokt-network/posmint/x/auth"
 	"io/ioutil"
 	"os"
 
@@ -22,7 +23,7 @@ import (
 
 	"github.com/pokt-network/posmint/x/auth/types"
 )
-// todo broken should this be here? how do we get rid of circular dep if in Context module?
+
 // GasEstimateResponse defines a response definition for tx gas estimation.
 type GasEstimateResponse struct {
 	GasEstimate uint64 `json:"gas_estimate" yaml:"gas_estimate"`
@@ -69,17 +70,6 @@ func CompleteAndBroadcastTxCLI(txBldr authtypes.TxBuilder, cliCtx context.CLICon
 	}
 
 	return nil
-}
-
-// EnrichWithGas calculates the gas estimate that would be consumed by the
-// transaction and set the transaction's respective value accordingly.
-func EnrichWithGas(txBldr authtypes.TxBuilder, cliCtx context.CLIContext, msgs []sdk.Msg) (authtypes.TxBuilder, error) {
-	_, adjusted, err := simulateMsgs(txBldr, cliCtx, msgs)
-	if err != nil {
-		return txBldr, err
-	}
-
-	return txBldr.WithGas(adjusted), nil
 }
 
 // CalculateGas simulates the execution of a transaction and returns
@@ -140,7 +130,7 @@ func SignStdTx(
 
 	// check whether the address is a signer
 	if !isTxSigner(sdk.AccAddress(addr), stdTx.GetSigners()) {
-		return signedStdTx, fmt.Errorf("%s: %s", errInvalidSigner, name)
+		return signedStdTx, fmt.Errorf("%s: %s", auth.errInvalidSigner, name)
 	}
 
 	if !offline {
@@ -167,7 +157,7 @@ func SignStdTxWithSignerAddress(txBldr authtypes.TxBuilder, cliCtx context.CLICo
 
 	// check whether the address is a signer
 	if !isTxSigner(addr, stdTx.GetSigners()) {
-		return signedStdTx, fmt.Errorf("%s: %s", errInvalidSigner, name)
+		return signedStdTx, fmt.Errorf("%s: %s", auth.errInvalidSigner, name)
 	}
 
 	if !offline {
@@ -284,24 +274,10 @@ func PrepareTxBuilder(txBldr authtypes.TxBuilder, cliCtx context.CLIContext) (au
 }
 
 func buildUnsignedStdTxOffline(txBldr authtypes.TxBuilder, cliCtx context.CLIContext, msgs []sdk.Msg) (stdTx authtypes.StdTx, err error) {
-	if txBldr.SimulateAndExecute() {
-		if cliCtx.GenerateOnly {
-			return stdTx, errors.New("cannot estimate gas with generate-only")
-		}
-
-		txBldr, err = EnrichWithGas(txBldr, cliCtx, msgs)
-		if err != nil {
-			return stdTx, err
-		}
-
-		_, _ = fmt.Fprintf(os.Stderr, "estimated gas = %v\n", txBldr.Gas())
-	}
-
 	stdSignMsg, err := txBldr.BuildSignMsg(msgs)
 	if err != nil {
 		return stdTx, nil
 	}
-
 	return authtypes.NewStdTx(stdSignMsg.Msgs, stdSignMsg.Fee, nil, stdSignMsg.Memo), nil
 }
 
@@ -341,20 +317,9 @@ func QueryTxsByEvents(cliCtx context.CLIContext, events []string, page, limit in
 		return nil, err
 	}
 
-	prove := !cliCtx.TrustNode
-
-	resTxs, err := node.TxSearch(query, prove, page, limit)
+	resTxs, err := node.TxSearch(query, false, page, limit)
 	if err != nil {
 		return nil, err
-	}
-
-	if prove {
-		for _, tx := range resTxs.Txs {
-			err := ValidateTxResult(cliCtx, tx)
-			if err != nil {
-				return nil, err
-			}
-		}
 	}
 
 	resBlocks, err := getBlocksForTxResults(cliCtx, resTxs.Txs)
@@ -385,15 +350,9 @@ func QueryTx(cliCtx context.CLIContext, hashHexStr string) (sdk.TxResponse, erro
 		return sdk.TxResponse{}, err
 	}
 
-	resTx, err := node.Tx(hash, !cliCtx.TrustNode)
+	resTx, err := node.Tx(hash, false)
 	if err != nil {
 		return sdk.TxResponse{}, err
-	}
-
-	if !cliCtx.TrustNode {
-		if err = ValidateTxResult(cliCtx, resTx); err != nil {
-			return sdk.TxResponse{}, err
-		}
 	}
 
 	resBlocks, err := getBlocksForTxResults(cliCtx, []*ctypes.ResultTx{resTx})
@@ -425,16 +384,6 @@ func formatTxResults(cdc *codec.Codec, resTxs []*ctypes.ResultTx, resBlocks map[
 
 // ValidateTxResult performs transaction verification.
 func ValidateTxResult(cliCtx context.CLIContext, resTx *ctypes.ResultTx) error {
-	if !cliCtx.TrustNode {
-		check, err := cliCtx.Verify(resTx.Height)
-		if err != nil {
-			return err
-		}
-		err = resTx.Proof.Validate(check.Header.DataHash)
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
 

@@ -5,15 +5,14 @@ import (
 	"github.com/pokt-network/posmint/context"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/auth"
+	"github.com/pokt-network/posmint/x/auth/util"
 	"github.com/pokt-network/posmint/x/crisis/internal/types"
 )
 
-func (am AppModule) InvariantBroken(cdc *codec.Codec, address sdk.ValAddress)error {
-	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(auth.GetTxEncoder(cdc))
+func (am AppModule) InvariantBroken(cdc *codec.Codec, moduleName, route string, address sdk.ValAddress) error {
+	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(util.GetTxEncoder(cdc))
 	cliCtx := context.NewCLIContext(am.node).WithCodec(cdc)
-
 	senderAddr := cliCtx.GetFromAddress()
-	moduleName, route := args[0], args[1] // todo
 	msg := types.NewMsgVerifyInvariant(senderAddr, moduleName, route)
-	return auth.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+	return util.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
 }
