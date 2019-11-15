@@ -12,14 +12,20 @@ type Config struct {
 	TraceWriter string
 }
 
-func NewDefaultConfig() *Config {
-	return NewConfig(
-		cfg.DefaultConfig(),
+func NewDefaultConfig(rootDirectory string) *Config {
+	return &Config{
+		cfg.DefaultConfig().SetRoot(rootDirectory),
 		log.NewTMLogger(log.NewSyncWriter(os.Stdout)),
-		"", // todo broken
-	)
+		"",
+	}
 }
 
-func NewConfig(config *cfg.Config, logger log.Logger, traceWriterPath string) *Config {
-	return &Config{config, logger, traceWriterPath}
+func NewConfig(rootDirectory string, MaxNumberInboundPeers, MaxNumberOutboundPeers int, logger log.Logger, traceWriterPath string) *Config {
+	// setup tendermint node config
+	newTMConfig := cfg.DefaultConfig()
+	newTMConfig.SetRoot(rootDirectory)
+	newTMConfig.P2P.MaxNumInboundPeers = MaxNumberInboundPeers
+	newTMConfig.P2P.MaxNumOutboundPeers = MaxNumberOutboundPeers
+
+	return &Config{newTMConfig, logger, traceWriterPath}
 }
