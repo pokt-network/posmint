@@ -2,6 +2,7 @@ package crisis
 
 import (
 	"encoding/json"
+	"github.com/pokt-network/posmint/crypto/keys"
 	"github.com/tendermint/tendermint/node"
 
 	"github.com/pokt-network/posmint/codec"
@@ -48,20 +49,21 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 // AppModule implements an application module for the crisis module.
 type AppModule struct {
 	AppModuleBasic
-
 	// NOTE: We store a reference to the keeper here so that after a module
 	// manager is created, the invariants can be properly registered and
 	// executed.
 	keeper *keeper.Keeper
 	node   *node.Node
+	keybase *keys.Keybase
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(keeper *keeper.Keeper, node *node.Node) AppModule {
+func NewAppModule(keeper *keeper.Keeper, node *node.Node, keybase *keys.Keybase) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		keeper:         keeper,
 		node:           node,
+		keybase:        keybase,
 	}
 }
 
@@ -85,6 +87,10 @@ func (am AppModule) NewHandler() sdk.Handler {
 
 func (am AppModule) GetTendermintNode() *node.Node {
 	return am.node
+}
+
+func (am AppModule) GetKeybase() *keys.Keybase {
+	return am.keybase
 }
 
 // QuerierRoute returns no querier route.

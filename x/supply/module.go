@@ -2,6 +2,7 @@ package supply
 
 import (
 	"encoding/json"
+	"github.com/pokt-network/posmint/crypto/keys"
 	"github.com/tendermint/tendermint/node"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -48,18 +49,20 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 // app module
 type AppModule struct {
 	AppModuleBasic
-	keeper Keeper
-	ak     types.AccountKeeper
-	node   *node.Node
+	keeper  Keeper
+	ak      types.AccountKeeper
+	node    *node.Node
+	keybase *keys.Keybase
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(keeper Keeper, ak types.AccountKeeper, node *node.Node) AppModule {
+func NewAppModule(keeper Keeper, ak types.AccountKeeper, node *node.Node, keybase *keys.Keybase) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		keeper:         keeper,
 		ak:             ak,
 		node:           node,
+		keybase:        keybase,
 	}
 }
 
@@ -70,6 +73,10 @@ func (AppModule) Name() string {
 
 func (am AppModule) GetTendermintNode() *node.Node {
 	return am.node
+}
+
+func (am AppModule) GetKeybase() *keys.Keybase {
+	return am.keybase
 }
 
 // register invariants
