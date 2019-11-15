@@ -13,7 +13,7 @@ import (
 
 // CLIContext implements a typical CLI context created in SDK modules for
 // transaction handling and queries.
-type CLIContext struct {
+type CLIContext struct { // TODO consider module passing clicontext instead of node and keybase
 	Codec         *codec.Codec
 	Client        rpcclient.Client
 	Keybase       cryptokeys.Keybase
@@ -27,9 +27,10 @@ type CLIContext struct {
 // NewCLIContext returns a new initialized CLIContext with parameters from the
 // command line using Viper. It takes a key name or address and populates the FromName and
 // FromAddress field accordingly.
-func NewCLIContext(node *node.Node) CLIContext {
+func NewCLIContext(node *node.Node, keybase *cryptokeys.Keybase) CLIContext {
 	return CLIContext{
-		Client: rpcclient.NewLocal(node),
+		Client:  rpcclient.NewLocal(node),
+		Keybase: *keybase,
 	}
 }
 
