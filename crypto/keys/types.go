@@ -69,7 +69,7 @@ func (kp KeyPair) GetAddress() types.AccAddress {
 
 // encoding info
 func writeKeyPair(kp KeyPair) []byte {
-	return cdc.MustMarshalBinaryLengthPrefixed(i)
+	return cdc.MustMarshalBinaryLengthPrefixed(kp)
 }
 
 // decoding info

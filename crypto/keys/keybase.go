@@ -9,7 +9,7 @@ import (
 	"github.com/pokt-network/posmint/crypto/keys/mintkey"
 	"github.com/pokt-network/posmint/types"
 
-	bip39 "github.com/cosmos/go-bip39"
+	"github.com/cosmos/go-bip39"
 
 	tmcrypto "github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
@@ -87,7 +87,6 @@ func (kb dbKeybase) List() ([]KeyPair, error) {
 	iter := kb.db.Iterator(nil, nil)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
-		key := string(iter.Key())
 		kp, err := readKeyPair(iter.Value())
 		if err != nil {
 			return nil, err
@@ -194,7 +193,7 @@ func (kb dbKeybase) CreateMnemonic(bip39Passwd string, passwd string) (kp KeyPai
 	}
 
 	seed := bip39.NewSeed(mnemonic, bip39Passwd)
-	masterPriv, ch := hd.ComputeMastersFromSeed(seed)
+	masterPriv, _ := hd.ComputeMastersFromSeed(seed)
 	kp = kb.writeLocalKeyPair(secp256k1.PrivKeySecp256k1(masterPriv), passwd)
 	return
 }
@@ -206,7 +205,7 @@ func (kb dbKeybase) DeriveFromMnemonic(mnemonic, bip39Passwd, encryptPasswd stri
 		return KeyPair{}, err
 	}
 
-	masterPriv, ch := hd.ComputeMastersFromSeed(seed)
+	masterPriv, _ := hd.ComputeMastersFromSeed(seed)
 	kp := kb.writeLocalKeyPair(secp256k1.PrivKeySecp256k1(masterPriv), encryptPasswd)
 	return kp, nil
 }

@@ -39,7 +39,7 @@ func (lkb lazyKeybase) List() ([]KeyPair, error) {
 func (lkb lazyKeybase) Get(address types.AccAddress) (KeyPair, error) {
 	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
 	if err != nil {
-		return nil, err
+		return KeyPair{}, err
 	}
 	defer db.Close()
 
@@ -79,7 +79,7 @@ func (lkb lazyKeybase) Sign(address types.AccAddress, passphrase string, msg []b
 func (lkb lazyKeybase) CreateMnemonic(bip39Passwd string, passwd string) (kp KeyPair, mnemonic string, err error) {
 	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
 	if err != nil {
-		return nil, "", err
+		return KeyPair{}, "", err
 	}
 	defer db.Close()
 
@@ -89,11 +89,11 @@ func (lkb lazyKeybase) CreateMnemonic(bip39Passwd string, passwd string) (kp Key
 func (lkb lazyKeybase) DeriveFromMnemonic(mnemonic, bip39Passwd, encryptPasswd string) (KeyPair, error) {
 	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
 	if err != nil {
-		return nil, err
+		return KeyPair{}, err
 	}
 	defer db.Close()
 
-	return newDbKeybase(db).Derive(mnemonic, bip39Passwd, encryptPasswd)
+	return newDbKeybase(db).DeriveFromMnemonic(mnemonic, bip39Passwd, encryptPasswd)
 }
 
 func (lkb lazyKeybase) ImportPrivKey(armor, decryptPassphrase, encryptPassphrase string) error {
@@ -109,7 +109,7 @@ func (lkb lazyKeybase) ImportPrivKey(armor, decryptPassphrase, encryptPassphrase
 func (lkb lazyKeybase) ExportPrivKeyEncryptedArmor(address types.AccAddress, decryptPassphrase, encryptPassphrase string) (armor string, err error) {
 	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer db.Close()
 
@@ -119,7 +119,7 @@ func (lkb lazyKeybase) ExportPrivKeyEncryptedArmor(address types.AccAddress, dec
 func (lkb lazyKeybase) ExportPrivateKeyObject(address types.AccAddress, passphrase string) (crypto.PrivKey, error) {
 	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer db.Close()
 

@@ -3,18 +3,15 @@ package util
 import (
 	"bytes"
 	"fmt"
+	"github.com/pokt-network/posmint/x/auth"
 	"io/ioutil"
 	"os"
-
-	"github.com/cosmos/cosmos-sdk/client/keys"
 	sdk "github.com/pokt-network/posmint/types"
 
 	"encoding/hex"
 	"errors"
 	"strings"
 	"time"
-
-	authtypes "github.com/pokt-network/posmint/x/auth/types"
 
 	"github.com/pokt-network/posmint/codec"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
@@ -35,7 +32,7 @@ func (gr GasEstimateResponse) String() string {
 // the provided context has generate-only enabled, the tx will only be printed
 // to STDOUT in a fully offline manner. Otherwise, the tx will be signed and
 // broadcasted.
-func GenerateOrBroadcastMsgs(cliCtx CLIContext, txBldr authtypes.TxBuilder, msgs []sdk.Msg) error {
+func GenerateOrBroadcastMsgs(cliCtx CLIContext, txBldr auth.TxBuilder, msgs []sdk.Msg) error {
 	return CompleteAndBroadcastTxCLI(txBldr, cliCtx, msgs)
 }
 
@@ -44,7 +41,7 @@ func GenerateOrBroadcastMsgs(cliCtx CLIContext, txBldr authtypes.TxBuilder, msgs
 // QueryContext. It ensures that the account exists, has a proper number and
 // sequence set. In addition, it builds and signs a transaction with the
 // supplied messages. Finally, it broadcasts the signed transaction to a node.
-func CompleteAndBroadcastTxCLI(txBldr authtypes.TxBuilder, cliCtx CLIContext, msgs []sdk.Msg) error {
+func CompleteAndBroadcastTxCLI(txBldr auth.TxBuilder, cliCtx CLIContext, msgs []sdk.Msg) error {
 	txBldr, err := PrepareTxBuilder(txBldr, cliCtx)
 	if err != nil {
 		return err
