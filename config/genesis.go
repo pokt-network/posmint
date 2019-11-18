@@ -11,12 +11,20 @@ import (
 
 type GenesisState map[string]json.RawMessage
 
-// expected usage
-//func (app *nameServiceApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
+//  expected usage
+//  func (app *nameServiceApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
 //	genesisState := GetGensisFromFile(app.cdc, "genesis.go")
 //	return app.mm.InitGenesis(ctx, genesisState)
 //}
-func GetGensisFromFile(cdc *codec.Codec, genFile string) GenesisState {
+func GenesisStateFromFile(cdc *codec.Codec, genFile string) GenesisState {
+	if !common.FileExists(genFile) {
+		panic(fmt.Errorf("%s does not exist, run `init` first", genFile))
+	}
+	genDoc := GenesisFileToGenDoc(genFile)
+	return GenesisStateFromGenDoc(cdc, *genDoc)
+}
+
+func GenesisFileToGenDoc(genFile string) *tmtypes.GenesisDoc {
 	if !common.FileExists(genFile) {
 		panic(fmt.Errorf("%s does not exist, run `init` first", genFile))
 	}
@@ -24,18 +32,14 @@ func GetGensisFromFile(cdc *codec.Codec, genFile string) GenesisState {
 	if err != nil {
 		panic(err)
 	}
-	genesisState, err := GenesisStateFromGenDoc(cdc, *genDoc)
-	if err != nil {
+	return genDoc
+}
+
+func GenesisStateFromGenDoc(cdc *codec.Codec, genDoc tmtypes.GenesisDoc) (genesisState map[string]json.RawMessage) {
+	if err := cdc.UnmarshalJSON(genDoc.AppState, &genesisState); err != nil {
 		panic(err)
 	}
 	return genesisState
-}
-
-func GenesisStateFromGenDoc(cdc *codec.Codec, genDoc tmtypes.GenesisDoc) (genesisState map[string]json.RawMessage, err error) {
-	if err = cdc.UnmarshalJSON(genDoc.AppState, &genesisState); err != nil {
-		return genesisState, err
-	}
-	return genesisState, nil
 }
 
 // InitConfig common config options for init
