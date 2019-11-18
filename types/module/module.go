@@ -31,10 +31,10 @@ import (
 	"encoding/json"
 	"github.com/tendermint/tendermint/node"
 
-	abci "github.com/tendermint/tendermint/abci/types"
-
 	"github.com/pokt-network/posmint/codec"
+	cryptokeys "github.com/pokt-network/posmint/crypto/keys"
 	sdk "github.com/pokt-network/posmint/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 //__________________________________________________________________________________________
@@ -100,7 +100,8 @@ type AppModule interface {
 	// registers
 	RegisterInvariants(sdk.InvariantRegistry)
 
-	GetTendermintNode() *node.Node // return tendermint Node
+	GetTendermintNode() *node.Node   // return tendermint Node
+	GetKeybase() *cryptokeys.Keybase // return keybase
 
 	// routes
 	Route() string
@@ -126,6 +127,8 @@ func NewGenesisOnlyAppModule(amg AppModuleGenesis) AppModule {
 }
 
 func (GenesisOnlyAppModule) GetTendermintNode() *node.Node { return nil }
+
+func (GenesisOnlyAppModule) GetKeybase() *cryptokeys.Keybase { return nil }
 
 // register invariants
 func (GenesisOnlyAppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}

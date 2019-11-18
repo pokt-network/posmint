@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"github.com/pokt-network/posmint/crypto/keys"
 	"github.com/tendermint/tendermint/node"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -51,14 +52,16 @@ type AppModule struct {
 	AppModuleBasic
 	accountKeeper AccountKeeper
 	node          *node.Node
+	keybase       *keys.Keybase
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(accountKeeper AccountKeeper, node *node.Node) AppModule {
+func NewAppModule(accountKeeper AccountKeeper, node *node.Node, keybase *keys.Keybase) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		accountKeeper:  accountKeeper,
 		node:           node,
+		keybase:        keybase,
 	}
 }
 
@@ -88,6 +91,10 @@ func (am AppModule) NewQuerierHandler() sdk.Querier {
 
 func (am AppModule) GetTendermintNode() *node.Node {
 	return am.node
+}
+
+func (am AppModule) GetKeybase() *keys.Keybase {
+	return am.keybase
 }
 
 // InitGenesis module init-genesis

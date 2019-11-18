@@ -12,7 +12,7 @@ import (
 
 // CLIContext implements a typical CLI context created in SDK modules for
 // transaction handling and queries.
-type CLIContext struct {
+type CLIContext struct { // TODO consider module passing clicontext instead of node and keybase
 	Codec         *codec.Codec
 	Client        rpcclient.Client
 	FromAddress   sdk.AccAddress
