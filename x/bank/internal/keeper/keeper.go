@@ -2,12 +2,9 @@ package keeper
 
 import (
 	"fmt"
-	"time"
-
 	"github.com/tendermint/tendermint/libs/log"
 
 	sdk "github.com/pokt-network/posmint/types"
-	"github.com/pokt-network/posmint/x/auth/exported"
 	"github.com/pokt-network/posmint/x/bank/internal/types"
 	"github.com/pokt-network/posmint/x/params"
 )
@@ -18,9 +15,6 @@ var _ Keeper = (*BaseKeeper)(nil)
 // between accounts.
 type Keeper interface {
 	SendKeeper
-
-	DelegateCoins(ctx sdk.Context, delegatorAddr, moduleAccAddr sdk.AccAddress, amt sdk.Coins) sdk.Error
-	UndelegateCoins(ctx sdk.Context, moduleAccAddr, delegatorAddr sdk.AccAddress, amt sdk.Coins) sdk.Error
 }
 
 // BaseKeeper manages transfers between accounts. It implements the Keeper interface.
@@ -42,93 +36,6 @@ func NewBaseKeeper(ak types.AccountKeeper,
 		ak:             ak,
 		paramSpace:     ps,
 	}
-}
-
-// DelegateCoins performs delegation by deducting amt coins from an account with
-// address addr. For vesting accounts, delegations amounts are tracked for both
-// vesting and vested coins.
-// The coins are then transferred from the delegator address to a ModuleAccount address.
-// If any of the delegation amounts are negative, an error is returned.
-func (keeper BaseKeeper) DelegateCoins(ctx sdk.Context, delegatorAddr, moduleAccAddr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-
-	delegatorAcc := keeper.ak.GetAccount(ctx, delegatorAddr)
-	if delegatorAcc == nil {
-		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", delegatorAddr))
-	}
-
-	moduleAcc := keeper.ak.GetAccount(ctx, moduleAccAddr)
-	if moduleAcc == nil {
-		return sdk.ErrUnknownAddress(fmt.Sprintf("module account %s does not exist", moduleAccAddr))
-	}
-
-	if !amt.IsValid() {
-		return sdk.ErrInvalidCoins(amt.String())
-	}
-
-	oldCoins := delegatorAcc.GetCoins()
-
-	_, hasNeg := oldCoins.SafeSub(amt)
-	if hasNeg {
-		return sdk.ErrInsufficientCoins(
-			fmt.Sprintf("insufficient account funds; %s < %s", oldCoins, amt),
-		)
-	}
-
-	if err := trackDelegation(delegatorAcc, ctx.BlockHeader().Time, amt); err != nil {
-		return sdk.ErrInternal(fmt.Sprintf("failed to track delegation: %v", err))
-	}
-
-	keeper.ak.SetAccount(ctx, delegatorAcc)
-
-	_, err := keeper.AddCoins(ctx, moduleAccAddr, amt)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// UndelegateCoins performs undelegation by crediting amt coins to an account with
-// address addr. For vesting accounts, undelegation amounts are tracked for both
-// vesting and vested coins.
-// The coins are then transferred from a ModuleAccount address to the delegator address.
-// If any of the undelegation amounts are negative, an error is returned.
-func (keeper BaseKeeper) UndelegateCoins(ctx sdk.Context, moduleAccAddr, delegatorAddr sdk.AccAddress, amt sdk.Coins) sdk.Error {
-
-	delegatorAcc := keeper.ak.GetAccount(ctx, delegatorAddr)
-	if delegatorAcc == nil {
-		return sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", delegatorAddr))
-	}
-
-	moduleAcc := keeper.ak.GetAccount(ctx, moduleAccAddr)
-	if moduleAcc == nil {
-		return sdk.ErrUnknownAddress(fmt.Sprintf("module account %s does not exist", moduleAccAddr))
-	}
-
-	if !amt.IsValid() {
-		return sdk.ErrInvalidCoins(amt.String())
-	}
-
-	oldCoins := moduleAcc.GetCoins()
-
-	newCoins, hasNeg := oldCoins.SafeSub(amt)
-	if hasNeg {
-		return sdk.ErrInsufficientCoins(
-			fmt.Sprintf("insufficient account funds; %s < %s", oldCoins, amt),
-		)
-	}
-
-	err := keeper.SetCoins(ctx, moduleAccAddr, newCoins)
-	if err != nil {
-		return err
-	}
-
-	if err := trackUndelegation(delegatorAcc, amt); err != nil {
-		return sdk.ErrInternal(fmt.Sprintf("failed to track undelegation: %v", err))
-	}
-
-	keeper.ak.SetAccount(ctx, delegatorAcc)
-	return nil
 }
 
 // SendKeeper defines a module interface that facilitates the transfer of coins
@@ -377,28 +284,4 @@ func (keeper BaseViewKeeper) HasCoins(ctx sdk.Context, addr sdk.AccAddress, amt 
 // Codespace returns the keeper's codespace.
 func (keeper BaseViewKeeper) Codespace() sdk.CodespaceType {
 	return keeper.codespace
-}
-
-// CONTRACT: assumes that amt is valid.
-func trackDelegation(acc exported.Account, blockTime time.Time, amt sdk.Coins) error {
-	vacc, ok := acc.(exported.VestingAccount)
-	if ok {
-		// TODO: return error on account.TrackDelegation
-		vacc.TrackDelegation(blockTime, amt)
-		return nil
-	}
-
-	return acc.SetCoins(acc.GetCoins().Sub(amt))
-}
-
-// CONTRACT: assumes that amt is valid.
-func trackUndelegation(acc exported.Account, amt sdk.Coins) error {
-	vacc, ok := acc.(exported.VestingAccount)
-	if ok {
-		// TODO: return error on account.TrackUndelegation
-		vacc.TrackUndelegation(amt)
-		return nil
-	}
-
-	return acc.SetCoins(acc.GetCoins().Add(amt))
 }

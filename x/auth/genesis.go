@@ -10,10 +10,14 @@ import (
 // a genesis port script to the new fee collector account
 func InitGenesis(ctx sdk.Context, ak AccountKeeper, data GenesisState) {
 	ak.SetParams(ctx, data.Params)
+	for _, account := range data.Accounts {
+		ak.SetAccount(ctx, account)
+	}
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper
 func ExportGenesis(ctx sdk.Context, ak AccountKeeper) GenesisState {
 	params := ak.GetParams(ctx)
-	return NewGenesisState(params)
+	accounts := ak.GetAllAccounts(ctx)
+	return NewGenesisState(params, accounts)
 }

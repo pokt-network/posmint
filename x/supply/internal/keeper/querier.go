@@ -2,12 +2,10 @@ package keeper
 
 import (
 	"fmt"
-
-	abci "github.com/tendermint/tendermint/abci/types"
-
-	"github.com/pokt-network/posmint/client"
 	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/auth/util"
 	"github.com/pokt-network/posmint/x/supply/internal/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 // NewQuerier creates a querier for supply REST endpoints
@@ -37,7 +35,7 @@ func queryTotalSupply(ctx sdk.Context, req abci.RequestQuery, k Keeper) ([]byte,
 
 	totalSupply := k.GetSupply(ctx).GetTotal()
 
-	start, end := client.Paginate(len(totalSupply), params.Page, params.Limit, 100)
+	start, end := util.Paginate(len(totalSupply), params.Page, params.Limit, 100)
 	if start < 0 || end < 0 {
 		totalSupply = sdk.Coins{}
 	} else {

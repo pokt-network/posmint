@@ -2,7 +2,9 @@ package pos
 
 import (
 	"encoding/json"
+	"github.com/pokt-network/posmint/crypto/keys"
 	"github.com/pokt-network/posmint/x/pos/keeper"
+	"github.com/tendermint/tendermint/node"
 
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
@@ -50,19 +52,22 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 // AppModule implements an application module for the staking module.
 type AppModule struct {
 	AppModuleBasic
-
+	keybase       *keys.Keybase
+	node          *node.Node
 	keeper        keeper.Keeper
 	accountKeeper types.AccountKeeper
 	supplyKeeper  types.SupplyKeeper
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(keeper keeper.Keeper, accountKeeper types.AccountKeeper, supplyKeeper types.SupplyKeeper) AppModule {
+func NewAppModule(keeper keeper.Keeper, accountKeeper types.AccountKeeper, supplyKeeper types.SupplyKeeper, node *node.Node, keybase *keys.Keybase) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		keeper:         keeper,
 		accountKeeper:  accountKeeper,
 		supplyKeeper:   supplyKeeper,
+		node:           node,
+		keybase:        keybase,
 	}
 }
 
@@ -74,6 +79,14 @@ func (AppModule) Name() string {
 // RegisterInvariants registers the staking module invariants.
 func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {
 	keeper.RegisterInvariants(ir, am.keeper)
+}
+
+func (am AppModule) GetTendermintNode() *node.Node {
+	return am.node
+}
+
+func (am AppModule) GetKeybase() *keys.Keybase {
+	return am.keybase
 }
 
 // Route returns the message routing key for the staking module.

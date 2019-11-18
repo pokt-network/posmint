@@ -2,14 +2,15 @@ package crisis
 
 import (
 	"encoding/json"
-
-	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/pokt-network/posmint/crypto/keys"
+	"github.com/tendermint/tendermint/node"
 
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/types/module"
 	"github.com/pokt-network/posmint/x/crisis/internal/keeper"
 	"github.com/pokt-network/posmint/x/crisis/internal/types"
+	abci "github.com/tendermint/tendermint/abci/types"
 )
 
 var (
@@ -48,18 +49,21 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 // AppModule implements an application module for the crisis module.
 type AppModule struct {
 	AppModuleBasic
-
 	// NOTE: We store a reference to the keeper here so that after a module
 	// manager is created, the invariants can be properly registered and
 	// executed.
 	keeper *keeper.Keeper
+	node   *node.Node
+	keybase *keys.Keybase
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(keeper *keeper.Keeper) AppModule {
+func NewAppModule(keeper *keeper.Keeper, node *node.Node, keybase *keys.Keybase) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		keeper:         keeper,
+		node:           node,
+		keybase:        keybase,
 	}
 }
 
@@ -79,6 +83,14 @@ func (AppModule) Route() string {
 // NewHandler returns an sdk.Handler for the crisis module.
 func (am AppModule) NewHandler() sdk.Handler {
 	return NewHandler(*am.keeper)
+}
+
+func (am AppModule) GetTendermintNode() *node.Node {
+	return am.node
+}
+
+func (am AppModule) GetKeybase() *keys.Keybase {
+	return am.keybase
 }
 
 // QuerierRoute returns no querier route.

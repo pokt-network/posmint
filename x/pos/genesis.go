@@ -22,6 +22,9 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, supplyKeeper types.Suppl
 	// set the 'previous state total power' from the data
 	keeper.SetPrevStateValidatorsPower(ctx, data.PrevStateTotalPower)
 	for _, validator := range data.Validators {
+		if validator.IsUnstaked() {
+			panic(fmt.Sprintf("%v the validators must be staked or unstaking at genesis", validator))
+		}
 		// Call the registration hook if not exported
 		if !data.Exported {
 			keeper.BeforeValidatorRegistered(ctx, validator.Address)

@@ -3,6 +3,8 @@
 package rest
 
 import (
+	"github.com/pokt-network/posmint/x/auth/util"
+	"github.com/tendermint/tendermint/node"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -13,7 +15,6 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 
-	"github.com/pokt-network/posmint/client/context"
 	"github.com/pokt-network/posmint/codec"
 	"github.com/pokt-network/posmint/types"
 )
@@ -119,14 +120,14 @@ func TestParseQueryHeight(t *testing.T) {
 		name           string
 		req            *http.Request
 		w              http.ResponseWriter
-		cliCtx         context.CLIContext
+		cliCtx         util.CLIContext
 		expectedHeight int64
 		expectedOk     bool
 	}{
-		{"no height", req0, httptest.NewRecorder(), context.CLIContext{}, emptyHeight, true},
-		{"height", req1, httptest.NewRecorder(), context.CLIContext{}, height, true},
-		{"invalid height", req2, httptest.NewRecorder(), context.CLIContext{}, emptyHeight, false},
-		{"negative height", req3, httptest.NewRecorder(), context.CLIContext{}, emptyHeight, false},
+		{"no height", req0, httptest.NewRecorder(), util.CLIContext{}, emptyHeight, true},
+		{"height", req1, httptest.NewRecorder(), util.CLIContext{}, height, true},
+		{"invalid height", req2, httptest.NewRecorder(), util.CLIContext{}, emptyHeight, false},
+		{"negative height", req3, httptest.NewRecorder(), util.CLIContext{}, emptyHeight, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -156,7 +157,7 @@ func TestProcessPostResponse(t *testing.T) {
 	}
 
 	// setup
-	ctx := context.NewCLIContext()
+	ctx := util.NewCLIContext(&node.Node{})
 	height := int64(194423)
 
 	privKey := secp256k1.GenPrivKey()
@@ -200,11 +201,7 @@ func TestProcessPostResponse(t *testing.T) {
 // asserts that ResponseRecorder returns the expected code and body
 // runs PostProcessResponse on the objects regular interface and on
 // the marshalled struct.
-func runPostProcessResponse(t *testing.T, ctx context.CLIContext, obj interface{}, expectedBody []byte, indent bool) {
-	if indent {
-		ctx.Indent = indent
-	}
-
+func runPostProcessResponse(t *testing.T, ctx util.CLIContext, obj interface{}, expectedBody []byte, indent bool) {
 	// test using regular struct
 	w := httptest.NewRecorder()
 	PostProcessResponse(w, ctx, obj)

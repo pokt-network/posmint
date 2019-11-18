@@ -6,17 +6,21 @@ import (
 
 // GenesisState - all auth state that must be provided at genesis
 type GenesisState struct {
-	Params Params `json:"params" yaml:"params"`
+	Params   Params `json:"params" yaml:"params"`
+	Accounts Accounts
 }
 
 // NewGenesisState - Create a new genesis state
-func NewGenesisState(params Params) GenesisState {
-	return GenesisState{params}
+func NewGenesisState(params Params, accounts Accounts) GenesisState {
+	return GenesisState{
+		Params:   params,
+		Accounts: accounts,
+	}
 }
 
 // DefaultGenesisState - Return a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState(DefaultParams())
+	return NewGenesisState(DefaultParams(), nil)
 }
 
 // ValidateGenesis performs basic validation of auth genesis data returning an

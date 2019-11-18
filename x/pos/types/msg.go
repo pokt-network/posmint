@@ -19,7 +19,7 @@ var (
 type MsgStake struct {
 	Address sdk.ValAddress `json:"validator_address" yaml:"validator_address"`
 	PubKey  crypto.PubKey  `json:"pubkey" yaml:"pubkey"`
-	Value   sdk.Coin       `json:"value" yaml:"value"`
+	Value   sdk.Int        `json:"value" yaml:"value"`
 }
 
 // Return address(es) that must sign over msg.GetSignBytes()
@@ -39,7 +39,7 @@ func (msg MsgStake) ValidateBasic() sdk.Error {
 	if msg.Address.Empty() {
 		return ErrNilValidatorAddr(DefaultCodespace)
 	}
-	if msg.Value.Amount.LTE(sdk.ZeroInt()) {
+	if msg.Value.LTE(sdk.ZeroInt()) {
 		return ErrBadDelegationAmount(DefaultCodespace)
 	}
 	return nil
