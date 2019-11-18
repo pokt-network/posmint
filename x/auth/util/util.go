@@ -3,10 +3,10 @@ package util
 import (
 	"bytes"
 	"fmt"
-	"github.com/pokt-network/posmint/x/auth"
 	"io/ioutil"
 	"os"
 
+	"github.com/cosmos/cosmos-sdk/client/keys"
 	sdk "github.com/pokt-network/posmint/types"
 
 	"encoding/hex"
