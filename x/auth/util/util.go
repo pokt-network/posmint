@@ -2,21 +2,18 @@ package util
 
 import (
 	"bytes"
-	"fmt"
-	"github.com/pokt-network/posmint/x/auth"
-	"io/ioutil"
-	"os"
-	sdk "github.com/pokt-network/posmint/types"
-
 	"encoding/hex"
 	"errors"
+	"fmt"
+	"github.com/pokt-network/posmint/codec"
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/auth"
+	"github.com/pokt-network/posmint/x/auth/types"
+	ctypes "github.com/tendermint/tendermint/rpc/core/types"
+	"io/ioutil"
+	"os"
 	"strings"
 	"time"
-
-	"github.com/pokt-network/posmint/codec"
-	ctypes "github.com/tendermint/tendermint/rpc/core/types"
-
-	"github.com/pokt-network/posmint/x/auth/types"
 )
 
 // GasEstimateResponse defines a response definition for tx gas estimation.
@@ -26,14 +23,6 @@ type GasEstimateResponse struct {
 
 func (gr GasEstimateResponse) String() string {
 	return fmt.Sprintf("gas estimate: %d", gr.GasEstimate)
-}
-
-// GenerateOrBroadcastMsgs creates a StdTx given a series of messages. If
-// the provided context has generate-only enabled, the tx will only be printed
-// to STDOUT in a fully offline manner. Otherwise, the tx will be signed and
-// broadcasted.
-func GenerateOrBroadcastMsgs(cliCtx CLIContext, txBldr auth.TxBuilder, msgs []sdk.Msg) error {
-	return CompleteAndBroadcastTxCLI(txBldr, cliCtx, msgs)
 }
 
 // CompleteAndBroadcastTxCLI implements a utility function that facilitates
@@ -47,13 +36,12 @@ func CompleteAndBroadcastTxCLI(txBldr auth.TxBuilder, cliCtx CLIContext, msgs []
 		return err
 	}
 
-	passphrase, err := keys.GetPassphrase(fromName) // todo
 	if err != nil {
 		return err
 	}
 
 	// build and sign the transaction
-	txBytes, err := txBldr.BuildAndSign(fromName, passphrase, msgs)
+	txBytes, err := txBldr.BuildAndSign(cliCtx.GetFromAddress(), cliCtx.Passphrase, msgs)
 	if err != nil {
 		return err
 	}
@@ -93,69 +81,27 @@ func CalculateGas(
 // SignStdTx appends a signature to a StdTx and returns a copy of it. If appendSig
 // is false, it replaces the signatures already attached with the new signature.
 // Don't perform online validation or lookups if offline is true.
-func SignStdTx(
-	txBldr authtypes.TxBuilder, cliCtx CLIContext, name string,
-	stdTx authtypes.StdTx, appendSig bool, offline bool,
-) (authtypes.StdTx, error) {
-
-	var signedStdTx authtypes.StdTx
-
-	info, err := txBldr.Keybase().Get(name)
-	if err != nil {
-		return signedStdTx, err
-	}
-
-	addr := info.GetPubKey().Address()
-
+func SignStdTx(txBldr auth.TxBuilder, cliCtx CLIContext, stdTx auth.StdTx, appendSig bool, offline bool) (auth.StdTx, error) {
+	var signedStdTx auth.StdTx
+	addr := cliCtx.FromAddress
 	// check whether the address is a signer
-	if !isTxSigner(sdk.AccAddress(addr), stdTx.GetSigners()) {
-		return signedStdTx, fmt.Errorf("%s: %s", auth.errInvalidSigner, name)
+	if !isTxSigner(addr, stdTx.GetSigners()) {
+		return signedStdTx, fmt.Errorf("%s: %s", auth.ErrInvalidSigner, addr.String())
 	}
 
 	if !offline {
+		var err error
 		txBldr, err = populateAccountFromState(txBldr, cliCtx, sdk.AccAddress(addr))
 		if err != nil {
 			return signedStdTx, err
 		}
 	}
-
-	passphrase, err := keys.GetPassphrase(name)
-	if err != nil {
-		return signedStdTx, err
-	}
-
-	return txBldr.SignStdTx(name, passphrase, stdTx, appendSig)
-}
-
-// SignStdTxWithSignerAddress attaches a signature to a StdTx and returns a copy of a it.
-// Don't perform online validation or lookups if offline is true, else
-// populate account and sequence numbers from a foreign account.
-func SignStdTxWithSignerAddress(txBldr authtypes.TxBuilder, cliCtx CLIContext,
-	addr sdk.AccAddress, name string, stdTx authtypes.StdTx,
-	offline bool) (signedStdTx authtypes.StdTx, err error) {
-
-	// check whether the address is a signer
-	if !isTxSigner(addr, stdTx.GetSigners()) {
-		return signedStdTx, fmt.Errorf("%s: %s", auth.errInvalidSigner, name)
-	}
-
-	if !offline {
-		txBldr, err = populateAccountFromState(txBldr, cliCtx, addr)
-		if err != nil {
-			return signedStdTx, err
-		}
-	}
-
-	passphrase, err := keys.GetPassphrase(name)
-	if err != nil {
-		return signedStdTx, err
-	}
-
-	return txBldr.SignStdTx(name, passphrase, stdTx, false)
+	passphrase := cliCtx.Passphrase
+	return txBldr.SignStdTx(addr, passphrase, stdTx, appendSig)
 }
 
 // ReadStdTxFromFile Read and decode a StdTx from the given filename.  Can pass "-" to read from stdin.
-func ReadStdTxFromFile(cdc *codec.Codec, filename string) (stdTx authtypes.StdTx, err error) {
+func ReadStdTxFromFile(cdc *codec.Codec, filename string) (stdTx auth.StdTx, err error) {
 	var bytes []byte
 
 	if filename == "-" {
@@ -176,10 +122,10 @@ func ReadStdTxFromFile(cdc *codec.Codec, filename string) (stdTx authtypes.StdTx
 }
 
 func populateAccountFromState(
-	txBldr authtypes.TxBuilder, cliCtx CLIContext, addr sdk.AccAddress,
-) (authtypes.TxBuilder, error) {
+	txBldr auth.TxBuilder, cliCtx CLIContext, addr sdk.AccAddress,
+) (auth.TxBuilder, error) {
 
-	num, seq, err := authtypes.NewAccountRetriever(cliCtx).GetAccountNumberSequence(addr)
+	num, seq, err := auth.NewAccountRetriever(cliCtx).GetAccountNumberSequence(addr)
 	if err != nil {
 		return txBldr, err
 	}
@@ -192,7 +138,7 @@ func populateAccountFromState(
 func GetTxEncoder(cdc *codec.Codec) (encoder sdk.TxEncoder) {
 	encoder = sdk.GetConfig().GetTxEncoder()
 	if encoder == nil {
-		encoder = authtypes.DefaultTxEncoder(cdc)
+		encoder = auth.DefaultTxEncoder(cdc)
 	}
 
 	return encoder
@@ -200,7 +146,7 @@ func GetTxEncoder(cdc *codec.Codec) (encoder sdk.TxEncoder) {
 
 // nolint
 // SimulateMsgs simulates the transaction and returns the gas estimate and the adjusted value.
-func simulateMsgs(txBldr authtypes.TxBuilder, cliCtx CLIContext, msgs []sdk.Msg) (estimated, adjusted uint64, err error) {
+func simulateMsgs(txBldr auth.TxBuilder, cliCtx CLIContext, msgs []sdk.Msg) (estimated, adjusted uint64, err error) {
 	txBytes, err := txBldr.BuildTxForSim(msgs)
 	if err != nil {
 		return
@@ -224,10 +170,10 @@ func parseQueryResponse(cdc *codec.Codec, rawRes []byte) (uint64, error) {
 }
 
 // PrepareTxBuilder populates a TxBuilder in preparation for the build of a Tx.
-func PrepareTxBuilder(txBldr authtypes.TxBuilder, cliCtx CLIContext) (authtypes.TxBuilder, error) {
+func PrepareTxBuilder(txBldr auth.TxBuilder, cliCtx CLIContext) (auth.TxBuilder, error) {
 	from := cliCtx.GetFromAddress()
 
-	accGetter := authtypes.NewAccountRetriever(cliCtx)
+	accGetter := auth.NewAccountRetriever(cliCtx)
 	if err := accGetter.EnsureExists(from); err != nil {
 		return txBldr, err
 	}
@@ -236,7 +182,7 @@ func PrepareTxBuilder(txBldr authtypes.TxBuilder, cliCtx CLIContext) (authtypes.
 	// TODO: (ref #1903) Allow for user supplied account number without
 	// automatically doing a manual lookup.
 	if txbldrAccNum == 0 || txbldrAccSeq == 0 {
-		num, seq, err := authtypes.NewAccountRetriever(cliCtx).GetAccountNumberSequence(from)
+		num, seq, err := auth.NewAccountRetriever(cliCtx).GetAccountNumberSequence(from)
 		if err != nil {
 			return txBldr, err
 		}
@@ -252,12 +198,12 @@ func PrepareTxBuilder(txBldr authtypes.TxBuilder, cliCtx CLIContext) (authtypes.
 	return txBldr, nil
 }
 
-func buildUnsignedStdTxOffline(txBldr authtypes.TxBuilder, cliCtx CLIContext, msgs []sdk.Msg) (stdTx authtypes.StdTx, err error) {
+func buildUnsignedStdTxOffline(txBldr auth.TxBuilder, cliCtx CLIContext, msgs []sdk.Msg) (stdTx auth.StdTx, err error) {
 	stdSignMsg, err := txBldr.BuildSignMsg(msgs)
 	if err != nil {
 		return stdTx, nil
 	}
-	return authtypes.NewStdTx(stdSignMsg.Msgs, stdSignMsg.Fee, nil, stdSignMsg.Memo), nil
+	return auth.NewStdTx(stdSignMsg.Msgs, stdSignMsg.Fee, nil, stdSignMsg.Memo), nil
 }
 
 func isTxSigner(user sdk.AccAddress, signers []sdk.AccAddress) bool {

@@ -13,5 +13,5 @@ func (am AppModule) InvariantBroken(cdc *codec.Codec, moduleName, route string, 
 	cliCtx := util.NewCLIContext(am.node).WithCodec(cdc)
 	senderAddr := cliCtx.GetFromAddress()
 	msg := types.NewMsgVerifyInvariant(senderAddr, moduleName, route)
-	return util.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+	return util.CompleteAndBroadcastTxCLI(cliCtx, txBldr, []sdk.Msg{msg})
 }

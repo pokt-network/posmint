@@ -50,7 +50,6 @@ var (
 	DefaultTxDecoder               = types.DefaultTxDecoder
 	DefaultTxEncoder               = types.DefaultTxEncoder
 	NewTxBuilder                   = types.NewTxBuilder
-	NewTxBuilderFromCLI            = types.NewTxBuilderFromCLI
 	MakeSignature                  = types.MakeSignature
 	NewAccountRetriever            = types.NewAccountRetriever
 
