@@ -52,13 +52,13 @@ type AppModule struct {
 	// NOTE: We store a reference to the keeper here so that after a module
 	// manager is created, the invariants can be properly registered and
 	// executed.
-	keeper *keeper.Keeper
-	node   *node.Node
-	keybase *keys.Keybase
+	keeper  *keeper.Keeper
+	node    *node.Node
+	keybase keys.Keybase
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(keeper *keeper.Keeper, node *node.Node, keybase *keys.Keybase) AppModule {
+func NewAppModule(keeper *keeper.Keeper, node *node.Node, keybase keys.Keybase) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		keeper:         keeper,
@@ -89,7 +89,7 @@ func (am AppModule) GetTendermintNode() *node.Node {
 	return am.node
 }
 
-func (am AppModule) GetKeybase() *keys.Keybase {
+func (am AppModule) GetKeybase() keys.Keybase {
 	return am.keybase
 }
 

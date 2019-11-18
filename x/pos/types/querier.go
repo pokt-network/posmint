@@ -17,6 +17,7 @@ const (
 	QueryParameters          = "parameters"
 	QuerySigningInfo         = "signingInfo"
 	QuerySigningInfos        = "signingInfos"
+	QueryAccountBalance      = "account_balance"
 )
 
 type QueryValidatorParams struct {
@@ -35,6 +36,10 @@ type QueryValidatorsParams struct {
 
 func NewQueryValidatorsParams(page, limit int) QueryValidatorsParams {
 	return QueryValidatorsParams{page, limit}
+}
+
+type QueryAccountBalanceParams struct {
+	sdk.ValAddress
 }
 
 type QueryUnstakingValidatorsParams struct {

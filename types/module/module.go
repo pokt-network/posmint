@@ -100,8 +100,8 @@ type AppModule interface {
 	// registers
 	RegisterInvariants(sdk.InvariantRegistry)
 
-	GetTendermintNode() *node.Node   // return tendermint Node
-	GetKeybase() *cryptokeys.Keybase // return keybase
+	GetTendermintNode() *node.Node  // return tendermint Node
+	GetKeybase() cryptokeys.Keybase // return keybase
 
 	// routes
 	Route() string
@@ -128,7 +128,7 @@ func NewGenesisOnlyAppModule(amg AppModuleGenesis) AppModule {
 
 func (GenesisOnlyAppModule) GetTendermintNode() *node.Node { return nil }
 
-func (GenesisOnlyAppModule) GetKeybase() *cryptokeys.Keybase { return nil }
+func (GenesisOnlyAppModule) GetKeybase() cryptokeys.Keybase { return nil }
 
 // register invariants
 func (GenesisOnlyAppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}

@@ -5,15 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/spf13/viper"
-
-	"github.com/pokt-network/posmint/client/flags"
-	"github.com/pokt-network/posmint/client/keys"
 	crkeys "github.com/pokt-network/posmint/crypto/keys"
 	sdk "github.com/pokt-network/posmint/types"
 )
 
-// todo broken need keybase
 // TxBuilder implements a transaction context created in SDK modules.
 type TxBuilder struct {
 	txEncoder          sdk.TxEncoder
@@ -30,9 +25,8 @@ type TxBuilder struct {
 }
 
 // NewTxBuilder returns a new initialized TxBuilder.
-func NewTxBuilder(
-	txEncoder sdk.TxEncoder, accNumber, seq, gas uint64, gasAdj float64, simulateAndExecute bool, chainID,
-	memo string, fees sdk.Coins, gasPrices sdk.DecCoins) TxBuilder {
+func NewTxBuilder(txEncoder sdk.TxEncoder, accNumber, seq, gas uint64, gasAdj float64,
+	simulateAndExecute bool, chainID, memo string, fees sdk.Coins, gasPrices sdk.DecCoins) TxBuilder {
 	return TxBuilder{
 		txEncoder:          txEncoder,
 		keybase:            nil,
@@ -46,30 +40,6 @@ func NewTxBuilder(
 		fees:               fees,
 		gasPrices:          gasPrices,
 	}
-}
-
-// NewTxBuilderFromCLI returns a new initialized TxBuilder with parameters from
-// the command line using Viper.
-func NewTxBuilderFromCLI() TxBuilder {
-	kb, err := keys.NewKeyBaseFromHomeFlag()
-	if err != nil {
-		panic(err)
-	}
-	txbldr := TxBuilder{
-		keybase:            kb,
-		accountNumber:      uint64(viper.GetInt64(flags.FlagAccountNumber)),
-		sequence:           uint64(viper.GetInt64(flags.FlagSequence)),
-		gas:                flags.GasFlagVar.Gas,
-		gasAdjustment:      viper.GetFloat64(flags.FlagGasAdjustment),
-		simulateAndExecute: flags.GasFlagVar.Simulate,
-		chainID:            viper.GetString(flags.FlagChainID),
-		memo:               viper.GetString(flags.FlagMemo),
-	}
-
-	txbldr = txbldr.WithFees(viper.GetString(flags.FlagFees))
-	txbldr = txbldr.WithGasPrices(viper.GetString(flags.FlagGasPrices))
-
-	return txbldr
 }
 
 // TxEncoder returns the transaction encoder
@@ -205,10 +175,10 @@ func (bldr TxBuilder) BuildSignMsg(msgs []sdk.Msg) (StdSignMsg, error) {
 	}, nil
 }
 
-// Sign signs a transaction given a name, passphrase, and a single message to
+// Sign signs a transaction given a address, passphrase, and a single message to
 // signed. An error is returned if signing fails.
-func (bldr TxBuilder) Sign(name, passphrase string, msg StdSignMsg) ([]byte, error) {
-	sig, err := MakeSignature(bldr.keybase, name, passphrase, msg)
+func (bldr TxBuilder) Sign(address sdk.AccAddress, passphrase string, msg StdSignMsg) ([]byte, error) {
+	sig, err := MakeSignature(bldr.keybase, address, passphrase, msg)
 	if err != nil {
 		return nil, err
 	}
@@ -217,14 +187,14 @@ func (bldr TxBuilder) Sign(name, passphrase string, msg StdSignMsg) ([]byte, err
 }
 
 // BuildAndSign builds a single message to be signed, and signs a transaction
-// with the built message given a name, passphrase, and a set of messages.
-func (bldr TxBuilder) BuildAndSign(name, passphrase string, msgs []sdk.Msg) ([]byte, error) {
+// with the built message given a address, passphrase, and a set of messages.
+func (bldr TxBuilder) BuildAndSign(address sdk.AccAddress, passphrase string, msgs []sdk.Msg) ([]byte, error) {
 	msg, err := bldr.BuildSignMsg(msgs)
 	if err != nil {
 		return nil, err
 	}
 
-	return bldr.Sign(name, passphrase, msg)
+	return bldr.Sign(address, passphrase, msg)
 }
 
 // BuildTxForSim creates a StdSignMsg and encodes a transaction with the
@@ -242,12 +212,12 @@ func (bldr TxBuilder) BuildTxForSim(msgs []sdk.Msg) ([]byte, error) {
 
 // SignStdTx appends a signature to a StdTx and returns a copy of it. If append
 // is false, it replaces the signatures already attached with the new signature.
-func (bldr TxBuilder) SignStdTx(name, passphrase string, stdTx StdTx, appendSig bool) (signedStdTx StdTx, err error) {
+func (bldr TxBuilder) SignStdTx(address sdk.AccAddress, passphrase string, stdTx StdTx, appendSig bool) (signedStdTx StdTx, err error) {
 	if bldr.chainID == "" {
 		return StdTx{}, fmt.Errorf("chain ID required but not specified")
 	}
 
-	stdSignature, err := MakeSignature(bldr.keybase, name, passphrase, StdSignMsg{
+	stdSignature, err := MakeSignature(bldr.keybase, address, passphrase, StdSignMsg{
 		ChainID:       bldr.chainID,
 		AccountNumber: bldr.accountNumber,
 		Sequence:      bldr.sequence,
@@ -269,17 +239,14 @@ func (bldr TxBuilder) SignStdTx(name, passphrase string, stdTx StdTx, appendSig 
 	return
 }
 
-// MakeSignature builds a StdSignature given keybase, key name, passphrase, and a StdSignMsg.
-func MakeSignature(keybase crkeys.Keybase, name, passphrase string,
+// MakeSignature builds a StdSignature given keybase, key address, passphrase, and a StdSignMsg.
+func MakeSignature(keybase crkeys.Keybase, address sdk.AccAddress, passphrase string,
 	msg StdSignMsg) (sig StdSignature, err error) {
 	if keybase == nil {
-		keybase, err = keys.NewKeyBaseFromHomeFlag()
-		if err != nil {
-			return
-		}
+		return StdSignature{}, errors.New("nil keybase error")
 	}
 
-	sigBytes, pubkey, err := keybase.Sign(name, passphrase, msg.Bytes())
+	sigBytes, pubkey, err := keybase.Sign(address, passphrase, msg.Bytes())
 	if err != nil {
 		return
 	}

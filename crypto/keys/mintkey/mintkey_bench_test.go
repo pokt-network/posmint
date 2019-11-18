@@ -2,10 +2,10 @@ package mintkey
 
 import (
 	"fmt"
+	"github.com/tendermint/crypto/bcrypt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tendermint/crypto/bcrypt"
 
 	"github.com/tendermint/tendermint/crypto"
 )

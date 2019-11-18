@@ -11,10 +11,24 @@ import (
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
-// todo query balance
+func (am AppModule) QueryAccountBalance(cdc *codec.Codec, addr sdk.ValAddress, height int64) (sdk.Int, error) {
+	cliCtx := util.NewCLIContext(am.GetTendermintNode(), nil, "").WithCodec(cdc).WithHeight(height)
+	params := types.QueryAccountBalanceParams{ValAddress: addr}
+	bz, err := cdc.MarshalBinaryBare(params)
+	if err != nil {
+		return sdk.ZeroInt(), err
+	}
+	balanceBz, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/account_balance", types.StoreKey), bz)
+	var balance sdk.Int
+	err = cdc.UnmarshalJSON(balanceBz, balance)
+	if err != nil {
+		return sdk.ZeroInt(), err
+	}
+	return balance, nil
+}
 
 func (am AppModule) QueryValidator(cdc *codec.Codec, addr sdk.ValAddress, height int64) (types.Validator, error) {
-	cliCtx := util.NewCLIContext(am.node, am.keybase).WithCodec(cdc).WithHeight(height)
+	cliCtx := util.NewCLIContext(am.GetTendermintNode(), nil, "").WithCodec(cdc).WithHeight(height)
 	res, _, err := cliCtx.QueryStore(types.KeyForValByAllVals(addr), types.StoreKey)
 	if err != nil {
 		return types.Validator{}, err
@@ -26,7 +40,7 @@ func (am AppModule) QueryValidator(cdc *codec.Codec, addr sdk.ValAddress, height
 }
 
 func (am AppModule) QueryValidators(cdc *codec.Codec, height int64) (types.Validators, error) {
-	cliCtx := util.NewCLIContext(am.node, am.keybase).WithCodec(cdc).WithHeight(height)
+	cliCtx := util.NewCLIContext(am.GetTendermintNode(), nil, "").WithCodec(cdc).WithHeight(height)
 	resKVs, _, err := cliCtx.QuerySubspace(types.AllValidatorsKey, types.StoreKey)
 	if err != nil {
 		return types.Validators{}, err
@@ -39,7 +53,7 @@ func (am AppModule) QueryValidators(cdc *codec.Codec, height int64) (types.Valid
 }
 
 func (am AppModule) QueryStakedValidators(cdc *codec.Codec, height int64) (types.Validators, error) {
-	cliCtx := util.NewCLIContext(am.node, am.keybase).WithCodec(cdc).WithHeight(height)
+	cliCtx := util.NewCLIContext(am.GetTendermintNode(), nil, "").WithCodec(cdc).WithHeight(height)
 	resKVs, _, err := cliCtx.QuerySubspace(types.StakedValidatorsKey, types.StoreKey)
 	if err != nil {
 		return types.Validators{}, err
@@ -52,7 +66,7 @@ func (am AppModule) QueryStakedValidators(cdc *codec.Codec, height int64) (types
 }
 
 func (am AppModule) QueryUnstakedValidators(cdc *codec.Codec, height int64) (types.Validators, error) {
-	cliCtx := util.NewCLIContext(am.node, am.keybase).WithCodec(cdc).WithHeight(height)
+	cliCtx := util.NewCLIContext(am.GetTendermintNode(), nil, "").WithCodec(cdc).WithHeight(height)
 	resKVs, _, err := cliCtx.QuerySubspace(types.UnstakedValidatorsKey, types.StoreKey)
 	if err != nil {
 		return types.Validators{}, err
@@ -65,7 +79,7 @@ func (am AppModule) QueryUnstakedValidators(cdc *codec.Codec, height int64) (typ
 }
 
 func (am AppModule) QueryUnstakingValidators(cdc *codec.Codec, height int64) (types.Validators, error) {
-	cliCtx := util.NewCLIContext(am.node, am.keybase).WithCodec(cdc).WithHeight(height)
+	cliCtx := util.NewCLIContext(am.GetTendermintNode(), nil, "").WithCodec(cdc).WithHeight(height)
 	resKVs, _, err := cliCtx.QuerySubspace(types.UnstakingValidatorsKey, types.StoreKey)
 	if err != nil {
 		return types.Validators{}, err
@@ -78,7 +92,7 @@ func (am AppModule) QueryUnstakingValidators(cdc *codec.Codec, height int64) (ty
 }
 
 func (am AppModule) QuerySigningInfo(cdc *codec.Codec, height int64, ctx sdk.Context, consAddr sdk.ConsAddress) (types.ValidatorSigningInfo, error) {
-	cliCtx := util.NewCLIContext(am.node, am.keybase).WithCodec(cdc).WithHeight(height)
+	cliCtx := util.NewCLIContext(am.GetTendermintNode(), nil, "").WithCodec(cdc).WithHeight(height)
 	key := types.GetValidatorSigningInfoKey(consAddr)
 	res, _, err := cliCtx.QueryStore(key, types.StoreKey)
 	if err != nil {
@@ -93,7 +107,7 @@ func (am AppModule) QuerySigningInfo(cdc *codec.Codec, height int64, ctx sdk.Con
 }
 
 func (am AppModule) QuerySupply(cdc *codec.Codec, height int64) (stakedCoins sdk.Int, unstakedCoins sdk.Int, err error) {
-	cliCtx := util.NewCLIContext(am.node, am.keybase).WithCodec(cdc).WithHeight(height)
+	cliCtx := util.NewCLIContext(am.GetTendermintNode(), nil, "").WithCodec(cdc).WithHeight(height)
 	stakedPoolBytes, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/stakedPool", types.StoreKey), nil)
 	if err != nil {
 		return sdk.Int{}, sdk.Int{}, err
@@ -114,7 +128,7 @@ func (am AppModule) QuerySupply(cdc *codec.Codec, height int64) (stakedCoins sdk
 }
 
 func (am AppModule) QueryDAO(cdc *codec.Codec, height int64) (daoCoins sdk.Int, err error) {
-	cliCtx := util.NewCLIContext(am.node, am.keybase).WithCodec(cdc).WithHeight(height)
+	cliCtx := util.NewCLIContext(am.GetTendermintNode(), nil, "").WithCodec(cdc).WithHeight(height)
 	daoPoolBytes, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/dao", types.StoreKey), nil)
 	if err != nil {
 		return sdk.Int{}, err
@@ -127,7 +141,7 @@ func (am AppModule) QueryDAO(cdc *codec.Codec, height int64) (daoCoins sdk.Int, 
 }
 
 func (am AppModule) QueryPOSParams(cdc *codec.Codec, height int64) (types.Params, error) {
-	cliCtx := util.NewCLIContext(am.node, am.keybase).WithCodec(cdc).WithHeight(height)
+	cliCtx := util.NewCLIContext(am.GetTendermintNode(), nil, "").WithCodec(cdc).WithHeight(height)
 	route := fmt.Sprintf("custom/%s/%s", types.StoreKey, types.QueryParameters)
 	bz, _, err := cliCtx.QueryWithData(route, nil)
 	if err != nil {
