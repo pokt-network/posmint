@@ -33,6 +33,8 @@ func NewQuerier(k Keeper) sdk.Querier {
 			return queryUnstakedPool(ctx, k)
 		case types.QueryDAO:
 			return queryDAO(ctx, k)
+		case types.QueryAccountBalance:
+			return queryAccountBalance(ctx, req, k)
 		case types.QueryParameters:
 			return queryParameters(ctx, k)
 		default:
@@ -59,6 +61,24 @@ func queryValidators(ctx sdk.Context, req abci.RequestQuery, k Keeper) ([]byte, 
 	}
 
 	res, err := codec.MarshalJSONIndent(types.ModuleCdc, validators)
+	if err != nil {
+		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to JSON marshal result: %s", err.Error()))
+	}
+
+	return res, nil
+}
+
+func queryAccountBalance(ctx sdk.Context, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
+	var params types.QueryAccountBalanceParams
+
+	err := types.ModuleCdc.UnmarshalJSON(req.Data, &params)
+	if err != nil {
+		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
+	}
+
+	balance := k.GetBalance(ctx, params.ValAddress)
+
+	res, err := codec.MarshalJSONIndent(types.ModuleCdc, balance)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("failed to JSON marshal result: %s", err.Error()))
 	}

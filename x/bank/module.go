@@ -49,11 +49,11 @@ type AppModule struct {
 	keeper        Keeper
 	accountKeeper types.AccountKeeper
 	node          *node.Node
-	keybase       *keys.Keybase
+	keybase       keys.Keybase
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(keeper Keeper, accountKeeper types.AccountKeeper, node *node.Node, keybase *keys.Keybase) AppModule {
+func NewAppModule(keeper Keeper, accountKeeper types.AccountKeeper, node *node.Node, keybase keys.Keybase) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		keeper:         keeper,
@@ -83,7 +83,7 @@ func (AppModule) QuerierRoute() string { return RouterKey }
 func (am AppModule) GetTendermintNode() *node.Node {
 	return am.node
 }
-func (am AppModule) GetKeybase() *keys.Keybase {
+func (am AppModule) GetKeybase() keys.Keybase {
 	return am.keybase
 }
 

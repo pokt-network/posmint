@@ -35,17 +35,11 @@ func CompleteAndBroadcastTxCLI(txBldr auth.TxBuilder, cliCtx CLIContext, msgs []
 	if err != nil {
 		return err
 	}
-
-	if err != nil {
-		return err
-	}
-
 	// build and sign the transaction
-	txBytes, err := txBldr.BuildAndSign(cliCtx.GetFromAddress(), cliCtx.Passphrase, msgs)
+	txBytes, err := txBldr.BuildAndSign(cliCtx.FromAddress, cliCtx.Passphrase, msgs)
 	if err != nil {
 		return err
 	}
-
 	// broadcast to a Tendermint node
 	_, err = cliCtx.BroadcastTx(txBytes)
 	if err != nil {
@@ -96,8 +90,7 @@ func SignStdTx(txBldr auth.TxBuilder, cliCtx CLIContext, stdTx auth.StdTx, appen
 			return signedStdTx, err
 		}
 	}
-	passphrase := cliCtx.Passphrase
-	return txBldr.SignStdTx(addr, passphrase, stdTx, appendSig)
+	return txBldr.SignStdTx(addr, cliCtx.Passphrase, stdTx, appendSig)
 }
 
 // ReadStdTxFromFile Read and decode a StdTx from the given filename.  Can pass "-" to read from stdin.

@@ -8,42 +8,38 @@ import (
 	"github.com/pokt-network/posmint/x/pos/types"
 )
 
-func (am AppModule) StakeTx(cdc *codec.Codec, address sdk.ValAddress, amount sdk.Int) error {
-	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(util.GetTxEncoder(cdc))
-	cliCtx := util.NewCLIContext(am.GetTendermintNode(), am.GetKeybase()).WithCodec(cdc).WithFromAddress(address)
-	kb, err := cliCtx.Keybase.GetByAddress(sdk.AccAddress(address))
+func (am AppModule) StakeTx(cdc *codec.Codec, txBuilder auth.TxBuilder, address sdk.ValAddress, passphrase string, amount sdk.Int) error {
+	cliCtx := util.NewCLIContext(am.GetTendermintNode(), sdk.AccAddress(address), passphrase).WithCodec(cdc)
+	kb, err := am.keybase.Get(sdk.AccAddress(address))
 	if err != nil {
 		return err
 	}
 	msg := types.MsgStake{
 		Address: address,
-		PubKey:  kb.GetPubKey(), // needed for validator creation
+		PubKey:  kb.PubKey, // needed for validator creation
 		Value:   amount,
 	}
-	return util.CompleteAndBroadcastTxCLI(cliCtx, txBldr, []sdk.Msg{msg})
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
 }
 
-func (am AppModule) UnstakeTx(cdc *codec.Codec, name string, height int64, address sdk.ValAddress) error {
-	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(util.GetTxEncoder(cdc))
-	cliCtx := util.NewCLIContext(am.GetTendermintNode(), am.GetKeybase()).WithCodec(cdc).WithFromAddress(address)
+func (am AppModule) UnstakeTx(cdc *codec.Codec, txBuilder auth.TxBuilder, address sdk.ValAddress, passphrase string) error {
+	cliCtx := util.NewCLIContext(am.GetTendermintNode(), sdk.AccAddress(address), passphrase).WithCodec(cdc)
 	msg := types.MsgBeginUnstake{Address: address}
-	return util.CompleteAndBroadcastTxCLI(cliCtx, txBldr, []sdk.Msg{msg})
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
 }
 
-func (am AppModule) UnjailTx(cdc *codec.Codec, name string, height int64, address sdk.ValAddress) error {
-	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(util.GetTxEncoder(cdc))
-	cliCtx := util.NewCLIContext(am.GetTendermintNode(), am.GetKeybase()).WithCodec(cdc).WithFromAddress(address)
+func (am AppModule) UnjailTx(cdc *codec.Codec, txBuilder auth.TxBuilder, address sdk.ValAddress, passphrase string) error {
+	cliCtx := util.NewCLIContext(am.GetTendermintNode(), sdk.AccAddress(address), passphrase).WithCodec(cdc)
 	msg := types.MsgUnjail{ValidatorAddr: address}
-	return util.CompleteAndBroadcastTxCLI(cliCtx, txBldr, []sdk.Msg{msg})
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
 }
 
-func (am AppModule) Send(cdc *codec.Codec, fromAddr, toAddr sdk.ValAddress, amount sdk.Int, name string, height int64) error {
-	txBldr := auth.NewTxBuilderFromCLI().WithTxEncoder(util.GetTxEncoder(cdc))
-	cliCtx := util.NewCLIContext(am.GetTendermintNode(), am.GetKeybase()).WithCodec(cdc).WithFromAddress(fromAddr)
+func (am AppModule) Send(cdc *codec.Codec, fromAddr, toAddr sdk.ValAddress, txBuilder auth.TxBuilder, passphrase string, amount sdk.Int) error {
+	cliCtx := util.NewCLIContext(am.GetTendermintNode(), sdk.AccAddress(fromAddr), passphrase).WithCodec(cdc)
 	msg := types.MsgSend{
 		FromAddress: fromAddr,
 		ToAddress:   toAddr,
 		Amount:      amount,
 	}
-	return util.CompleteAndBroadcastTxCLI(cliCtx, txBldr, []sdk.Msg{msg})
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
 }
