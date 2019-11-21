@@ -93,7 +93,11 @@ func stakeRegisteredValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keep
 	if !found {
 		return types.ErrNoValidatorFound(k.Codespace()).Result()
 	}
-	err := k.StakeValidator(ctx, validator, msg.Value)
+	err := k.ValidateValidatorStaking(ctx, validator, msg.Value)
+	if err != nil {
+		return err.Result()
+	}
+	err = k.StakeValidator(ctx, validator, msg.Value)
 	if err != nil {
 		return err.Result()
 	}
