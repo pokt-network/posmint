@@ -10,13 +10,9 @@ import (
 
 func (am AppModule) StakeTx(cdc *codec.Codec, txBuilder auth.TxBuilder, address sdk.ValAddress, passphrase string, amount sdk.Int) error {
 	cliCtx := util.NewCLIContext(am.GetTendermintNode(), sdk.AccAddress(address), passphrase).WithCodec(cdc)
-	kb, err := am.keybase.Get(sdk.AccAddress(address))
-	if err != nil {
-		return err
-	}
 	msg := types.MsgStake{
 		Address: address,
-		PubKey:  kb.PubKey, // needed for validator creation
+		PubKey:  am.node.PrivValidator().GetPubKey(),
 		Value:   amount,
 	}
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
