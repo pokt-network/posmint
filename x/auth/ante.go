@@ -36,9 +36,7 @@ type SignatureVerificationGasConsumer = func(meter sdk.GasMeter, sig []byte, pub
 // numbers, checks signatures & account numbers, and deducts fees from the first
 // signer.
 func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper, sigGasConsumer SignatureVerificationGasConsumer) sdk.AnteHandler {
-	return func(
-		ctx sdk.Context, tx sdk.Tx, simulate bool,
-	) (newCtx sdk.Context, res sdk.Result, abort bool) {
+	return func(ctx sdk.Context, tx sdk.Tx, simulate bool) (newCtx sdk.Context, res sdk.Result, abort bool) {
 
 		if addr := supplyKeeper.GetModuleAddress(types.FeeCollectorName); addr == nil {
 			panic(fmt.Sprintf("%s module account has not been set", types.FeeCollectorName))
@@ -199,10 +197,8 @@ func ValidateMemo(stdTx StdTx, params Params) sdk.Result {
 
 // verify the signature and increment the sequence. If the account doesn't have
 // a pubkey, set it.
-func processSig(
-	ctx sdk.Context, acc Account, sig StdSignature, signBytes []byte, simulate bool, params Params,
-	sigGasConsumer SignatureVerificationGasConsumer,
-) (updatedAcc Account, res sdk.Result) {
+func processSig(ctx sdk.Context, acc Account, sig StdSignature, signBytes []byte, simulate bool, params Params,
+	sigGasConsumer SignatureVerificationGasConsumer) (updatedAcc Account, res sdk.Result) {
 
 	pubKey, res := ProcessPubKey(acc, sig, simulate)
 	if !res.IsOK() {

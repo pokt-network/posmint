@@ -29,11 +29,6 @@ var (
 	NewBaseAccount                 = types.NewBaseAccount
 	ProtoBaseAccount               = types.ProtoBaseAccount
 	NewBaseAccountWithAddress      = types.NewBaseAccountWithAddress
-	NewBaseVestingAccount          = types.NewBaseVestingAccount
-	NewContinuousVestingAccountRaw = types.NewContinuousVestingAccountRaw
-	NewContinuousVestingAccount    = types.NewContinuousVestingAccount
-	NewDelayedVestingAccountRaw    = types.NewDelayedVestingAccountRaw
-	NewDelayedVestingAccount       = types.NewDelayedVestingAccount
 	RegisterCodec                  = types.RegisterCodec
 	NewGenesisState                = types.NewGenesisState
 	DefaultGenesisState            = types.DefaultGenesisState
@@ -67,11 +62,7 @@ var (
 // Type exported types
 type (
 	Account                  = exported.Account
-	VestingAccount           = exported.VestingAccount
 	BaseAccount              = types.BaseAccount
-	BaseVestingAccount       = types.BaseVestingAccount
-	ContinuousVestingAccount = types.ContinuousVestingAccount
-	DelayedVestingAccount    = types.DelayedVestingAccount
 	GenesisState             = types.GenesisState
 	Params                   = types.Params
 	QueryAccountParams       = types.QueryAccountParams
