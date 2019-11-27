@@ -11,6 +11,7 @@ type PrivateKey ed25519.PrivKeyEd25519
 
 const (
 	PubKeySize = ed25519.PubKeyEd25519Size
+	SignatureSize = ed25519.SignatureSize
 )
 
 func NewPublicKey(hexString string) (*PublicKey, error) {
