@@ -3,6 +3,7 @@ package util
 import (
 	"errors"
 	"fmt"
+
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
@@ -90,7 +91,7 @@ func (ctx CLIContext) BroadcastTx(txBytes []byte) (res sdk.TxResponse, err error
 		res, err = ctx.BroadcastTxCommit(txBytes)
 
 	default:
-		return sdk.TxResponse{}, fmt.Errorf("unsupported return type %s; supported types: sync, async, block", ctx.BroadcastMode)
+		return sdk.TxResponse{}, fmt.Errorf("unsupported return type %v; supported types: sync, async, block", ctx.BroadcastMode)
 	}
 
 	return res, err
