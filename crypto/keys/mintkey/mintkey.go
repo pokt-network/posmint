@@ -12,6 +12,7 @@ import (
 	cmn "github.com/tendermint/tendermint/libs/common"
 
 	"github.com/pokt-network/posmint/crypto/keys/keyerror"
+	"github.com/tendermint/crypto/bcrypt"
 )
 
 const (

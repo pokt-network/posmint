@@ -1,7 +1,6 @@
 package config
 
 import (
-	"github.com/tendermint/tendermint/crypto/ed25519"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	"github.com/tendermint/tendermint/privval"
 )
@@ -26,25 +25,10 @@ func LoadOrGenFilePV(keyFilePath, stateFilePath string) *privval.FilePV {
 // GenFilePV generates a new validator with randomly generated private key
 // and sets the filePaths, but does not call Save().
 func GenFilePV(keyFilePath, stateFilePath string) *privval.FilePV {
-	privKey := ed25519.GenPrivKey()
-	return &privval.FilePV{
-		Key: privval.FilePVKey{
-			privKey.PubKey().Address(),
-			privKey.PubKey(),
-			privKey,
-			keyFilePath,
-		},
-		LastSignState: privval.FilePVLastSignState{
-			0,
-			0,
-			stepNone,
-			nil,
-			nil,
-			stateFilePath,
-		},
-	}
+	return privval.GenFilePV(keyFilePath, stateFilePath)
 }
 
+// LoadFilePV loads the private validator file and generates the FilePV object
 func LoadFilePV(privValKeyFile, privValStateFile string) *privval.FilePV {
 	return privval.LoadFilePV(privValKeyFile, privValStateFile)
 }

@@ -2,15 +2,10 @@ package keeper
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 
-	abci "github.com/tendermint/tendermint/abci/types"
-	tmtime "github.com/tendermint/tendermint/types/time"
-
 	sdk "github.com/pokt-network/posmint/types"
-	"github.com/pokt-network/posmint/x/auth"
 	"github.com/pokt-network/posmint/x/bank/internal/types"
 )
 
@@ -166,66 +161,66 @@ func TestViewKeeper(t *testing.T) {
 	require.False(t, viewKeeper.HasCoins(ctx, addr, sdk.NewCoins(sdk.NewInt64Coin("barcoin", 5))))
 }
 
-func TestVestingAccountSend(t *testing.T) {
-	input := setupTestInput()
-	now := tmtime.Now()
-	ctx := input.ctx.WithBlockHeader(abci.Header{Time: now})
-	endTime := now.Add(24 * time.Hour)
+// func TestVestingAccountSend(t *testing.T) {
+// 	input := setupTestInput()
+// 	now := tmtime.Now()
+// 	ctx := input.ctx.WithBlockHeader(abci.Header{Time: now})
+// 	endTime := now.Add(24 * time.Hour)
 
-	origCoins := sdk.NewCoins(sdk.NewInt64Coin("stake", 100))
-	sendCoins := sdk.NewCoins(sdk.NewInt64Coin("stake", 50))
+// 	origCoins := sdk.NewCoins(sdk.NewInt64Coin("stake", 100))
+// 	sendCoins := sdk.NewCoins(sdk.NewInt64Coin("stake", 50))
 
-	addr1 := sdk.AccAddress([]byte("addr1"))
-	addr2 := sdk.AccAddress([]byte("addr2"))
-	bacc := auth.NewBaseAccountWithAddress(addr1)
-	bacc.SetCoins(origCoins)
-	vacc := auth.NewContinuousVestingAccount(&bacc, ctx.BlockHeader().Time.Unix(), endTime.Unix())
-	input.ak.SetAccount(ctx, vacc)
+// 	addr1 := sdk.AccAddress([]byte("addr1"))
+// 	addr2 := sdk.AccAddress([]byte("addr2"))
+// 	bacc := auth.NewBaseAccountWithAddress(addr1)
+// 	bacc.SetCoins(origCoins)
+// 	vacc := auth.NewContinuousVestingAccount(&bacc, ctx.BlockHeader().Time.Unix(), endTime.Unix())
+// 	input.ak.SetAccount(ctx, vacc)
 
-	// require that no coins be sendable at the beginning of the vesting schedule
-	err := input.k.SendCoins(ctx, addr1, addr2, sendCoins)
-	require.Error(t, err)
+// 	// require that no coins be sendable at the beginning of the vesting schedule
+// 	err := input.k.SendCoins(ctx, addr1, addr2, sendCoins)
+// 	require.Error(t, err)
 
-	// receive some coins
-	vacc.SetCoins(origCoins.Add(sendCoins))
-	input.ak.SetAccount(ctx, vacc)
+// 	// receive some coins
+// 	vacc.SetCoins(origCoins.Add(sendCoins))
+// 	input.ak.SetAccount(ctx, vacc)
 
-	// require that all vested coins are spendable plus any received
-	ctx = ctx.WithBlockTime(now.Add(12 * time.Hour))
-	err = input.k.SendCoins(ctx, addr1, addr2, sendCoins)
-	vacc = input.ak.GetAccount(ctx, addr1).(*auth.ContinuousVestingAccount)
-	require.NoError(t, err)
-	require.Equal(t, origCoins, vacc.GetCoins())
-}
+// 	// require that all vested coins are spendable plus any received
+// 	ctx = ctx.WithBlockTime(now.Add(12 * time.Hour))
+// 	err = input.k.SendCoins(ctx, addr1, addr2, sendCoins)
+// 	vacc = input.ak.GetAccount(ctx, addr1).(*auth.ContinuousVestingAccount)
+// 	require.NoError(t, err)
+// 	require.Equal(t, origCoins, vacc.GetCoins())
+// }
 
-func TestVestingAccountReceive(t *testing.T) {
-	input := setupTestInput()
-	now := tmtime.Now()
-	ctx := input.ctx.WithBlockHeader(abci.Header{Time: now})
-	endTime := now.Add(24 * time.Hour)
+// func TestVestingAccountReceive(t *testing.T) {
+// 	input := setupTestInput()
+// 	now := tmtime.Now()
+// 	ctx := input.ctx.WithBlockHeader(abci.Header{Time: now})
+// 	endTime := now.Add(24 * time.Hour)
 
-	origCoins := sdk.NewCoins(sdk.NewInt64Coin("stake", 100))
-	sendCoins := sdk.NewCoins(sdk.NewInt64Coin("stake", 50))
+// 	origCoins := sdk.NewCoins(sdk.NewInt64Coin("stake", 100))
+// 	sendCoins := sdk.NewCoins(sdk.NewInt64Coin("stake", 50))
 
-	addr1 := sdk.AccAddress([]byte("addr1"))
-	addr2 := sdk.AccAddress([]byte("addr2"))
+// 	addr1 := sdk.AccAddress([]byte("addr1"))
+// 	addr2 := sdk.AccAddress([]byte("addr2"))
 
-	bacc := auth.NewBaseAccountWithAddress(addr1)
-	bacc.SetCoins(origCoins)
-	vacc := auth.NewContinuousVestingAccount(&bacc, ctx.BlockHeader().Time.Unix(), endTime.Unix())
-	acc := input.ak.NewAccountWithAddress(ctx, addr2)
-	input.ak.SetAccount(ctx, vacc)
-	input.ak.SetAccount(ctx, acc)
-	input.k.SetCoins(ctx, addr2, origCoins)
+// 	bacc := auth.NewBaseAccountWithAddress(addr1)
+// 	bacc.SetCoins(origCoins)
+// 	vacc := auth.NewContinuousVestingAccount(&bacc, ctx.BlockHeader().Time.Unix(), endTime.Unix())
+// 	acc := input.ak.NewAccountWithAddress(ctx, addr2)
+// 	input.ak.SetAccount(ctx, vacc)
+// 	input.ak.SetAccount(ctx, acc)
+// 	input.k.SetCoins(ctx, addr2, origCoins)
 
-	// send some coins to the vesting account
-	input.k.SendCoins(ctx, addr2, addr1, sendCoins)
+// 	// send some coins to the vesting account
+// 	input.k.SendCoins(ctx, addr2, addr1, sendCoins)
 
-	// require the coins are spendable
-	vacc = input.ak.GetAccount(ctx, addr1).(*auth.ContinuousVestingAccount)
-	require.Equal(t, origCoins.Add(sendCoins), vacc.GetCoins())
-	require.Equal(t, vacc.SpendableCoins(now), sendCoins)
+// 	// require the coins are spendable
+// 	vacc = input.ak.GetAccount(ctx, addr1).(*auth.ContinuousVestingAccount)
+// 	require.Equal(t, origCoins.Add(sendCoins), vacc.GetCoins())
+// 	require.Equal(t, vacc.SpendableCoins(now), sendCoins)
 
-	// require coins are spendable plus any that have vested
-	require.Equal(t, vacc.SpendableCoins(now.Add(12*time.Hour)), origCoins)
-}
+// 	// require coins are spendable plus any that have vested
+// 	require.Equal(t, vacc.SpendableCoins(now.Add(12*time.Hour)), origCoins)
+// }

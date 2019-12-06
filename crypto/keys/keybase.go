@@ -285,5 +285,5 @@ func (kb dbKeybase) writeKeyPair(kp KeyPair) {
 }
 
 func addrKey(address types.AccAddress) []byte {
-	return []byte(fmt.Sprintf("%s.%s", address.String()))
+	return []byte(fmt.Sprintf("%s", address.String()))
 }
