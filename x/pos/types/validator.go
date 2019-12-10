@@ -16,7 +16,7 @@ type Validator struct {
 	ConsPubKey              crypto.PubKey  `json:"cons_pubkey" yaml:"cons_pubkey"`       // the consensus public key of the validator; bech encoded in JSON
 	Jailed                  bool           `json:"jailed" yaml:"jailed"`                 // has the validator been jailed from bonded status?
 	Status                  sdk.BondStatus `json:"status" yaml:"status"`                 // validator status (bonded/unbonding/unbonded)
-	StakedTokens            sdk.Int        `json:"Tokens" yaml:"Tokens"`                 // tokens staked in the network
+	StakedTokens            sdk.Int        `json:"Tokens" yaml:"Tokens"`                 // tokens staked in the network // todo edit all json
 	UnstakingCompletionTime time.Time      `json:"unstaking_time" yaml:"unstaking_time"` // if unstaking, min time for the validator to complete unstaking
 }
 
