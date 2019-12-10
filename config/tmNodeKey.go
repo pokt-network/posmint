@@ -3,20 +3,24 @@ package config
 import (
 	"fmt"
 	"github.com/pokt-network/posmint/codec"
-	"github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/crypto/ed25519"
+	cmn "github.com/tendermint/tendermint/libs/common"
 	"github.com/tendermint/tendermint/p2p"
 	"io/ioutil"
 )
 
-func LoadOrGenerateNodeKeyFile(rootPath string) error {
-	config.DefaultConfig().SetRoot(rootPath)
-	nodeKeyFile := config.DefaultConfig().NodeKeyFile()
-	nodeKey, err := p2p.LoadOrGenNodeKey(nodeKeyFile)
+func LoadOrGenerateNodeKeyFile(cdc *codec.Codec, filePath string) error {
+	if cmn.FileExists(filePath) {
+		_, err := LoadNodeKeyFile(cdc, filePath)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+	_, err := GenerateNodeKeyFile(cdc, filePath)
 	if err != nil {
 		return err
 	}
-	fmt.Println(nodeKey.ID())
 	return nil
 }
 
