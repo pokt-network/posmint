@@ -21,7 +21,7 @@ func (am AppModule) StakeTx(cdc *codec.Codec, txBuilder auth.TxBuilder, address 
 func (am AppModule) UnstakeTx(cdc *codec.Codec, txBuilder auth.TxBuilder, address sdk.ValAddress, passphrase string) (*sdk.TxResponse, error) {
 	cliCtx := util.NewCLIContext(am.GetTendermintNode(), sdk.AccAddress(address), passphrase).WithCodec(cdc)
 	msg := types.MsgBeginUnstake{Address: address}
-	return util.CompleteAndBroadcastTxCLI(txBuilder, clgiCtx, []sdk.Msg{msg})
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
 }
 
 func (am AppModule) UnjailTx(cdc *codec.Codec, txBuilder auth.TxBuilder, address sdk.ValAddress, passphrase string) (*sdk.TxResponse, error) {
