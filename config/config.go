@@ -21,10 +21,11 @@ func NewDefaultConfig() *Config {
 	}
 }
 
-func NewConfig(datadir, nodekey, privValKey, privValState, persistentPeers, seeds, listenAddr string, createEmptyBlocks bool, createEmptyBlocksInterval time.Duration,
+func NewConfig(rootDir, datadir, nodekey, privValKey, privValState, persistentPeers, seeds, listenAddr string, createEmptyBlocks bool, createEmptyBlocksInterval time.Duration,
 	MaxNumberInboundPeers, MaxNumberOutboundPeers int, logger log.Logger, traceWriterPath string) *Config {
 	// setup tendermint node config
 	newTMConfig := cfg.DefaultConfig()
+	newTMConfig.RootDir = rootDir
 	newTMConfig.DBPath = datadir
 	newTMConfig.NodeKey = nodekey
 	newTMConfig.PrivValidatorKey = privValKey

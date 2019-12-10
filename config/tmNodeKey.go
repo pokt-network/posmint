@@ -5,7 +5,6 @@ import (
 	"github.com/pokt-network/posmint/codec"
 	"github.com/tendermint/tendermint/config"
 	"github.com/tendermint/tendermint/crypto/ed25519"
-	cmn "github.com/tendermint/tendermint/libs/common"
 	"github.com/tendermint/tendermint/p2p"
 	"io/ioutil"
 )
@@ -13,10 +12,6 @@ import (
 func LoadOrGenerateNodeKeyFile(rootPath string) error {
 	config.DefaultConfig().SetRoot(rootPath)
 	nodeKeyFile := config.DefaultConfig().NodeKeyFile()
-	if cmn.FileExists(nodeKeyFile) {
-		return fmt.Errorf("node key at %s already exists", nodeKeyFile)
-	}
-
 	nodeKey, err := p2p.LoadOrGenNodeKey(nodeKeyFile)
 	if err != nil {
 		return err
