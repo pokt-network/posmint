@@ -30,23 +30,23 @@ func (gr GasEstimateResponse) String() string {
 // QueryContext. It ensures that the account exists, has a proper number and
 // sequence set. In addition, it builds and signs a transaction with the
 // supplied messages. Finally, it broadcasts the signed transaction to a node.
-func CompleteAndBroadcastTxCLI(txBldr auth.TxBuilder, cliCtx CLIContext, msgs []sdk.Msg) error {
+func CompleteAndBroadcastTxCLI(txBldr auth.TxBuilder, cliCtx CLIContext, msgs []sdk.Msg) (*sdk.TxResponse, error) {
 	txBldr, err := PrepareTxBuilder(txBldr, cliCtx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	// build and sign the transaction
 	txBytes, err := txBldr.BuildAndSign(cliCtx.FromAddress, cliCtx.Passphrase, msgs)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	// broadcast to a Tendermint node
-	_, err = cliCtx.BroadcastTx(txBytes)
+	tx, err := cliCtx.BroadcastTx(txBytes)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &tx, nil
 }
 
 // CalculateGas simulates the execution of a transaction and returns
