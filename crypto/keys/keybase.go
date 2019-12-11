@@ -5,14 +5,15 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/pokt-network/posmint/crypto/keys/hd"
 	"github.com/pokt-network/posmint/crypto/keys/mintkey"
 	"github.com/pokt-network/posmint/types"
 
 	"github.com/cosmos/go-bip39"
 
+	"github.com/tendermint/crypto/ed25519"
 	tmcrypto "github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
+	tmed "github.com/tendermint/tendermint/crypto/ed25519"
+
 	dbm "github.com/tendermint/tm-db"
 )
 
@@ -56,8 +57,8 @@ const (
 
 var (
 	// ErrUnsupportedSigningAlgo is raised when the caller tries to use a
-	// different signing scheme than secp256k1.
-	ErrUnsupportedSigningAlgo = errors.New("unsupported signing algo: only secp256k1 is supported")
+	// different signing scheme than ed25519.
+	ErrUnsupportedSigningAlgo = errors.New("unsupported signing algo: only ed25519 is supported")
 
 	// ErrUnsupportedLanguage is raised when the caller tries to use a
 	// different language than english for creating a mnemonic sentence.
@@ -193,8 +194,10 @@ func (kb dbKeybase) CreateMnemonic(bip39Passwd string, passwd string) (kp KeyPai
 	}
 
 	seed := bip39.NewSeed(mnemonic, bip39Passwd)
-	masterPriv, _ := hd.ComputeMastersFromSeed(seed)
-	kp = kb.writeLocalKeyPair(secp256k1.PrivKeySecp256k1(masterPriv), passwd)
+	res := ed25519.NewKeyFromSeed(seed)
+	var pk [64]byte
+	copy(pk[:], res)
+	kp = kb.writeLocalKeyPair(tmed.PrivKeyEd25519(pk), passwd)
 	return
 }
 
@@ -205,8 +208,10 @@ func (kb dbKeybase) DeriveFromMnemonic(mnemonic, bip39Passwd, encryptPasswd stri
 		return KeyPair{}, err
 	}
 
-	masterPriv, _ := hd.ComputeMastersFromSeed(seed)
-	kp := kb.writeLocalKeyPair(secp256k1.PrivKeySecp256k1(masterPriv), encryptPasswd)
+	res := ed25519.NewKeyFromSeed(seed)
+	var pk [64]byte
+	copy(pk[:], res)
+	kp = kb.writeLocalKeyPair(tmed.PrivKeyEd25519(pk), passwd)
 	return kp, nil
 }
 
