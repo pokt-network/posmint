@@ -25,7 +25,7 @@ func NewConfig(rootDir, datadir, nodekey, privValKey, privValState, persistentPe
 	MaxNumberInboundPeers, MaxNumberOutboundPeers int, logger log.Logger, traceWriterPath string) *Config {
 	// setup tendermint node config
 	newTMConfig := cfg.DefaultConfig()
-	newTMConfig.RootDir = rootDir
+	newTMConfig.SetRoot(rootDir)
 	newTMConfig.DBPath = datadir
 	newTMConfig.NodeKey = nodekey
 	newTMConfig.PrivValidatorKey = privValKey
