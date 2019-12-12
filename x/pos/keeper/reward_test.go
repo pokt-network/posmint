@@ -7,6 +7,7 @@ import (
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/types/module"
 	"github.com/pokt-network/posmint/x/bank"
+	"github.com/stretchr/testify/assert"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
@@ -20,8 +21,7 @@ const (
 )
 
 var (
-	capKey1      = sdk.NewKVStoreKey("key1")
-	capKey2      = sdk.NewKVStoreKey("key2")
+	capKey = sdk.NewKVStoreKey(baseapp.MainStoreKey)
 	ModuleBasics = module.NewBasicManager(
 		bank.AppModuleBasic{},
 	)
@@ -48,20 +48,26 @@ func TestSetValidatorAward(t *testing.T) {
 		name          string
 		args          args
 		expectedCoins sdk.Int
+		expectedFind bool
 		app           *baseapp.BaseApp
 		keeper        Keeper
 	}{
 		{
 			name:          "can set Value",
 			expectedCoins: sdk.NewInt(1),
+			expectedFind:	true,
 			app:           bapp,
 			args:          args{ctx: getNewContext(bapp), amount: sdk.NewInt(int64(1)), address: validatorAddress},
-			keeper:        Keeper{cdc: cdc},
+			keeper:        getNewKeeper(capKey, cdc),
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			t.Fail()
+			test.keeper.setValidatorAward(test.args.ctx, test.args.amount, test.args.address)
+			coins, found := test.keeper.getValidatorAward(test.args.ctx, test.args.address)
+			assert.Equal(t, test.expectedCoins, coins, "coins don't match")
+			assert.Equal(t, test.expectedFind, found, "finds don't match")
+
 		})
 	}
 }
@@ -89,7 +95,15 @@ func getNewApp(cdc *codec.Codec, options ...func(*baseapp.BaseApp)) *baseapp.Bas
 	registerTestCodec(cdc)
 
 	app := baseapp.NewBaseApp("test-app", logger, db, testTxDecoder(cdc), options...)
-	app.MountStores(capKey1, capKey2)
+	//app.LoadLatestVersion(capKey1)
+
+	// make a cap key and mount the store
+	app.MountStores(capKey)
+	err := app.LoadLatestVersion(capKey) // needed to make stores non-nil
+
+	if err != nil {
+		panic(err)
+	}
 	app.InitChain(abci.RequestInitChain{})
 
 	return app
@@ -101,6 +115,10 @@ func MakeCodec() *codec.Codec {
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
 	return cdc
+}
+
+func getNewKeeper(key sdk.StoreKey, cdc *codec.Codec) Keeper {
+	return Keeper{storeKey: key, cdc: cdc}
 }
 
 func getNewContext(bapp *baseapp.BaseApp) sdk.Context {
