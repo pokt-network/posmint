@@ -1,16 +1,18 @@
 package types
 
 import (
-	sdk "github.com/pokt-network/posmint/types"
 	"reflect"
 	"testing"
+
+	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/auth/types"
 )
 
 func TestDefaultGenesisState(t *testing.T) {
 	tests := []struct {
 		name string
-		want GenesisState
-	}{{"defaultState", GenesisState{
+		want types.GenesisState
+	}{{"defaultState", types.GenesisState{
 		Params:       DefaultParams(),
 		SigningInfos: make(map[string]ValidatorSigningInfo),
 		MissedBlocks: make(map[string][]MissedBlock),
@@ -19,7 +21,7 @@ func TestDefaultGenesisState(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := DefaultGenesisState(); !reflect.DeepEqual(got, tt.want) {
+			if got := types.DefaultGenesisState(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("DefaultGenesisState() = %v, want %v", got, tt.want)
 			}
 		})
@@ -28,12 +30,12 @@ func TestDefaultGenesisState(t *testing.T) {
 
 func TestNewGenesisState(t *testing.T) {
 	type args struct {
-		params           Params
-		validators       []Validator
-		dao              DAOPool
+		params           types.Params
+		validators       []types.Validator
+		dao              types.DAOPool
 		previousProposer sdk.ConsAddress
-		signingInfos     map[string]ValidatorSigningInfo
-		missedBlocks     map[string][]MissedBlock
+		signingInfos     map[string]types.ValidatorSigningInfo
+		missedBlocks     map[string][]types.MissedBlock
 	}
 	tests := []struct {
 		name string

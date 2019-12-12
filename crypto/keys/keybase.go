@@ -10,9 +10,9 @@ import (
 
 	"github.com/cosmos/go-bip39"
 
-	"github.com/tendermint/crypto/ed25519"
 	tmcrypto "github.com/tendermint/tendermint/crypto"
 	tmed "github.com/tendermint/tendermint/crypto/ed25519"
+	"golang.org/x/crypto/ed25519"
 
 	dbm "github.com/tendermint/tm-db"
 )
@@ -211,7 +211,7 @@ func (kb dbKeybase) DeriveFromMnemonic(mnemonic, bip39Passwd, encryptPasswd stri
 	res := ed25519.NewKeyFromSeed(seed)
 	var pk [64]byte
 	copy(pk[:], res)
-	kp = kb.writeLocalKeyPair(tmed.PrivKeyEd25519(pk), passwd)
+	kp := kb.writeLocalKeyPair(tmed.PrivKeyEd25519(pk), encryptPasswd)
 	return kp, nil
 }
 
