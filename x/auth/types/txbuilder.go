@@ -11,34 +11,29 @@ import (
 
 // TxBuilder implements a transaction context created in SDK modules.
 type TxBuilder struct {
-	txEncoder          sdk.TxEncoder
-	keybase            crkeys.Keybase
-	accountNumber      uint64
-	sequence           uint64
-	gas                uint64
-	gasAdjustment      float64
-	simulateAndExecute bool
-	chainID            string
-	memo               string
-	fees               sdk.Coins
-	gasPrices          sdk.DecCoins
+	txEncoder     sdk.TxEncoder
+	keybase       crkeys.Keybase
+	accountNumber uint64
+	sequence      uint64
+	chainID       string
+	memo          string
+	fees          sdk.Coins
+	//gasPrices          sdk.DecCoins
+	//gas                uint64
+	//gasAdjustment      float64
+	//simulateAndExecute bool
 }
 
 // NewTxBuilder returns a new initialized TxBuilder.
-func NewTxBuilder(txEncoder sdk.TxEncoder, accNumber, seq, gas uint64, gasAdj float64,
-	simulateAndExecute bool, chainID, memo string, fees sdk.Coins, gasPrices sdk.DecCoins) TxBuilder {
+func NewTxBuilder(txEncoder sdk.TxEncoder, accNumber, seq uint64, chainID, memo string, fees sdk.Coins) TxBuilder {
 	return TxBuilder{
-		txEncoder:          txEncoder,
-		keybase:            nil,
-		accountNumber:      accNumber,
-		sequence:           seq,
-		gas:                gas,
-		gasAdjustment:      gasAdj,
-		simulateAndExecute: simulateAndExecute,
-		chainID:            chainID,
-		memo:               memo,
-		fees:               fees,
-		gasPrices:          gasPrices,
+		txEncoder:     txEncoder,
+		keybase:       nil,
+		accountNumber: accNumber,
+		sequence:      seq,
+		chainID:       chainID,
+		memo:          memo,
+		fees:          fees,
 	}
 }
 
@@ -52,17 +47,17 @@ func (bldr TxBuilder) AccountNumber() uint64 { return bldr.accountNumber }
 func (bldr TxBuilder) Sequence() uint64 { return bldr.sequence }
 
 // Gas returns the gas for the transaction
-func (bldr TxBuilder) Gas() uint64 { return bldr.gas }
+//func (bldr TxBuilder) Gas() uint64 { return bldr.gas }
 
 // GasAdjustment returns the gas adjustment
-func (bldr TxBuilder) GasAdjustment() float64 { return bldr.gasAdjustment }
+//func (bldr TxBuilder) GasAdjustment() float64 { return bldr.gasAdjustment }
 
 // Keybase returns the keybase
 func (bldr TxBuilder) Keybase() crkeys.Keybase { return bldr.keybase }
 
 // SimulateAndExecute returns the option to simulate and then execute the transaction
 // using the gas from the simulation results
-func (bldr TxBuilder) SimulateAndExecute() bool { return bldr.simulateAndExecute }
+// func (bldr TxBuilder) SimulateAndExecute() bool { return bldr.simulateAndExecute }
 
 // ChainID returns the chain id
 func (bldr TxBuilder) ChainID() string { return bldr.chainID }
@@ -74,7 +69,7 @@ func (bldr TxBuilder) Memo() string { return bldr.memo }
 func (bldr TxBuilder) Fees() sdk.Coins { return bldr.fees }
 
 // GasPrices returns the gas prices set for the transaction, if any.
-func (bldr TxBuilder) GasPrices() sdk.DecCoins { return bldr.gasPrices }
+//func (bldr TxBuilder) GasPrices() sdk.DecCoins { return bldr.gasPrices }
 
 // WithTxEncoder returns a copy of the context with an updated codec.
 func (bldr TxBuilder) WithTxEncoder(txEncoder sdk.TxEncoder) TxBuilder {
@@ -89,10 +84,10 @@ func (bldr TxBuilder) WithChainID(chainID string) TxBuilder {
 }
 
 // WithGas returns a copy of the context with an updated gas.
-func (bldr TxBuilder) WithGas(gas uint64) TxBuilder {
-	bldr.gas = gas
-	return bldr
-}
+// func (bldr TxBuilder) WithGas(gas uint64) TxBuilder {
+// 	bldr.gas = gas
+// 	return bldr
+// }
 
 // WithFees returns a copy of the context with an updated fee.
 func (bldr TxBuilder) WithFees(fees string) TxBuilder {
@@ -106,15 +101,15 @@ func (bldr TxBuilder) WithFees(fees string) TxBuilder {
 }
 
 // WithGasPrices returns a copy of the context with updated gas prices.
-func (bldr TxBuilder) WithGasPrices(gasPrices string) TxBuilder {
-	parsedGasPrices, err := sdk.ParseDecCoins(gasPrices)
-	if err != nil {
-		panic(err)
-	}
+// func (bldr TxBuilder) WithGasPrices(gasPrices string) TxBuilder {
+// 	parsedGasPrices, err := sdk.ParseDecCoins(gasPrices)
+// 	if err != nil {
+// 		panic(err)
+// 	}
 
-	bldr.gasPrices = parsedGasPrices
-	return bldr
-}
+// 	bldr.gasPrices = parsedGasPrices
+// 	return bldr
+// }
 
 // WithKeybase returns a copy of the context with updated keybase.
 func (bldr TxBuilder) WithKeybase(keybase crkeys.Keybase) TxBuilder {
@@ -149,21 +144,21 @@ func (bldr TxBuilder) BuildSignMsg(msgs []sdk.Msg) (StdSignMsg, error) {
 	}
 
 	fees := bldr.fees
-	if !bldr.gasPrices.IsZero() {
-		if !fees.IsZero() {
-			return StdSignMsg{}, errors.New("cannot provide both fees and gas prices")
-		}
+	// if !bldr.gasPrices.IsZero() {
+	// 	if !fees.IsZero() {
+	// 		return StdSignMsg{}, errors.New("cannot provide both fees and gas prices")
+	// 	}
 
-		glDec := sdk.NewDec(int64(bldr.gas))
+	// 	glDec := sdk.NewDec(int64(bldr.gas))
 
-		// Derive the fees based on the provided gas prices, where
-		// fee = ceil(gasPrice * gasLimit).
-		fees = make(sdk.Coins, len(bldr.gasPrices))
-		for i, gp := range bldr.gasPrices {
-			fee := gp.Amount.Mul(glDec)
-			fees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
-		}
-	}
+	// 	// Derive the fees based on the provided gas prices, where
+	// 	// fee = ceil(gasPrice * gasLimit).
+	// 	fees = make(sdk.Coins, len(bldr.gasPrices))
+	// 	for i, gp := range bldr.gasPrices {
+	// 		fee := gp.Amount.Mul(glDec)
+	// 		fees[i] = sdk.NewCoin(gp.Denom, fee.Ceil().RoundInt())
+	// 	}
+	// }
 
 	return StdSignMsg{
 		ChainID:       bldr.chainID,
@@ -171,7 +166,8 @@ func (bldr TxBuilder) BuildSignMsg(msgs []sdk.Msg) (StdSignMsg, error) {
 		Sequence:      bldr.sequence,
 		Memo:          bldr.memo,
 		Msgs:          msgs,
-		Fee:           NewStdFee(bldr.gas, fees),
+		Fee:           fees,
+		//Fee:           NewStdFee(bldr.gas, fees),
 	}, nil
 }
 
