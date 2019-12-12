@@ -25,7 +25,7 @@ var ( // Keys for store prefixes
 	PrevStateValidatorsPowerKey     = []byte{0x31} // prefix for the key to the validators of the prevState state
 	PrevStateTotalPowerKey          = []byte{0x32} // prefix for the total power of the prevState state
 	UnstakingValidatorsKey          = []byte{0x41} // prefix for unstaking validator
-	UnstakedValidatorsKey           = []byte{0x42} // prefix for unstaked validators
+	UnstakedValidatorsKey           = []byte{0x42} // prefix for unstaked validators // todo remove
 	AwardValidatorKey               = []byte{0x51} // prefix for awarding validators
 	BurnValidatorKey                = []byte{0x52} // prefix for awarding validators
 )

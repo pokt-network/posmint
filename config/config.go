@@ -21,10 +21,15 @@ func NewDefaultConfig() *Config {
 	}
 }
 
-func NewConfig(persistentPeers, seeds, listenAddr string, createEmptyBlocks bool, createEmptyBlocksInterval time.Duration,
+func NewConfig(rootDir, datadir, nodekey, privValKey, privValState, persistentPeers, seeds, listenAddr string, createEmptyBlocks bool, createEmptyBlocksInterval time.Duration,
 	MaxNumberInboundPeers, MaxNumberOutboundPeers int, logger log.Logger, traceWriterPath string) *Config {
 	// setup tendermint node config
 	newTMConfig := cfg.DefaultConfig()
+	newTMConfig.SetRoot(rootDir)
+	newTMConfig.DBPath = datadir
+	newTMConfig.NodeKey = nodekey
+	newTMConfig.PrivValidatorKey = privValKey
+	newTMConfig.PrivValidatorState = privValState
 	newTMConfig.P2P.ListenAddress = listenAddr                  // Node listen address. (0.0.0.0:0 means any interface, any port)
 	newTMConfig.P2P.PersistentPeers = persistentPeers           // Comma-delimited ID@host:port persistent peers
 	newTMConfig.P2P.Seeds = seeds                               // Comma-delimited ID@host:port seed nodes
