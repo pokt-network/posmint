@@ -173,7 +173,6 @@ func (kb dbKeybase) ExportPrivKeyEncryptedArmor(address types.AccAddress, decryp
 // ImportPrivateKeyObject using the raw unencrypted privateKey string and encrypts it to disk using encryptPassphrase
 func (kb dbKeybase) ImportPrivateKeyObject(privateKey [64]byte, encryptPassphrase string) (KeyPair, error) {
 	ed25519PK := tmed25519.PrivKeyEd25519(privateKey)
-	fmt.Println(ed25519PK.PubKey().Address().String())
 	accAddress, err := types.AccAddressFromHex(ed25519PK.PubKey().Address().String())
 	if err != nil {
 		return KeyPair{}, err

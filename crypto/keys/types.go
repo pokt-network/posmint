@@ -9,14 +9,9 @@ import (
 // SigningAlgo defines an algorithm to derive key-pairs which can be used for cryptographic signing.
 type SigningAlgo string
 
-// const (
-// 	// Ed25519 represents the Ed25519 signature system.
-// 	// It is currently not supported for end-user keys (wallets/ledgers).
-// 	Ed25519 = SigningAlgo("ed25519")
-// )
-
 // Keybase exposes operations on a generic keystore
 // Keybase only supports Ed25519 key pairs
+// Optimization: Merge Keybase interface with LazyKeybase and Keybase impl into a single type
 type Keybase interface {
 	// CRUD on the keystore
 	List() ([]KeyPair, error)

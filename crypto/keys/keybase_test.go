@@ -2,7 +2,6 @@ package keys
 
 import (
 	"crypto/rand"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -171,8 +170,6 @@ func TestRawExportImport(t *testing.T) {
 	rawPk, err := cstore.ExportPrivateKeyObject(kp.GetAddress(), passphrase)
 	require.NoError(t, err)
 	require.NotEmpty(t, rawPk)
-	fmt.Println(kp.PubKey.Address().String())
-	fmt.Println(rawPk.PubKey().Address().String())
 	require.Equal(t, kp.PubKey.Address().String(), rawPk.PubKey().Address().String())
 	kpList, err := cstore.List()
 	require.NoError(t, err)
