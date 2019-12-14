@@ -1,6 +1,7 @@
 package keys
 
 import (
+	"crypto/ed25519"
 	"fmt"
 
 	"github.com/pkg/errors"
@@ -8,62 +9,14 @@ import (
 	"github.com/pokt-network/posmint/crypto/keys/mintkey"
 	"github.com/pokt-network/posmint/types"
 
-	"github.com/cosmos/go-bip39"
-
+	//tmed "github.com/tendermint/crypto/ed25519"
 	tmcrypto "github.com/tendermint/tendermint/crypto"
-	tmed "github.com/tendermint/tendermint/crypto/ed25519"
-	"golang.org/x/crypto/ed25519"
+	tmed25519 "github.com/tendermint/tendermint/crypto/ed25519"
 
 	dbm "github.com/tendermint/tm-db"
 )
 
 var _ Keybase = dbKeybase{}
-
-// Language is a language to create the BIP 39 mnemonic in.
-// Currently, only english is supported though.
-// Find a list of all supported languages in the BIP 39 spec (word lists).
-type Language int
-
-//noinspection ALL
-const (
-	// English is the default language to create a mnemonic.
-	// It is the only supported language by this package.
-	English Language = iota + 1
-	// Japanese is currently not supported.
-	Japanese
-	// Korean is currently not supported.
-	Korean
-	// Spanish is currently not supported.
-	Spanish
-	// ChineseSimplified is currently not supported.
-	ChineseSimplified
-	// ChineseTraditional is currently not supported.
-	ChineseTraditional
-	// French is currently not supported.
-	French
-	// Italian is currently not supported.
-	Italian
-	//addressSuffix = "address"
-	//infoSuffix    = "info"
-)
-
-const (
-	// used for deriving seed from mnemonic
-	DefaultBIP39Passphrase = ""
-
-	// bits of entropy to draw when creating a mnemonic
-	defaultEntropySize = 256
-)
-
-var (
-	// ErrUnsupportedSigningAlgo is raised when the caller tries to use a
-	// different signing scheme than ed25519.
-	ErrUnsupportedSigningAlgo = errors.New("unsupported signing algo: only ed25519 is supported")
-
-	// ErrUnsupportedLanguage is raised when the caller tries to use a
-	// different language than english for creating a mnemonic sentence.
-	ErrUnsupportedLanguage = errors.New("unsupported language: only english is supported")
-)
 
 // dbKeybase combines encryption and storage implementation to provide
 // a full-featured key manager
@@ -103,27 +56,25 @@ func (kb dbKeybase) Get(address types.AccAddress) (KeyPair, error) {
 	if len(ik) == 0 {
 		return KeyPair{}, fmt.Errorf("key with address %s not found", address)
 	}
-	bs := kb.db.Get(ik)
-	return readKeyPair(bs)
+	return readKeyPair(ik)
 }
 
 // Delete removes key forever, but we must present the
 // proper passphrase before deleting it (for security).
 // It returns an error if the key doesn't exist or
 // passphrases don't match.
-// Passphrase is ignored when deleting references to
-// offline and Ledger / HW wallet keys.
-func (kb dbKeybase) Delete(address types.AccAddress, passphrase string, skipPass bool) error {
-	// verify we have the proper password before deleting
+func (kb dbKeybase) Delete(address types.AccAddress, passphrase string) error {
+	// verify we have the key in the keybase
 	kp, err := kb.Get(address)
 	if err != nil {
 		return err
 	}
-	if !skipPass {
-		if _, err = mintkey.UnarmorDecryptPrivKey(kp.PrivKeyArmor, passphrase); err != nil {
-			return err
-		}
+
+	// Verify passphrase matches
+	if _, err = mintkey.UnarmorDecryptPrivKey(kp.PrivKeyArmor, passphrase); err != nil {
+		return err
 	}
+
 	kb.db.DeleteSync(addrKey(kp.GetAddress()))
 	return nil
 }
@@ -176,65 +127,37 @@ func (kb dbKeybase) Sign(address types.AccAddress, passphrase string, msg []byte
 	return sig, pub, nil
 }
 
-// CreateMnemonic generates a new key and persists it to storage, encrypted
-// using the provided password.
-// It returns the generated mnemonic and the key Info.
-// It returns an error if it fails to
-// generate a key for the given algo type
-func (kb dbKeybase) CreateMnemonic(bip39Passwd string, passwd string) (kp KeyPair, mnemonic string, err error) {
-	// default number of words (24):
-	// this generates a mnemonic directly from the number of words by reading system entropy.
-	entropy, err := bip39.NewEntropy(defaultEntropySize)
-	if err != nil {
-		return
-	}
-	mnemonic, err = bip39.NewMnemonic(entropy)
-	if err != nil {
-		return
-	}
-
-	seed := bip39.NewSeed(mnemonic, bip39Passwd)
-	res := ed25519.NewKeyFromSeed(seed)
-	var pk [64]byte
-	copy(pk[:], res)
-	kp = kb.writeLocalKeyPair(tmed.PrivKeyEd25519(pk), passwd)
-	return
-}
-
-// DeriveFromMnemonic a KeyPair using bip39Passwd, and encrypts using encryptPasswd
-func (kb dbKeybase) DeriveFromMnemonic(mnemonic, bip39Passwd, encryptPasswd string) (KeyPair, error) {
-	seed, err := bip39.NewSeedWithErrorChecking(mnemonic, bip39Passwd)
+// Create a new KeyPair and encrypt it to disk using encryptPassphrase
+func (kb dbKeybase) Create(encryptPassphrase string) (KeyPair, error) {
+	_, privKey, err := ed25519.GenerateKey(nil)
 	if err != nil {
 		return KeyPair{}, err
 	}
-
-	res := ed25519.NewKeyFromSeed(seed)
-	var pk [64]byte
-	copy(pk[:], res)
-	kp := kb.writeLocalKeyPair(tmed.PrivKeyEd25519(pk), encryptPasswd)
+	var privKeyBytes [64]byte
+	copy(privKeyBytes[:], privKey)
+	kp := kb.writeLocalKeyPair(tmed25519.PrivKeyEd25519(privKeyBytes), encryptPassphrase)
 	return kp, nil
 }
 
 // ImportPrivKey imports a private key in ASCII armor format.
 // It returns an error if a key with the same address exists or a wrong decryptPassphrase is
 // supplied.
-func (kb dbKeybase) ImportPrivKey(armor, decryptPassphrase, encryptPassphrase string) error {
+func (kb dbKeybase) ImportPrivKey(armor, decryptPassphrase, encryptPassphrase string) (KeyPair, error) {
 	privKey, err := mintkey.UnarmorDecryptPrivKey(armor, decryptPassphrase)
 	if err != nil {
-		return err
+		return KeyPair{}, err
 	}
 
 	accAddress, err := types.AccAddressFromHex(privKey.PubKey().Address().String())
 	if err != nil {
-		return err
+		return KeyPair{}, err
 	}
 
 	if _, err := kb.Get(accAddress); err == nil {
-		return errors.New("Cannot overwrite key with address: " + accAddress.String())
+		return KeyPair{}, errors.New("Cannot overwrite key with address: " + accAddress.String())
 	}
 
-	kb.writeLocalKeyPair(privKey, encryptPassphrase)
-	return nil
+	return kb.writeLocalKeyPair(privKey, encryptPassphrase), nil
 }
 
 // ExportPrivKeyEncryptedArmor finds the KeyPair by the address, decrypts the armor private key,
@@ -245,6 +168,20 @@ func (kb dbKeybase) ExportPrivKeyEncryptedArmor(address types.AccAddress, decryp
 		return "", err
 	}
 	return mintkey.EncryptArmorPrivKey(priv, encryptPassphrase), nil
+}
+
+// ImportPrivateKeyObject using the raw unencrypted privateKey string and encrypts it to disk using encryptPassphrase
+func (kb dbKeybase) ImportPrivateKeyObject(privateKey [64]byte, encryptPassphrase string) (KeyPair, error) {
+	ed25519PK := tmed25519.PrivKeyEd25519(privateKey)
+	fmt.Println(ed25519PK.PubKey().Address().String())
+	accAddress, err := types.AccAddressFromHex(ed25519PK.PubKey().Address().String())
+	if err != nil {
+		return KeyPair{}, err
+	}
+	if _, err := kb.Get(accAddress); err == nil {
+		return KeyPair{}, errors.New("Cannot overwrite key with address: " + accAddress.String())
+	}
+	return kb.writeLocalKeyPair(ed25519PK, encryptPassphrase), nil
 }
 
 // ExportPrivateKeyObject exports raw PrivKey object.

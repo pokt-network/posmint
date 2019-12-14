@@ -16,7 +16,6 @@ require (
 	github.com/tendermint/iavl v0.12.4
 	github.com/tendermint/tendermint v0.32.7
 	github.com/tendermint/tm-db v0.2.0
-	golang.org/x/crypto v0.0.0-20190313024323-a1f597ede03a
 	golang.org/x/sys v0.0.0-20190222072716-a9d3bda3a223 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 )

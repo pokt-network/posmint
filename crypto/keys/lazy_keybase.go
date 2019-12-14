@@ -46,14 +46,14 @@ func (lkb lazyKeybase) Get(address types.AccAddress) (KeyPair, error) {
 	return newDbKeybase(db).Get(address)
 }
 
-func (lkb lazyKeybase) Delete(address types.AccAddress, passphrase string, skipPass bool) error {
+func (lkb lazyKeybase) Delete(address types.AccAddress, passphrase string) error {
 	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
 	if err != nil {
 		return err
 	}
 	defer db.Close()
 
-	return newDbKeybase(db).Delete(address, passphrase, skipPass)
+	return newDbKeybase(db).Delete(address, passphrase)
 }
 
 func (lkb lazyKeybase) Update(address types.AccAddress, oldpass string, newpass string) error {
@@ -76,30 +76,20 @@ func (lkb lazyKeybase) Sign(address types.AccAddress, passphrase string, msg []b
 	return newDbKeybase(db).Sign(address, passphrase, msg)
 }
 
-func (lkb lazyKeybase) CreateMnemonic(bip39Passwd string, passwd string) (kp KeyPair, mnemonic string, err error) {
-	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
-	if err != nil {
-		return KeyPair{}, "", err
-	}
-	defer db.Close()
-
-	return newDbKeybase(db).CreateMnemonic(bip39Passwd, passwd)
-}
-
-func (lkb lazyKeybase) DeriveFromMnemonic(mnemonic, bip39Passwd, encryptPasswd string) (KeyPair, error) {
+func (lkb lazyKeybase) Create(encryptPassphrase string) (KeyPair, error) {
 	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
 	if err != nil {
 		return KeyPair{}, err
 	}
 	defer db.Close()
 
-	return newDbKeybase(db).DeriveFromMnemonic(mnemonic, bip39Passwd, encryptPasswd)
+	return newDbKeybase(db).Create(encryptPassphrase)
 }
 
-func (lkb lazyKeybase) ImportPrivKey(armor, decryptPassphrase, encryptPassphrase string) error {
+func (lkb lazyKeybase) ImportPrivKey(armor, decryptPassphrase, encryptPassphrase string) (KeyPair, error) {
 	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
 	if err != nil {
-		return err
+		return KeyPair{}, err
 	}
 	defer db.Close()
 
@@ -114,6 +104,16 @@ func (lkb lazyKeybase) ExportPrivKeyEncryptedArmor(address types.AccAddress, dec
 	defer db.Close()
 
 	return newDbKeybase(db).ExportPrivKeyEncryptedArmor(address, decryptPassphrase, encryptPassphrase)
+}
+
+func (lkb lazyKeybase) ImportPrivateKeyObject(privateKey [64]byte, encryptPassphrase string) (KeyPair, error) {
+	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
+	if err != nil {
+		return KeyPair{}, err
+	}
+	defer db.Close()
+
+	return newDbKeybase(db).ImportPrivateKeyObject(privateKey, encryptPassphrase)
 }
 
 func (lkb lazyKeybase) ExportPrivateKeyObject(address types.AccAddress, passphrase string) (crypto.PrivKey, error) {
