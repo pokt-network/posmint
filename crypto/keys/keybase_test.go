@@ -177,12 +177,7 @@ func TestRawExportImport(t *testing.T) {
 	kpList, err := cstore.List()
 	require.NoError(t, err)
 	require.NotEmpty(t, kpList)
-
-	// Import raw account, expect error because it already exists in the keybase
-	pkBytes := rawPk.Bytes()
-	var rawPkBytes [64]byte
-	copy(rawPkBytes[:], pkBytes)
-	_, err = cstore.ImportPrivateKeyObject(rawPkBytes, passphrase)
+	_, err = cstore.ImportPrivateKeyObject(rawPk.(ed25519.PrivKeyEd25519), passphrase)
 	require.Error(t, err)
 
 	// Delete the account, because otherwise it would error out
@@ -190,7 +185,7 @@ func TestRawExportImport(t *testing.T) {
 	require.NoError(t, err)
 
 	// Import the raw account succesfully
-	importedKp, err := cstore.ImportPrivateKeyObject(rawPkBytes, passphrase)
+	importedKp, err := cstore.ImportPrivateKeyObject(rawPk.(ed25519.PrivKeyEd25519), passphrase)
 	require.NoError(t, err)
 	fetchedKp, err := cstore.Get(importedKp.GetAddress())
 	require.NoError(t, err)
