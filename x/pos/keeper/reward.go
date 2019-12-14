@@ -90,7 +90,9 @@ func (k Keeper) mintValidatorAwards(ctx sdk.Context) {
 // store functions used to keep track of a validator award
 func (k Keeper) setValidatorAward(ctx sdk.Context, amount sdk.Int, address sdk.ValAddress) {
 	store := ctx.KVStore(k.storeKey)
-	store.Set(types.KeyForValidatorAward(address), amino.MustMarshalBinaryBare(amount))
+	key := types.KeyForValidatorAward(address)
+	val := amino.MustMarshalBinaryBare(amount)
+	store.Set(key, val)
 }
 
 func (k Keeper) getValidatorAward(ctx sdk.Context, address sdk.ValAddress) (coins sdk.Int, found bool) {
@@ -99,7 +101,8 @@ func (k Keeper) getValidatorAward(ctx sdk.Context, address sdk.ValAddress) (coin
 	if value == nil {
 		return coins, false
 	}
-	k.cdc.MustUnmarshalBinaryLengthPrefixed(value, &coins)
+	k.cdc.MustUnmarshalBinaryBare(value, &coins)
+	found = true
 	return
 }
 

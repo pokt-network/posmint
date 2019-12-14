@@ -32,12 +32,10 @@ func NewPool(tokens sdk.Int) Pool {
 
 // String returns a human readable string representation of a pool.
 func (bp StakingPool) String() string {
-	return fmt.Sprintf(`Staked Tokens:      %s`, bp.Tokens)
+	return fmt.Sprintf(`Staked Tokens: %s`, bp.Tokens)
 }
 
 // String returns a human readable string representation of a pool.
 func (dao DAOPool) String() string {
-	return fmt.Sprintf(`Tokens:	
-  Tokens In DAO Tokens:      %s`,
-		dao.Tokens)
+	return fmt.Sprintf(`Tokens:Tokens In DAO Tokens: %s`, dao.Tokens)
 }

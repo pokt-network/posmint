@@ -19,7 +19,7 @@ func (h MultiPOSHooks) AfterValidatorRegistered(ctx sdk.Context, valAddr sdk.Val
 	}
 }
 
-func (h MultiPOSHooks) BeforeValidtorRemoved(ctx sdk.Context, consAddr sdk.ConsAddress, address sdk.ValAddress) {
+func (h MultiPOSHooks) BeforeValidatorRemoved(ctx sdk.Context, consAddr sdk.ConsAddress, address sdk.ValAddress) {
 	for i := range h {
 		h[i].BeforeValidatorRemoved(ctx, consAddr, address)
 	}
