@@ -26,27 +26,27 @@ const (
 
 // Var function aliases
 var (
-	NewBaseAccount                 = types.NewBaseAccount
-	ProtoBaseAccount               = types.ProtoBaseAccount
-	NewBaseAccountWithAddress      = types.NewBaseAccountWithAddress
-	RegisterCodec                  = types.RegisterCodec
-	NewGenesisState                = types.NewGenesisState
-	DefaultGenesisState            = types.DefaultGenesisState
-	ValidateGenesis                = types.ValidateGenesis
-	AddressStoreKey                = types.AddressStoreKey
-	NewParams                      = types.NewParams
-	ParamKeyTable                  = types.ParamKeyTable
-	DefaultParams                  = types.DefaultParams
-	NewQueryAccountParams          = types.NewQueryAccountParams
-	NewStdTx                       = types.NewStdTx
-	CountSubKeys                   = types.CountSubKeys
-	NewStdFee                      = types.NewStdFee
-	StdSignBytes                   = types.StdSignBytes
-	DefaultTxDecoder               = types.DefaultTxDecoder
-	DefaultTxEncoder               = types.DefaultTxEncoder
-	NewTxBuilder                   = types.NewTxBuilder
-	MakeSignature                  = types.MakeSignature
-	NewAccountRetriever            = types.NewAccountRetriever
+	NewBaseAccount            = types.NewBaseAccount
+	ProtoBaseAccount          = types.ProtoBaseAccount
+	NewBaseAccountWithAddress = types.NewBaseAccountWithAddress
+	RegisterCodec             = types.RegisterCodec
+	NewGenesisState           = types.NewGenesisState
+	DefaultGenesisState       = types.DefaultGenesisState
+	ValidateGenesis           = types.ValidateGenesis
+	AddressStoreKey           = types.AddressStoreKey
+	NewParams                 = types.NewParams
+	ParamKeyTable             = types.ParamKeyTable
+	DefaultParams             = types.DefaultParams
+	NewQueryAccountParams     = types.NewQueryAccountParams
+	NewStdTx                  = types.NewStdTx
+	CountSubKeys              = types.CountSubKeys
+	NewStdFee                 = types.NewStdFee
+	StdSignBytes              = types.StdSignBytes
+	DefaultTxDecoder          = types.DefaultTxDecoder
+	DefaultTxEncoder          = types.DefaultTxEncoder
+	NewTxBuilder              = types.NewTxBuilder
+	MakeSignature             = types.MakeSignature
+	NewAccountRetriever       = types.NewAccountRetriever
 
 	// variable aliases
 	ModuleCdc                 = types.ModuleCdc
@@ -61,15 +61,15 @@ var (
 
 // Type exported types
 type (
-	Account                  = exported.Account
-	BaseAccount              = types.BaseAccount
-	GenesisState             = types.GenesisState
-	Params                   = types.Params
-	QueryAccountParams       = types.QueryAccountParams
-	StdSignMsg               = types.StdSignMsg
-	StdTx                    = types.StdTx
-	StdFee                   = types.StdFee
-	StdSignDoc               = types.StdSignDoc
-	StdSignature             = types.StdSignature
-	TxBuilder                = types.TxBuilder
+	Account            = exported.Account
+	BaseAccount        = types.BaseAccount
+	GenesisState       = types.GenesisState
+	Params             = types.Params
+	QueryAccountParams = types.QueryAccountParams
+	StdSignMsg         = types.StdSignMsg
+	StdTx              = types.StdTx
+	StdFee             = types.StdFee
+	StdSignDoc         = types.StdSignDoc
+	StdSignature       = types.StdSignature
+	TxBuilder          = types.TxBuilder
 )
