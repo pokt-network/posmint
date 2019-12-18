@@ -10,7 +10,7 @@ type PublicKey ed25519.PubKeyEd25519
 type PrivateKey ed25519.PrivKeyEd25519
 
 const (
-	PubKeySize = ed25519.PubKeyEd25519Size
+	PubKeySize    = ed25519.PubKeyEd25519Size
 	SignatureSize = ed25519.SignatureSize
 )
 

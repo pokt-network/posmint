@@ -5,15 +5,16 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/auth"
 	"github.com/pokt-network/posmint/x/auth/types"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
-	"io/ioutil"
-	"os"
-	"strings"
-	"time"
 )
 
 // GasEstimateResponse defines a response definition for tx gas estimation.
@@ -139,13 +140,14 @@ func GetTxEncoder(cdc *codec.Codec) (encoder sdk.TxEncoder) {
 
 // nolint
 // SimulateMsgs simulates the transaction and returns the gas estimate and the adjusted value.
+// TODO: phase out this function
 func simulateMsgs(txBldr auth.TxBuilder, cliCtx CLIContext, msgs []sdk.Msg) (estimated, adjusted uint64, err error) {
 	txBytes, err := txBldr.BuildTxForSim(msgs)
 	if err != nil {
 		return
 	}
 
-	estimated, adjusted, err = CalculateGas(cliCtx.QueryWithData, cliCtx.Codec, txBytes, txBldr.GasAdjustment())
+	estimated, adjusted, err = CalculateGas(cliCtx.QueryWithData, cliCtx.Codec, txBytes, 0)
 	return
 }
 

@@ -8,7 +8,7 @@ require (
 	github.com/gogo/protobuf v1.3.0
 	github.com/golang/mock v1.3.1-0.20190508161146-9fa652df1129
 	github.com/pkg/errors v0.8.1
-	github.com/spf13/cobra v0.0.5
+	github.com/spf13/cobra v0.0.5 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/stumble/gorocksdb v0.0.3 // indirect
 	github.com/tendermint/crypto v0.0.0-20191022145703-50d29ede1e15

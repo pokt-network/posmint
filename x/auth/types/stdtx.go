@@ -15,19 +15,19 @@ import (
 var (
 	_ sdk.Tx = (*StdTx)(nil)
 
-	maxGasWanted = uint64((1 << 63) - 1)
+	//maxGasWanted = uint64((1 << 63) - 1)
 )
 
 // StdTx is a standard way to wrap a Msg with Fee and Signatures.
 // NOTE: the first signature is the fee payer (Signatures must not be nil).
 type StdTx struct {
 	Msgs       []sdk.Msg      `json:"msg" yaml:"msg"`
-	Fee        StdFee         `json:"fee" yaml:"fee"`
+	Fee        sdk.Coins      `json:"fee" yaml:"fee"`
 	Signatures []StdSignature `json:"signatures" yaml:"signatures"`
 	Memo       string         `json:"memo" yaml:"memo"`
 }
 
-func NewStdTx(msgs []sdk.Msg, fee StdFee, sigs []StdSignature, memo string) StdTx {
+func NewStdTx(msgs []sdk.Msg, fee sdk.Coins, sigs []StdSignature, memo string) StdTx {
 	return StdTx{
 		Msgs:       msgs,
 		Fee:        fee,
@@ -43,12 +43,8 @@ func (tx StdTx) GetMsgs() []sdk.Msg { return tx.Msgs }
 // require access to any other information.
 func (tx StdTx) ValidateBasic() sdk.Error {
 	stdSigs := tx.GetSignatures()
-
-	if tx.Fee.Gas > maxGasWanted {
-		return sdk.ErrGasOverflow(fmt.Sprintf("invalid gas supplied; %d > %d", tx.Fee.Gas, maxGasWanted))
-	}
-	if tx.Fee.Amount.IsAnyNegative() {
-		return sdk.ErrInsufficientFee(fmt.Sprintf("invalid fee %s amount provided", tx.Fee.Amount))
+	if tx.Fee.IsValid() == false {
+		return sdk.ErrInsufficientFee(fmt.Sprintf("invalid fee %s amount provided", tx.Fee.String()))
 	}
 	if len(stdSigs) == 0 {
 		return sdk.ErrNoSignatures("no signers")
@@ -112,43 +108,43 @@ func (tx StdTx) GetSignatures() []StdSignature { return tx.Signatures }
 // StdFee includes the amount of coins paid in fees and the maximum
 // gas to be used by the transaction. The ratio yields an effective "gasprice",
 // which must be above some miminum to be accepted into the mempool.
-type StdFee struct {
-	Amount sdk.Coins `json:"amount" yaml:"amount"`
-	Gas    uint64    `json:"gas" yaml:"gas"`
-}
+// type StdFee struct {
+// 	Amount sdk.Coins `json:"amount" yaml:"amount"`
+// 	Gas    uint64    `json:"gas" yaml:"gas"`
+// }
 
 // NewStdFee returns a new instance of StdFee
-func NewStdFee(gas uint64, amount sdk.Coins) StdFee {
-	return StdFee{
-		Amount: amount,
-		Gas:    gas,
-	}
-}
+// func NewStdFee(gas uint64, amount sdk.Coins) StdFee {
+// 	return StdFee{
+// 		Amount: amount,
+// 		Gas:    gas,
+// 	}
+// }
 
 // Bytes for signing later
-func (fee StdFee) Bytes() []byte {
-	// normalize. XXX
-	// this is a sign of something ugly
-	// (in the lcd_test, client side its null,
-	// server side its [])
-	if len(fee.Amount) == 0 {
-		fee.Amount = sdk.NewCoins()
-	}
-	bz, err := ModuleCdc.MarshalJSON(fee) // TODO
-	if err != nil {
-		panic(err)
-	}
-	return bz
-}
+// func (fee StdFee) Bytes() []byte {
+// 	// normalize. XXX
+// 	// this is a sign of something ugly
+// 	// (in the lcd_test, client side its null,
+// 	// server side its [])
+// 	if len(fee.Amount) == 0 {
+// 		fee.Amount = sdk.NewCoins()
+// 	}
+// 	bz, err := ModuleCdc.MarshalJSON(fee) // TODO
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	return bz
+// }
 
 // GasPrices returns the gas prices for a StdFee.
 //
 // NOTE: The gas prices returned are not the true gas prices that were
 // originally part of the submitted transaction because the fee is computed
 // as fee = ceil(gasWanted * gasPrices).
-func (fee StdFee) GasPrices() sdk.DecCoins {
-	return sdk.NewDecCoins(fee.Amount).QuoDec(sdk.NewDec(int64(fee.Gas)))
-}
+// func (fee StdFee) GasPrices() sdk.DecCoins {
+// 	return sdk.NewDecCoins(fee.Amount).QuoDec(sdk.NewDec(int64(fee.Gas)))
+// }
 
 //__________________________________________________________
 
@@ -167,15 +163,20 @@ type StdSignDoc struct {
 }
 
 // StdSignBytes returns the bytes to sign for a transaction.
-func StdSignBytes(chainID string, accnum uint64, sequence uint64, fee StdFee, msgs []sdk.Msg, memo string) []byte {
+func StdSignBytes(chainID string, accnum uint64, sequence uint64, fee sdk.Coins, msgs []sdk.Msg, memo string) []byte {
 	var msgsBytes []json.RawMessage
 	for _, msg := range msgs {
 		msgsBytes = append(msgsBytes, json.RawMessage(msg.GetSignBytes()))
 	}
+	var feeBytes json.RawMessage
+	feeBytes, err := fee.MarshalJSON()
+	if err != nil {
+		panic(err)
+	}
 	bz, err := ModuleCdc.MarshalJSON(StdSignDoc{
 		AccountNumber: accnum,
 		ChainID:       chainID,
-		Fee:           json.RawMessage(fee.Bytes()),
+		Fee:           json.RawMessage(feeBytes),
 		Memo:          memo,
 		Msgs:          msgsBytes,
 		Sequence:      sequence,

@@ -71,6 +71,7 @@ func (p *Params) ParamSetPairs() params.ParamSetPairs {
 		{Key: KeyDowntimeJailDuration, Value: &p.DowntimeJailDuration},
 		{Key: KeySlashFractionDoubleSign, Value: &p.SlashFractionDoubleSign},
 		{Key: KeySlashFractionDowntime, Value: &p.SlashFractionDowntime},
+		{Key: KeyProposerRewardPercentage, Value: &p.ProposerRewardPercentage},
 	}
 }
 

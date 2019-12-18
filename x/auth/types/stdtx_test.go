@@ -22,8 +22,8 @@ var (
 
 func TestStdTx(t *testing.T) {
 	msgs := []sdk.Msg{sdk.NewTestMsg(addr)}
-	fee := NewTestStdFee()
 	sigs := []StdSignature{}
+	fee := sdk.NewCoins(sdk.NewCoin("stake", sdk.NewInt(5)))
 
 	tx := NewStdTx(msgs, fee, sigs, "")
 	require.Equal(t, msgs, tx.GetMsgs())
@@ -38,18 +38,18 @@ func TestStdSignBytes(t *testing.T) {
 		chainID  string
 		accnum   uint64
 		sequence uint64
-		fee      StdFee
+		fee      sdk.Coins
 		msgs     []sdk.Msg
 		memo     string
 	}
-	defaultFee := NewTestStdFee()
+	defaultFee := NewTestCoins()
 	tests := []struct {
 		args args
 		want string
 	}{
 		{
 			args{"1234", 3, 6, defaultFee, []sdk.Msg{sdk.NewTestMsg(addr)}, "memo"},
-			fmt.Sprintf("{\"account_number\":\"3\",\"chain_id\":\"1234\",\"fee\":{\"amount\":[{\"amount\":\"150\",\"denom\":\"atom\"}],\"gas\":\"50000\"},\"memo\":\"memo\",\"msgs\":[[\"%s\"]],\"sequence\":\"6\"}", addr),
+			fmt.Sprintf("{\"account_number\":\"3\",\"chain_id\":\"1234\",\"fee\":[{\"amount\":\"10000000\",\"denom\":\"atom\"}],\"memo\":\"memo\",\"msgs\":[[\"%s\"]],\"sequence\":\"6\"}", addr),
 		},
 	}
 	for i, tc := range tests {
@@ -67,13 +67,13 @@ func TestTxValidateBasic(t *testing.T) {
 
 	// msg and signatures
 	msg1 := NewTestMsg(addr1, addr2)
-	fee := NewTestStdFee()
+	fee := NewTestCoins()
 
 	msgs := []sdk.Msg{msg1}
 
 	// require to fail validation upon invalid fee
-	badFee := NewTestStdFee()
-	badFee.Amount[0].Amount = sdk.NewInt(-5)
+	badFee := NewTestCoins()
+	badFee[0].Amount = sdk.NewInt(-5)
 	tx := NewTestTx(ctx, nil, nil, nil, nil, badFee)
 
 	err := tx.ValidateBasic()
@@ -96,15 +96,6 @@ func TestTxValidateBasic(t *testing.T) {
 	require.Error(t, err)
 	require.Equal(t, sdk.CodeUnauthorized, err.Result().Code)
 
-	// require to fail with invalid gas supplied
-	badFee = NewTestStdFee()
-	badFee.Gas = 9223372036854775808
-	tx = NewTestTx(ctx, nil, nil, nil, nil, badFee)
-
-	err = tx.ValidateBasic()
-	require.Error(t, err)
-	require.Equal(t, sdk.CodeGasOverflow, err.Result().Code)
-
 	// require to pass when above criteria are matched
 	privs, accNums, seqs = []crypto.PrivKey{priv1, priv2}, []uint64{0, 1}, []uint64{0, 0}
 	tx = NewTestTx(ctx, msgs, privs, accNums, seqs, fee)
@@ -121,7 +112,7 @@ func TestDefaultTxEncoder(t *testing.T) {
 	encoder := DefaultTxEncoder(cdc)
 
 	msgs := []sdk.Msg{sdk.NewTestMsg(addr)}
-	fee := NewTestStdFee()
+	fee := NewTestCoins()
 	sigs := []StdSignature{}
 
 	tx := NewStdTx(msgs, fee, sigs, "")

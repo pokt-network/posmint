@@ -2,69 +2,52 @@ package keeper
 
 import (
 	"encoding/hex"
-	"github.com/pokt-network/posmint/baseapp"
-	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
-	"github.com/pokt-network/posmint/types/module"
-	"github.com/pokt-network/posmint/x/bank"
 	"github.com/stretchr/testify/assert"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/libs/log"
-	dbm "github.com/tendermint/tm-db"
-	"os"
 	"testing"
 )
 
-const (
-	routeMsgCounter  = "msgCounter"
-	routeMsgCounter2 = "msgCounter2"
-)
-
-var (
-	capKey = sdk.NewKVStoreKey(baseapp.MainStoreKey)
-	ModuleBasics = module.NewBasicManager(
-		bank.AppModuleBasic{},
-	)
-)
 
 type args struct {
-	ctx     sdk.Context
-	amount  sdk.Int
-	address sdk.ValAddress
+	amount      sdk.Int
+	valAddress  sdk.ValAddress
+	consAddress sdk.ConsAddress
 }
 
-func TestSetValidatorAward(t *testing.T) {
+func TestSetandGetValidatorAward(t *testing.T) {
+	initialPower := int64(100)
+	nAccs := int64(4)
 	addressBytes := []byte("abcdefghijklmnopqrst")
 	validatorAddress, err := sdk.ValAddressFromHex(hex.EncodeToString(addressBytes))
 	if err != nil {
 		panic(err)
 	}
-	minGasPrices := sdk.DecCoins{sdk.NewInt64DecCoin("stake", 5000)}
-	options := baseapp.SetMinGasPrices(minGasPrices.String())
-	cdc := MakeCodec()
-	bapp := getNewApp(cdc, options)
 
 	tests := []struct {
 		name          string
 		args          args
 		expectedCoins sdk.Int
-		expectedFind bool
-		app           *baseapp.BaseApp
-		keeper        Keeper
+		expectedFind  bool
 	}{
 		{
-			name:          "can set Value",
+			name:          "can set award",
 			expectedCoins: sdk.NewInt(1),
-			expectedFind:	true,
-			app:           bapp,
-			args:          args{ctx: getNewContext(bapp), amount: sdk.NewInt(int64(1)), address: validatorAddress},
-			keeper:        getNewKeeper(capKey, cdc),
+			expectedFind:  true,
+			args:          args{amount: sdk.NewInt(int64(1)), valAddress: validatorAddress},
+		},
+		{
+			name:          "can get award",
+			expectedCoins: sdk.NewInt(2),
+			expectedFind:  true,
+			args:          args{amount: sdk.NewInt(int64(2)), valAddress: validatorAddress},
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			test.keeper.setValidatorAward(test.args.ctx, test.args.amount, test.args.address)
-			coins, found := test.keeper.getValidatorAward(test.args.ctx, test.args.address)
+			context, _, keeper := createTestInput(t, true, initialPower, nAccs)
+
+			keeper.setValidatorAward(context, test.args.amount, test.args.valAddress)
+			coins, found := keeper.getValidatorAward(context, test.args.valAddress)
 			assert.Equal(t, test.expectedCoins, coins, "coins don't match")
 			assert.Equal(t, test.expectedFind, found, "finds don't match")
 
@@ -72,131 +55,91 @@ func TestSetValidatorAward(t *testing.T) {
 	}
 }
 
-func defaultLogger() log.Logger {
-	return log.NewTMLogger(log.NewSyncWriter(os.Stdout)).With("module", "sdk/app")
-}
-
-func testTxDecoder(cdc *codec.Codec) sdk.TxDecoder {
-	return func(txBytes []byte) (sdk.Tx, sdk.Error) {
-		var tx txTest
-		if len(txBytes) == 0 {
-			return nil, sdk.ErrTxDecode("txBytes are empty")
-		}
-		err := cdc.UnmarshalBinaryLengthPrefixed(txBytes, &tx)
-		if err != nil {
-			return nil, sdk.ErrTxDecode("").TraceSDK(err.Error())
-		}
-		return tx, nil
-	}
-}
-func getNewApp(cdc *codec.Codec, options ...func(*baseapp.BaseApp)) *baseapp.BaseApp {
-	logger := defaultLogger()
-	db := dbm.NewMemDB()
-	registerTestCodec(cdc)
-
-	app := baseapp.NewBaseApp("test-app", logger, db, testTxDecoder(cdc), options...)
-	//app.LoadLatestVersion(capKey1)
-
-	// make a cap key and mount the store
-	app.MountStores(capKey)
-	err := app.LoadLatestVersion(capKey) // needed to make stores non-nil
-
+func TestSetAndGetProposer(t *testing.T) {
+	initialPower := int64(100)
+	nAccs := int64(4)
+	addressBytes := []byte("abcdefghijklmnopqrst")
+	consAddress, err := sdk.ConsAddressFromHex(hex.EncodeToString(addressBytes))
 	if err != nil {
 		panic(err)
 	}
-	app.InitChain(abci.RequestInitChain{})
 
-	return app
-}
-
-func MakeCodec() *codec.Codec {
-	var cdc = codec.New()
-	ModuleBasics.RegisterCodec(cdc)
-	sdk.RegisterCodec(cdc)
-	codec.RegisterCrypto(cdc)
-	return cdc
-}
-
-func getNewKeeper(key sdk.StoreKey, cdc *codec.Codec) Keeper {
-	return Keeper{storeKey: key, cdc: cdc}
-}
-
-func getNewContext(bapp *baseapp.BaseApp) sdk.Context {
-	header := abci.Header{Height: 0}
-	newContext := bapp.NewContext(false, header)
-	return newContext
-}
-
-func registerTestCodec(cdc *codec.Codec) {
-	// register test types
-	cdc.RegisterConcrete(&txTest{}, "posmint/baseapp/txTest", nil)
-	cdc.RegisterConcrete(&msgCounter{}, "posmint/baseapp/msgCounter", nil)
-	cdc.RegisterConcrete(&msgCounter2{}, "posmint/baseapp/msgCounter2", nil)
-	cdc.RegisterConcrete(&msgNoRoute{}, "posmint/baseapp/msgNoRoute", nil)
-}
-
-type msgCounter struct {
-	Counter       int64
-	FailOnHandler bool
-}
-
-// Implements Msg
-func (msg msgCounter) Route() string                { return routeMsgCounter }
-func (msg msgCounter) Type() string                 { return "counter1" }
-func (msg msgCounter) GetSignBytes() []byte         { return nil }
-func (msg msgCounter) GetSigners() []sdk.AccAddress { return nil }
-func (msg msgCounter) ValidateBasic() sdk.Error {
-	if msg.Counter >= 0 {
-		return nil
+	tests := []struct {
+		name            string
+		args            args
+		expectedAddress sdk.ConsAddress
+	}{
+		{
+			name:            "can set the preivous proposer",
+			args:            args{consAddress: consAddress},
+			expectedAddress: consAddress,
+		},
 	}
-	return sdk.ErrInvalidSequence("counter should be a non-negative integer.")
-}
 
-type msgCounter2 struct {
-	Counter int64
-}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			context, _, keeper := createTestInput(t, true, initialPower, nAccs)
 
-// Implements Msg
-func (msg msgCounter2) Route() string                { return routeMsgCounter2 }
-func (msg msgCounter2) Type() string                 { return "counter2" }
-func (msg msgCounter2) GetSignBytes() []byte         { return nil }
-func (msg msgCounter2) GetSigners() []sdk.AccAddress { return nil }
-func (msg msgCounter2) ValidateBasic() sdk.Error {
-	if msg.Counter >= 0 {
-		return nil
-	}
-	return sdk.ErrInvalidSequence("counter should be a non-negative integer.")
-}
-
-type msgNoRoute struct {
-	msgCounter
-}
-
-func (tx msgNoRoute) Route() string { return "noroute" }
-
-// a msg we dont know how to decode
-type msgNoDecode struct {
-	msgCounter
-}
-
-func (tx msgNoDecode) Route() string { return routeMsgCounter }
-
-type txTest struct {
-	Msgs       []sdk.Msg
-	Counter    int64
-	FailOnAnte bool
-}
-
-func (tx *txTest) setFailOnAnte(fail bool) {
-	tx.FailOnAnte = fail
-}
-
-func (tx *txTest) setFailOnHandler(fail bool) {
-	for i, msg := range tx.Msgs {
-		tx.Msgs[i] = msgCounter{msg.(msgCounter).Counter, fail}
+			keeper.SetPreviousProposer(context, test.args.consAddress)
+			receivedAddress := keeper.GetPreviousProposer(context)
+			assert.Equal(t, test.expectedAddress, receivedAddress, "addresses do not match ")
+		})
 	}
 }
 
-// Implements Tx
-func (tx txTest) GetMsgs() []sdk.Msg       { return tx.Msgs }
-func (tx txTest) ValidateBasic() sdk.Error { return nil }
+func TestDeleteValidatorAward(t *testing.T) {
+	initialPower := int64(100)
+	nAccs := int64(4)
+	addressBytes := []byte("abcdefghijklmnopqrst")
+	validatorAddress, err := sdk.ValAddressFromHex(hex.EncodeToString(addressBytes))
+	if err != nil {
+		panic(err)
+	}
+
+	tests := []struct {
+		name          string
+		args          args
+		expectedCoins sdk.Int
+		expectedFind  bool
+	}{
+		{
+			name:          "can delete award",
+			expectedCoins: sdk.NewInt(0),
+			expectedFind:  false,
+			args:          args{amount: sdk.NewInt(int64(1)), valAddress: validatorAddress},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			context, _, keeper := createTestInput(t, true, initialPower, nAccs)
+
+			keeper.setValidatorAward(context, test.args.amount, test.args.valAddress)
+			keeper.deleteValidatorAward(context, test.args.valAddress)
+			_, found := keeper.getValidatorAward(context, test.args.valAddress)
+			assert.Equal(t, test.expectedFind, found, "finds do not match")
+
+		})
+	}
+}
+
+func TestGetProposerRewardPercentage(t *testing.T) {
+	initialPower := int64(100)
+	nAccs := int64(4)
+	tests := []struct {
+		name               string
+		expectedPercentage sdk.Int
+	}{
+		{
+			name:               "get reward percentage",
+			expectedPercentage: sdk.NewInt(90),
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			context, _, keeper := createTestInput(t, true, initialPower, nAccs)
+
+			percentage := keeper.getProposerRewardPercentage(context) // TODO: replace with  sdk.Dec isntead of sdk.Int
+			assert.Equal(t, test.expectedPercentage, percentage, "percentages do not match")
+		})
+	}
+}

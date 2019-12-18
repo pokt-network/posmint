@@ -150,5 +150,6 @@ func (k Keeper) SetPreviousProposer(ctx sdk.Context, consAddr sdk.ConsAddress) {
 // returns the current BaseProposerReward rate from the global param store
 // nolint: errcheck
 func (k Keeper) getProposerRewardPercentage(ctx sdk.Context) sdk.Int {
-	return sdk.NewInt(int64(k.ProposerRewardPercentage(ctx))).Quo(sdk.NewInt(100))
+	reward := sdk.NewInt(int64(k.ProposerRewardPercentage(ctx))).Quo(sdk.NewInt(100)) // TODO replace sdk.NewInt to sdk.NewDec
+	return reward
 }
