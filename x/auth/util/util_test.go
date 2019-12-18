@@ -97,7 +97,7 @@ func TestReadStdTxFromFile(t *testing.T) {
 	sdk.RegisterCodec(cdc)
 
 	// Build a test transaction
-	fee := authtypes.NewStdFee(50000, sdk.Coins{sdk.NewInt64Coin("atom", 150)})
+	fee := sdk.Coins{sdk.NewInt64Coin("atom", 150)}
 	stdTx := authtypes.NewStdTx([]sdk.Msg{}, fee, []authtypes.StdSignature{}, "foomemo")
 
 	// Write it to the file
@@ -113,7 +113,7 @@ func TestReadStdTxFromFile(t *testing.T) {
 
 func compareEncoders(t *testing.T, expected sdk.TxEncoder, actual sdk.TxEncoder) {
 	msgs := []sdk.Msg{sdk.NewTestMsg(addr)}
-	tx := authtypes.NewStdTx(msgs, authtypes.StdFee{}, []authtypes.StdSignature{}, "")
+	tx := authtypes.NewStdTx(msgs, sdk.Coins{}, []authtypes.StdSignature{}, "")
 
 	defaultEncoderBytes, err := expected(tx)
 	require.NoError(t, err)

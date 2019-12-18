@@ -40,7 +40,6 @@ var (
 	NewQueryAccountParams     = types.NewQueryAccountParams
 	NewStdTx                  = types.NewStdTx
 	CountSubKeys              = types.CountSubKeys
-	NewStdFee                 = types.NewStdFee
 	StdSignBytes              = types.StdSignBytes
 	DefaultTxDecoder          = types.DefaultTxDecoder
 	DefaultTxEncoder          = types.DefaultTxEncoder
@@ -68,7 +67,6 @@ type (
 	QueryAccountParams = types.QueryAccountParams
 	StdSignMsg         = types.StdSignMsg
 	StdTx              = types.StdTx
-	StdFee             = types.StdFee
 	StdSignDoc         = types.StdSignDoc
 	StdSignature       = types.StdSignature
 	TxBuilder          = types.TxBuilder
