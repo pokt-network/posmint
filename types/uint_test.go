@@ -155,6 +155,8 @@ func TestCompUint(t *testing.T) {
 			{i1.LT(i2), n1 < n2},
 			{i1.GTE(i2), !i1.LT(i2)},
 			{!i1.GTE(i2), i1.LT(i2)},
+			{i1.LTE(i2), n1 <= n2},
+			{i2.LTE(i1), n2 <= n1},
 		}
 
 		for tcnum, tc := range cases {
