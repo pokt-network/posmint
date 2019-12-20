@@ -52,17 +52,15 @@ type AppModule struct {
 	keeper  Keeper
 	ak      types.AccountKeeper
 	node    *node.Node
-	keybase keys.Keybase
+	keybase *keys.Keybase
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(keeper Keeper, ak types.AccountKeeper, node *node.Node, keybase keys.Keybase) AppModule {
+func NewAppModule(keeper Keeper, ak types.AccountKeeper) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		keeper:         keeper,
 		ak:             ak,
-		node:           node,
-		keybase:        keybase,
 	}
 }
 
@@ -71,11 +69,19 @@ func (AppModule) Name() string {
 	return ModuleName
 }
 
+func (am AppModule) SetTendermintNode(n *node.Node) {
+	am.node = n
+}
+
 func (am AppModule) GetTendermintNode() *node.Node {
 	return am.node
 }
 
-func (am AppModule) GetKeybase() keys.Keybase {
+func (am AppModule) SetKeybase(k *keys.Keybase) {
+	am.keybase = k
+}
+
+func (am AppModule) GetKeybase() *keys.Keybase {
 	return am.keybase
 }
 
