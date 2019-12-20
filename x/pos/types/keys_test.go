@@ -1,8 +1,11 @@
 package types
 
 import (
+	"encoding/binary"
 	"fmt"
 	"github.com/pokt-network/posmint/types"
+	"github.com/tendermint/tendermint/crypto/ed25519"
+	"math/rand"
 	"reflect"
 	"testing"
 	"time"
@@ -51,13 +54,15 @@ func TestGetValMissedBlockKey(t *testing.T) {
 	}
 	ca, _ := types.ConsAddressFromHex("29f0a60104f3218a2cb51e6a269182d5dc271447114e342086d9c922a106a3c0")
 
+	b := make([]byte, 8)
+	binary.LittleEndian.PutUint64(b, uint64(1))
+
 	tests := []struct {
 		name string
 		args args
 		want []byte
 	}{
-		{"sampleByteArray", args{ca, int64(1)}, []byte{0x12}},
-		//TODO FIX
+		{"sampleByteArray", args{ca, int64(1)}, append(append([]byte{0x12}, ca.Bytes()...), []byte{1, 0, 0, 0, 0, 0, 0, 0}...)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -73,12 +78,14 @@ func TestGetValMissedBlockPrefixKey(t *testing.T) {
 	type args struct {
 		v types.ConsAddress
 	}
+	ca, _ := types.ConsAddressFromHex("29f0a60104f3218a2cb51e6a269182d5dc271447114e342086d9c922a106a3c0")
+
 	tests := []struct {
 		name string
 		args args
 		want []byte
 	}{
-		// TODO: Add test cases.
+		{"sampleByteArray", args{ca}, append([]byte{0x12}, ca.Bytes()...)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -93,12 +100,16 @@ func TestGetValidatorSigningInfoAddress(t *testing.T) {
 	type args struct {
 		key []byte
 	}
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+	ca := types.ConsAddress(pub.Address())
+
 	tests := []struct {
 		name  string
 		args  args
 		wantV types.ConsAddress
 	}{
-		// TODO: Add test cases.
+		{"sampleByteArray", args{append([]byte{0x11}, ca.Bytes()...)}, append(ca.Bytes())},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -113,12 +124,14 @@ func TestGetValidatorSigningInfoKey(t *testing.T) {
 	type args struct {
 		v types.ConsAddress
 	}
+	ca, _ := types.ConsAddressFromHex("29f0a60104f3218a2cb51e6a269182d5dc271447114e342086d9c922a106a3c0")
+
 	tests := []struct {
 		name string
 		args args
 		want []byte
 	}{
-		// TODO: Add test cases.
+		{"sampleByteArray", args{ca}, append([]byte{0x11}, ca.Bytes()...)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -133,12 +146,14 @@ func TestKeyForUnstakingValidators(t *testing.T) {
 	type args struct {
 		unstakingTime time.Time
 	}
+	ut := time.Now()
+
 	tests := []struct {
 		name string
 		args args
 		want []byte
 	}{
-		// TODO: Add test cases.
+		{"sampleByteArray", args{ut}, append([]byte{0x41}, types.FormatTimeBytes(ut)...)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -153,12 +168,14 @@ func TestKeyForValByAllVals(t *testing.T) {
 	type args struct {
 		addr types.ValAddress
 	}
+	ca, _ := types.ValAddressFromHex("29f0a60104f3218a2cb51e6a269182d5dc271447114e342086d9c922a106a3c0")
+
 	tests := []struct {
 		name string
 		args args
 		want []byte
 	}{
-		// TODO: Add test cases.
+		{"sampleByteArray", args{ca}, append([]byte{0x21}, ca.Bytes()...)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -173,12 +190,14 @@ func TestKeyForValidatorAward(t *testing.T) {
 	type args struct {
 		address types.ValAddress
 	}
+	ca, _ := types.ValAddressFromHex("29f0a60104f3218a2cb51e6a269182d5dc271447114e342086d9c922a106a3c0")
+
 	tests := []struct {
 		name string
 		args args
 		want []byte
 	}{
-		// TODO: Add test cases.
+		{"sampleByteArray", args{ca}, append([]byte{0x51}, ca.Bytes()...)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -193,12 +212,14 @@ func TestKeyForValidatorBurn(t *testing.T) {
 	type args struct {
 		address types.ValAddress
 	}
+	ca, _ := types.ValAddressFromHex("29f0a60104f3218a2cb51e6a269182d5dc271447114e342086d9c922a106a3c0")
+
 	tests := []struct {
 		name string
 		args args
 		want []byte
 	}{
-		// TODO: Add test cases.
+		{"sampleByteArray", args{ca}, append([]byte{0x52}, ca.Bytes()...)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -213,12 +234,14 @@ func TestKeyForValidatorByConsAddr(t *testing.T) {
 	type args struct {
 		addr types.ConsAddress
 	}
+	ca, _ := types.ConsAddressFromHex("29f0a60104f3218a2cb51e6a269182d5dc271447114e342086d9c922a106a3c0")
+
 	tests := []struct {
 		name string
 		args args
 		want []byte
 	}{
-		// TODO: Add test cases.
+		{"sampleByteArray", args{ca}, append([]byte{0x22}, ca.Bytes()...)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -233,17 +256,25 @@ func TestKeyForValidatorInStakingSet(t *testing.T) {
 	type args struct {
 		validator Validator
 	}
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
+	operAddrInvr := types.CopyBytes(pub.Address())
+	for i, b := range operAddrInvr {
+		operAddrInvr[i] = ^b
+	}
+
 	tests := []struct {
 		name string
 		args args
 		want []byte
 	}{
-		// TODO: Add test cases.
+		{"NewValidator", args{validator: NewValidator(types.ValAddress(pub.Address()), pub, types.ZeroInt())}, append([]byte{0x23, 0, 0, 0, 0, 0, 0, 0, 0}, operAddrInvr...)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := KeyForValidatorInStakingSet(tt.args.validator); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("KeyForValidatorInStakingSet() = %v, want %v", got, tt.want)
+				t.Errorf("KeyForValidatorInStakingSet() = %s, want %s", got, tt.want)
 			}
 		})
 	}
@@ -253,12 +284,14 @@ func TestKeyForValidatorPrevStateStateByPower(t *testing.T) {
 	type args struct {
 		address types.ValAddress
 	}
+	ca, _ := types.ValAddressFromHex("29f0a60104f3218a2cb51e6a269182d5dc271447114e342086d9c922a106a3c0")
+
 	tests := []struct {
 		name string
 		args args
 		want []byte
 	}{
-		// TODO: Add test cases.
+		{"sampleByteArray", args{ca}, append([]byte{0x31}, ca.Bytes()...)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -273,12 +306,27 @@ func TestParseValidatorPowerRankKey(t *testing.T) {
 	type args struct {
 		key []byte
 	}
+
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
+	operAddrInvr := types.CopyBytes(pub.Address())
+	for i, b := range operAddrInvr {
+		operAddrInvr[i] = ^b
+	}
+
+	prk := append([]byte{0x23, 0, 0, 0, 0, 0, 0, 0, 0}, operAddrInvr...)
+
+	for i, b := range operAddrInvr {
+		operAddrInvr[i] = ^b
+	}
+
 	tests := []struct {
 		name         string
 		args         args
 		wantOperAddr []byte
 	}{
-		// TODO: Add test cases.
+		{"samplepowerrankKey", args{key: prk}, operAddrInvr},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -293,12 +341,20 @@ func Test_getStakedValPowerRankKey(t *testing.T) {
 	type args struct {
 		validator Validator
 	}
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
+	operAddrInvr := types.CopyBytes(pub.Address())
+	for i, b := range operAddrInvr {
+		operAddrInvr[i] = ^b
+	}
+
 	tests := []struct {
 		name string
 		args args
 		want []byte
 	}{
-		// TODO: Add test cases.
+		{"NewValidator", args{validator: NewValidator(types.ValAddress(pub.Address()), pub, types.ZeroInt())}, append([]byte{0x23, 0, 0, 0, 0, 0, 0, 0, 0}, operAddrInvr...)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
