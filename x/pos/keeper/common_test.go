@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	kb "github.com/pokt-network/posmint/crypto/keys"
 	"github.com/pokt-network/posmint/types/module"
 	"github.com/pokt-network/posmint/x/supply"
 	"testing"
@@ -9,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"github.com/tendermint/tendermint/libs/log"
-	"github.com/tendermint/tendermint/node"
 	dbm "github.com/tendermint/tm-db"
 
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -31,8 +29,6 @@ var (
 	multiPerm    = "multiple permissions account"
 	randomPerm   = "random permission"
 	holder       = "holder"
-	Keybase      kb.Keybase
-	TMNode       *node.Node
 	ModuleBasics = module.NewBasicManager(
 		auth.AppModuleBasic{},
 		bank.AppModuleBasic{},
@@ -96,9 +92,9 @@ func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64)
 	sk := supply.NewKeeper(cdc, keySupply, ak, bk, maccPerms)
 
 	moduleManager := module.NewManager(
-		auth.NewAppModule(ak, TMNode, Keybase),
-		bank.NewAppModule(bk, ak, TMNode, Keybase),
-		supply.NewAppModule(sk, ak, TMNode, Keybase),
+		auth.NewAppModule(ak),
+		bank.NewAppModule(bk, ak),
+		supply.NewAppModule(sk, ak),
 	)
 
 	genesisState := ModuleBasics.DefaultGenesis()
