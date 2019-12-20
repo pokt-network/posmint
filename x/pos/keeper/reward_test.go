@@ -142,3 +142,31 @@ func TestGetProposerRewardPercentage(t *testing.T) {
 		})
 	}
 }
+
+func TestMint(t *testing.T) {
+	initialPower := int64(100)
+	nAccs := int64(4)
+	addressBytes := []byte("abcdefghijklmnopqrst")
+	validatorAddress, err := sdk.ValAddressFromHex(hex.EncodeToString(addressBytes))
+	if err != nil {
+		panic(err)
+	}
+
+	tests := []struct {
+		name               string
+		amount sdk.Int
+	}{
+		{
+			name:               "mints a coin",
+			amount: sdk.NewInt(90),
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			context, _, keeper := createTestInput(t, true, initialPower, nAccs)
+
+			result := keeper.mint(context, test.amount, validatorAddress)
+			assert.Contains(t, result.Log, "was successfully minted", "does not contain message")
+		})
+	}
+}

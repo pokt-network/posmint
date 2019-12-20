@@ -114,7 +114,7 @@ func (k Keeper) deleteValidatorAward(ctx sdk.Context, address sdk.ValAddress) {
 // Mints sdk.Coins
 func (k Keeper) mint(ctx sdk.Context, amount sdk.Int, address sdk.ValAddress) sdk.Result {
 	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), amount))
-	mintErr := k.supplyKeeper.MintCoins(ctx, types.ModuleName, coins.Add(coins))
+	mintErr := k.supplyKeeper.MintCoins(ctx, types.StakedPoolName, coins.Add(coins))
 	if mintErr != nil {
 		return mintErr.Result()
 	}
