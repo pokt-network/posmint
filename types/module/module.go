@@ -99,9 +99,10 @@ type AppModule interface {
 
 	// registers
 	RegisterInvariants(sdk.InvariantRegistry)
-
-	GetTendermintNode() *node.Node  // return tendermint Node
-	GetKeybase() cryptokeys.Keybase // return keybase
+	SetTendermintNode(*node.Node)           // set tendermint node
+	SetKeybase(keybase *cryptokeys.Keybase) // set keybase
+	GetTendermintNode() *node.Node          // return tendermint Node
+	GetKeybase() *cryptokeys.Keybase        // return keybase
 
 	// routes
 	Route() string
@@ -126,9 +127,13 @@ func NewGenesisOnlyAppModule(amg AppModuleGenesis) AppModule {
 	}
 }
 
+func (GenesisOnlyAppModule) SetTendermintNode(_ *node.Node) {}
+
+func (GenesisOnlyAppModule) SetKeybase(_ *cryptokeys.Keybase) {}
+
 func (GenesisOnlyAppModule) GetTendermintNode() *node.Node { return nil }
 
-func (GenesisOnlyAppModule) GetKeybase() cryptokeys.Keybase { return nil }
+func (GenesisOnlyAppModule) GetKeybase() *cryptokeys.Keybase { return nil }
 
 // register invariants
 func (GenesisOnlyAppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
@@ -181,6 +186,15 @@ func NewManager(modules ...AppModule) *Manager {
 		OrderBeginBlockers: modulesStr,
 		OrderEndBlockers:   modulesStr,
 	}
+}
+
+func (m Manager) GetModule(name string) *AppModule {
+	appModule := m.Modules[name]
+	return &appModule
+}
+
+func (m *Manager) SetModule(name string, module AppModule) {
+	m.Modules[name] = module
 }
 
 // set the order of init genesis calls
