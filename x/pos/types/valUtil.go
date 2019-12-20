@@ -41,10 +41,8 @@ func UnmarshalValidator(cdc *codec.Codec, valBytes []byte) (validator Validator,
 
 // String returns a human readable string representation of a validator.
 func (v Validator) String() string {
-	bechConsPubKey, err := sdk.Bech32ifyConsPub(v.ConsPubKey)
-	if err != nil {
-		panic(err)
-	}
+	bechConsPubKey := sdk.HexConsPub(v.ConsPubKey)
+
 	return fmt.Sprintf(`Validator
   Address:           		  %s
   Validator Cons Pubkey: %s
@@ -68,10 +66,7 @@ type bechValidator struct {
 
 // MarshalJSON marshals the validator to JSON using Bech32
 func (v Validator) MarshalJSON() ([]byte, error) {
-	bechConsPubKey, err := sdk.Bech32ifyConsPub(v.ConsPubKey)
-	if err != nil {
-		return nil, err
-	}
+	bechConsPubKey := sdk.HexConsPub(v.ConsPubKey)
 	return codec.Cdc.MarshalJSON(bechValidator{
 		Address:                 v.Address,
 		ConsPubKey:              bechConsPubKey,
@@ -88,7 +83,7 @@ func (v *Validator) UnmarshalJSON(data []byte) error {
 	if err := codec.Cdc.UnmarshalJSON(data, bv); err != nil {
 		return err
 	}
-	consPubKey, err := sdk.GetConsPubKeyBech32(bv.ConsPubKey)
+	consPubKey, err := sdk.GetConsPubKeyHex(bv.ConsPubKey)
 	if err != nil {
 		return err
 	}
