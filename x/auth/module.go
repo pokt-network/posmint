@@ -52,16 +52,14 @@ type AppModule struct {
 	AppModuleBasic
 	accountKeeper AccountKeeper
 	node          *node.Node
-	keybase       keys.Keybase
+	keybase       *keys.Keybase
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(accountKeeper AccountKeeper, node *node.Node, keybase keys.Keybase) AppModule {
+func NewAppModule(accountKeeper AccountKeeper) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		accountKeeper:  accountKeeper,
-		node:           node,
-		keybase:        keybase,
 	}
 }
 
@@ -89,11 +87,19 @@ func (am AppModule) NewQuerierHandler() sdk.Querier {
 	return NewQuerier(am.accountKeeper)
 }
 
+func (am AppModule) SetTendermintNode(n *node.Node) {
+	am.node = n
+}
+
 func (am AppModule) GetTendermintNode() *node.Node {
 	return am.node
 }
 
-func (am AppModule) GetKeybase() keys.Keybase {
+func (am AppModule) SetKeybase(k *keys.Keybase) {
+	am.keybase = k
+}
+
+func (am AppModule) GetKeybase() *keys.Keybase {
 	return am.keybase
 }
 

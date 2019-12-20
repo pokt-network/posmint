@@ -7,7 +7,6 @@ import (
 	"testing"
 )
 
-
 type args struct {
 	amount      sdk.Int
 	valAddress  sdk.ValAddress
