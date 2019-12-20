@@ -49,7 +49,7 @@ func (acc BaseAccount) String() string {
 	var pubkey string
 
 	if acc.PubKey != nil {
-		pubkey = sdk.MustBech32ifyAccPub(acc.PubKey)
+		pubkey = sdk.HexAccPub(acc.PubKey)
 	}
 
 	return fmt.Sprintf(`Account:
@@ -145,10 +145,7 @@ func (acc BaseAccount) MarshalYAML() (interface{}, error) {
 	var pubkey string
 
 	if acc.PubKey != nil {
-		pubkey, err = sdk.Bech32ifyAccPub(acc.PubKey)
-		if err != nil {
-			return nil, err
-		}
+		pubkey = sdk.HexAccPub(acc.PubKey)
 	}
 
 	bs, err = yaml.Marshal(struct {
