@@ -78,7 +78,7 @@ func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64)
 
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName: nil,
-		types.StakedPoolName:  {supply.Burner, supply.Staking},
+		types.StakedPoolName:  {supply.Burner, supply.Staking, supply.Minter},
 	}
 	modAccAddrs := make(map[string]bool)
 	for acc := range maccPerms {
