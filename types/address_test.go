@@ -45,11 +45,11 @@ func TestEmptyAddresses(t *testing.T) {
 	require.True(t, accAddr.Empty())
 	require.Nil(t, err)
 
-	valAddr, err := types.AccAddressFromHex("")
+	valAddr, err := types.ValAddressFromHex("")
 	require.True(t, valAddr.Empty())
 	require.Nil(t, err)
 
-	consAddr, err := types.AccAddressFromHex("")
+	consAddr, err := types.ConsAddressFromHex("")
 	require.True(t, consAddr.Empty())
 	require.Nil(t, err)
 }
