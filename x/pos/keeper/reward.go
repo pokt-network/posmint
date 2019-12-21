@@ -118,7 +118,7 @@ func (k Keeper) mint(ctx sdk.Context, amount sdk.Int, address sdk.ValAddress) sd
 	if mintErr != nil {
 		return mintErr.Result()
 	}
-	sendErr := k.supplyKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, sdk.AccAddress(address), coins)
+	sendErr := k.supplyKeeper.SendCoinsFromModuleToAccount(ctx, types.StakedPoolName, sdk.AccAddress(address), coins)
 	if sendErr != nil {
 		return sendErr.Result()
 	}
