@@ -3,10 +3,10 @@ package keeper
 import (
 	"github.com/pokt-network/posmint/types/module"
 	"github.com/pokt-network/posmint/x/supply"
+	"github.com/tendermint/tendermint/crypto/ed25519"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
@@ -44,6 +44,8 @@ func makeTestCodec() *codec.Codec {
 
 	bank.RegisterCodec(cdc)
 	auth.RegisterCodec(cdc)
+	supply.RegisterCodec(cdc)
+	params.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
 
@@ -78,7 +80,7 @@ func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64)
 
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName: nil,
-		types.StakedPoolName:  {supply.Burner, supply.Staking},
+		types.StakedPoolName:  {supply.Burner, supply.Staking, supply.Minter},
 	}
 	modAccAddrs := make(map[string]bool)
 	for acc := range maccPerms {
@@ -114,7 +116,8 @@ func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64)
 // nolint: unparam deadcode unused
 func createTestAccs(ctx sdk.Context, numAccs int, initialCoins sdk.Coins, ak *auth.AccountKeeper) (accs []auth.Account) {
 	for i := 0; i < numAccs; i++ {
-		privKey := secp256k1.GenPrivKey()
+
+		privKey := ed25519.GenPrivKey()
 		pubKey := privKey.PubKey()
 		addr := sdk.AccAddress(pubKey.Address())
 		acc := auth.NewBaseAccountWithAddress(addr)
