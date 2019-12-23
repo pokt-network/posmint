@@ -334,17 +334,17 @@ func (va *ValAddress) Unmarshal(data []byte) error {
 	return nil
 }
 
-// MarshalJSON marshals to JSON using Bech32.
+// MarshalJSON marshals to JSON using Hex
 func (va ValAddress) MarshalJSON() ([]byte, error) {
 	return json.Marshal(va.String())
 }
 
-// MarshalYAML marshals to YAML using Bech32.
+// MarshalYAML marshals to YAML using Hex
 func (va ValAddress) MarshalYAML() (interface{}, error) {
 	return va.String(), nil
 }
 
-// UnmarshalJSON unmarshals from JSON assuming Bech32 encoding.
+// UnmarshalJSON unmarshals from JSON assuming Hex encoding
 func (va *ValAddress) UnmarshalJSON(data []byte) error {
 	var s string
 
@@ -362,7 +362,7 @@ func (va *ValAddress) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// UnmarshalYAML unmarshals from YAML assuming Bech32 encoding.
+// UnmarshalYAML unmarshals from YAML assuming Hex encoding.
 func (va *ValAddress) UnmarshalYAML(data []byte) error {
 	var s string
 
@@ -493,7 +493,7 @@ func (ca *ConsAddress) Unmarshal(data []byte) error {
 	return nil
 }
 
-// MarshalJSON marshals to JSON using Bech32.
+// MarshalJSON marshals to JSON using Hex
 func (ca ConsAddress) MarshalJSON() ([]byte, error) {
 	return json.Marshal(ca.String())
 }
@@ -503,7 +503,7 @@ func (ca ConsAddress) MarshalYAML() (interface{}, error) {
 	return ca.String(), nil
 }
 
-// UnmarshalJSON unmarshals from JSON assuming Bech32 encoding.
+// UnmarshalJSON unmarshals from JSON assuming Hex encoding.
 func (ca *ConsAddress) UnmarshalJSON(data []byte) error {
 	var s string
 
@@ -521,7 +521,7 @@ func (ca *ConsAddress) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// UnmarshalYAML unmarshals from YAML assuming Bech32 encoding.
+// UnmarshalYAML unmarshals from YAML assuming Hex encoding.
 func (ca *ConsAddress) UnmarshalYAML(data []byte) error {
 	var s string
 
@@ -780,10 +780,10 @@ func GetFromBech32(bech32str, prefix string) ([]byte, error) {
 	return bz, nil
 }
 
-// GetFromBech32 decodes a bytestring from a Bech32 encoded string.
+// GetFromHex decodes a bytestring from a Hex encoded string.
 func GetFromHex(hexString string) ([]byte, error) {
 	if len(hexString) == 0 {
-		return nil, errors.New("decoding Bech32 address failed: must provide an address")
+		return nil, errors.New("decoding hex address failed: must provide an address")
 	}
 
 	bz, err := hex.DecodeString(hexString)
