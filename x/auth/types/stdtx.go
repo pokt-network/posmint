@@ -229,10 +229,7 @@ func (ss StdSignature) MarshalYAML() (interface{}, error) {
 	)
 
 	if ss.PubKey != nil {
-		pubkey, err = sdk.Bech32ifyAccPub(ss.PubKey)
-		if err != nil {
-			return nil, err
-		}
+		pubkey = sdk.HexAccPub(ss.PubKey)
 	}
 
 	bz, err = yaml.Marshal(struct {

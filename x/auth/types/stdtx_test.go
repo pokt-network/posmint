@@ -139,11 +139,11 @@ func TestStdSignatureMarshalYAML(t *testing.T) {
 		},
 		{
 			StdSignature{PubKey: pubKey, Signature: []byte("dummySig")},
-			fmt.Sprintf("|\n  pubkey: %s\n  signature: dummySig\n", sdk.MustBech32ifyAccPub(pubKey)),
+			fmt.Sprintf("|\n  pubkey: %s\n  signature: dummySig\n", sdk.HexAccPub(pubKey)),
 		},
 		{
 			StdSignature{PubKey: pubKey, Signature: nil},
-			fmt.Sprintf("|\n  pubkey: %s\n  signature: \"\"\n", sdk.MustBech32ifyAccPub(pubKey)),
+			fmt.Sprintf("|\n  pubkey: %s\n  signature: \"\"\n", sdk.HexAccPub(pubKey)),
 		},
 	}
 

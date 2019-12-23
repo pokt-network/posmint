@@ -106,7 +106,11 @@ func (am AppModule) GetKeybase() *keys.Keybase {
 // InitGenesis module init-genesis
 func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.ValidatorUpdate {
 	var genesisState GenesisState
-	types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
+	if data == nil {
+		genesisState = DefaultGenesisState()
+	} else {
+		ModuleCdc.MustUnmarshalJSON(data, &genesisState)
+	}
 	InitGenesis(ctx, am.accountKeeper, genesisState)
 	return []abci.ValidatorUpdate{}
 }

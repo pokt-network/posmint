@@ -32,7 +32,7 @@ const (
 	// AddrLen defines a valid address length
 	AddrLen = 20
 	// Bech32PrefixAccAddr defines the Bech32 prefix of an account's address
-	Bech32MainPrefix = "cosmos"
+	Bech32MainPrefix = "pocket"
 
 	// Atom in https://github.com/satoshilabs/slips/blob/master/slip-0044.md
 	CoinType = 118
@@ -42,18 +42,18 @@ const (
 	FullFundraiserPath = "44'/118'/0'/0/0"
 
 	// PrefixAccount is the prefix for account keys
-	PrefixAccount = "acc"
+	PrefixAccount = ""
 	// PrefixValidator is the prefix for validator keys
-	PrefixValidator = "val"
+	PrefixValidator = ""
 	// PrefixConsensus is the prefix for consensus keys
-	PrefixConsensus = "cons"
+	PrefixConsensus = ""
 	// PrefixPublic is the prefix for public keys
-	PrefixPublic = "pub"
+	PrefixPublic = ""
 	// PrefixOperator is the prefix for operator keys
-	PrefixOperator = "oper"
+	PrefixOperator = ""
 
 	// PrefixAddress is the prefix for addresses
-	PrefixAddress = "addr"
+	PrefixAddress = ""
 
 	// Bech32PrefixAccAddr defines the Bech32 prefix of an account's address
 	Bech32PrefixAccAddr = Bech32MainPrefix
@@ -100,10 +100,14 @@ type AccAddress []byte
 // AccAddressFromHex creates an AccAddress from a hex string.
 func AccAddressFromHex(address string) (addr AccAddress, err error) {
 	if len(address) == 0 {
-		return addr, errors.New("decoding Bech32 address failed: must provide an address")
+		return AccAddress{}, nil
 	}
 
 	bz, err := hex.DecodeString(address)
+	if err != nil {
+		return nil, err
+	}
+	err = VerifyAddressFormat(bz)
 	if err != nil {
 		return nil, err
 	}
@@ -196,7 +200,7 @@ func (aa *AccAddress) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	aa2, err := AccAddressFromBech32(s)
+	aa2, err := AccAddressFromHex(s)
 	if err != nil {
 		return err
 	}
@@ -213,7 +217,7 @@ func (aa *AccAddress) UnmarshalYAML(data []byte) error {
 		return err
 	}
 
-	aa2, err := AccAddressFromBech32(s)
+	aa2, err := AccAddressFromHex(s)
 	if err != nil {
 		return err
 	}
@@ -233,14 +237,9 @@ func (aa AccAddress) String() string {
 		return ""
 	}
 
-	bech32PrefixAccAddr := GetConfig().GetBech32AccountAddrPrefix()
+	str := hex.EncodeToString(aa.Bytes())
 
-	bech32Addr, err := bech32.ConvertAndEncode(bech32PrefixAccAddr, aa.Bytes())
-	if err != nil {
-		panic(err)
-	}
-
-	return bech32Addr
+	return str
 }
 
 // Format implements the fmt.Formatter interface.
@@ -267,10 +266,14 @@ type ValAddress []byte
 // ValAddressFromHex creates a ValAddress from a hex string.
 func ValAddressFromHex(address string) (addr ValAddress, err error) {
 	if len(address) == 0 {
-		return addr, errors.New("decoding Bech32 address failed: must provide an address")
+		return ValAddress{}, nil
 	}
 
 	bz, err := hex.DecodeString(address)
+	if err != nil {
+		return nil, err
+	}
+	err = VerifyAddressFormat(bz)
 	if err != nil {
 		return nil, err
 	}
@@ -331,17 +334,17 @@ func (va *ValAddress) Unmarshal(data []byte) error {
 	return nil
 }
 
-// MarshalJSON marshals to JSON using Bech32.
+// MarshalJSON marshals to JSON using Hex
 func (va ValAddress) MarshalJSON() ([]byte, error) {
 	return json.Marshal(va.String())
 }
 
-// MarshalYAML marshals to YAML using Bech32.
+// MarshalYAML marshals to YAML using Hex
 func (va ValAddress) MarshalYAML() (interface{}, error) {
 	return va.String(), nil
 }
 
-// UnmarshalJSON unmarshals from JSON assuming Bech32 encoding.
+// UnmarshalJSON unmarshals from JSON assuming Hex encoding
 func (va *ValAddress) UnmarshalJSON(data []byte) error {
 	var s string
 
@@ -350,7 +353,7 @@ func (va *ValAddress) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	va2, err := ValAddressFromBech32(s)
+	va2, err := ValAddressFromHex(s)
 	if err != nil {
 		return err
 	}
@@ -359,7 +362,7 @@ func (va *ValAddress) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// UnmarshalYAML unmarshals from YAML assuming Bech32 encoding.
+// UnmarshalYAML unmarshals from YAML assuming Hex encoding.
 func (va *ValAddress) UnmarshalYAML(data []byte) error {
 	var s string
 
@@ -368,7 +371,7 @@ func (va *ValAddress) UnmarshalYAML(data []byte) error {
 		return err
 	}
 
-	va2, err := ValAddressFromBech32(s)
+	va2, err := ValAddressFromHex(s)
 	if err != nil {
 		return err
 	}
@@ -388,14 +391,9 @@ func (va ValAddress) String() string {
 		return ""
 	}
 
-	bech32PrefixValAddr := GetConfig().GetBech32ValidatorAddrPrefix()
+	str := hex.EncodeToString(va.Bytes())
 
-	bech32Addr, err := bech32.ConvertAndEncode(bech32PrefixValAddr, va.Bytes())
-	if err != nil {
-		panic(err)
-	}
-
-	return bech32Addr
+	return str
 }
 
 // Format implements the fmt.Formatter interface.
@@ -422,7 +420,7 @@ type ConsAddress []byte
 // ConsAddressFromHex creates a ConsAddress from a hex string.
 func ConsAddressFromHex(address string) (addr ConsAddress, err error) {
 	if len(address) == 0 {
-		return addr, errors.New("decoding Bech32 address failed: must provide an address")
+		return ConsAddress{}, nil
 	}
 
 	bz, err := hex.DecodeString(address)
@@ -430,6 +428,10 @@ func ConsAddressFromHex(address string) (addr ConsAddress, err error) {
 		return nil, err
 	}
 
+	err = VerifyAddressFormat(bz)
+	if err != nil {
+		return nil, err
+	}
 	return ConsAddress(bz), nil
 }
 
@@ -491,7 +493,7 @@ func (ca *ConsAddress) Unmarshal(data []byte) error {
 	return nil
 }
 
-// MarshalJSON marshals to JSON using Bech32.
+// MarshalJSON marshals to JSON using Hex
 func (ca ConsAddress) MarshalJSON() ([]byte, error) {
 	return json.Marshal(ca.String())
 }
@@ -501,7 +503,7 @@ func (ca ConsAddress) MarshalYAML() (interface{}, error) {
 	return ca.String(), nil
 }
 
-// UnmarshalJSON unmarshals from JSON assuming Bech32 encoding.
+// UnmarshalJSON unmarshals from JSON assuming Hex encoding.
 func (ca *ConsAddress) UnmarshalJSON(data []byte) error {
 	var s string
 
@@ -510,7 +512,7 @@ func (ca *ConsAddress) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	ca2, err := ConsAddressFromBech32(s)
+	ca2, err := ConsAddressFromHex(s)
 	if err != nil {
 		return err
 	}
@@ -519,7 +521,7 @@ func (ca *ConsAddress) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// UnmarshalYAML unmarshals from YAML assuming Bech32 encoding.
+// UnmarshalYAML unmarshals from YAML assuming Hex encoding.
 func (ca *ConsAddress) UnmarshalYAML(data []byte) error {
 	var s string
 
@@ -528,7 +530,7 @@ func (ca *ConsAddress) UnmarshalYAML(data []byte) error {
 		return err
 	}
 
-	ca2, err := ConsAddressFromBech32(s)
+	ca2, err := ConsAddressFromHex(s)
 	if err != nil {
 		return err
 	}
@@ -547,15 +549,9 @@ func (ca ConsAddress) String() string {
 	if ca.Empty() {
 		return ""
 	}
+	str := hex.EncodeToString(ca.Bytes())
 
-	bech32PrefixConsAddr := GetConfig().GetBech32ConsensusAddrPrefix()
-
-	bech32Addr, err := bech32.ConvertAndEncode(bech32PrefixConsAddr, ca.Bytes())
-	if err != nil {
-		panic(err)
-	}
-
-	return bech32Addr
+	return str
 }
 
 // Format implements the fmt.Formatter interface.
@@ -575,6 +571,10 @@ func (ca ConsAddress) Format(s fmt.State, verb rune) {
 // auxiliary
 // ----------------------------------------------------------------------------
 
+func HexAccPub(pub crypto.PubKey) string {
+	return hex.EncodeToString(pub.Bytes())
+}
+
 // Bech32ifyAccPub returns a Bech32 encoded string containing the
 // Bech32PrefixAccPub prefix for a given account PubKey.
 func Bech32ifyAccPub(pub crypto.PubKey) (string, error) {
@@ -590,6 +590,10 @@ func MustBech32ifyAccPub(pub crypto.PubKey) string {
 	}
 
 	return enc
+}
+
+func HexValPub(pub crypto.PubKey) string {
+	return hex.EncodeToString(pub.Bytes())
 }
 
 // Bech32ifyValPub returns a Bech32 encoded string containing the
@@ -608,6 +612,9 @@ func MustBech32ifyValPub(pub crypto.PubKey) string {
 
 	return enc
 }
+func HexConsPub(pub crypto.PubKey) string {
+	return hex.EncodeToString(pub.Bytes())
+}
 
 // Bech32ifyConsPub returns a Bech32 encoded string containing the
 // Bech32PrefixConsPub prefixfor a given consensus node's PubKey.
@@ -625,6 +632,20 @@ func MustBech32ifyConsPub(pub crypto.PubKey) string {
 	}
 
 	return enc
+}
+func GetAccPubKeyHex(pubkey string) (pk crypto.PubKey, err error) {
+
+	bz, err := GetFromHex(pubkey)
+	if err != nil {
+		return nil, err
+	}
+	pk, err = cryptoAmino.PubKeyFromBytes(bz)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return pk, nil
 }
 
 // GetAccPubKeyBech32 creates a PubKey for an account with a given public key
@@ -655,6 +676,21 @@ func MustGetAccPubKeyBech32(pubkey string) (pk crypto.PubKey) {
 	return pk
 }
 
+func GetValPubKeyHex(pubkey string) (pk crypto.PubKey, err error) {
+
+	bz, err := GetFromHex(pubkey)
+	if err != nil {
+		return nil, err
+	}
+	pk, err = cryptoAmino.PubKeyFromBytes(bz)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return pk, nil
+}
+
 // GetValPubKeyBech32 creates a PubKey for a validator's operator with a given
 // public key string using the Bech32 Bech32PrefixValPub prefix.
 func GetValPubKeyBech32(pubkey string) (pk crypto.PubKey, err error) {
@@ -681,6 +717,21 @@ func MustGetValPubKeyBech32(pubkey string) (pk crypto.PubKey) {
 	}
 
 	return pk
+}
+
+func GetConsPubKeyHex(pubkey string) (pk crypto.PubKey, err error) {
+
+	bz, err := GetFromHex(pubkey)
+	if err != nil {
+		return nil, err
+	}
+	pk, err = cryptoAmino.PubKeyFromBytes(bz)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return pk, nil
 }
 
 // GetConsPubKeyBech32 creates a PubKey for a consensus node with a given public
@@ -724,6 +775,20 @@ func GetFromBech32(bech32str, prefix string) ([]byte, error) {
 
 	if hrp != prefix {
 		return nil, fmt.Errorf("invalid Bech32 prefix; expected %s, got %s", prefix, hrp)
+	}
+
+	return bz, nil
+}
+
+// GetFromHex decodes a bytestring from a Hex encoded string.
+func GetFromHex(hexString string) ([]byte, error) {
+	if len(hexString) == 0 {
+		return nil, errors.New("decoding hex address failed: must provide an address")
+	}
+
+	bz, err := hex.DecodeString(hexString)
+	if err != nil {
+		return nil, err
 	}
 
 	return bz, nil
