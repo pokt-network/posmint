@@ -109,7 +109,7 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, supplyKeeper types.Suppl
 	)
 	// update signing information from genesis state
 	for addr, info := range data.SigningInfos {
-		address, err := sdk.ConsAddressFromBech32(addr)
+		address, err := sdk.ConsAddressFromHex(addr)
 		if err != nil {
 			panic(err)
 		}
@@ -117,7 +117,7 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, supplyKeeper types.Suppl
 	}
 	// update missed block information from genesis state
 	for addr, array := range data.MissedBlocks {
-		address, err := sdk.ConsAddressFromBech32(addr)
+		address, err := sdk.ConsAddressFromHex(addr)
 		if err != nil {
 			panic(err)
 		}
