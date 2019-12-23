@@ -24,6 +24,7 @@ import (
 	sdk "github.com/pokt-network/posmint/types"
 )
 
+
 // nolint: deadcode unused
 var (
 	multiPerm    = "multiple permissions account"
@@ -51,7 +52,6 @@ func makeTestCodec() *codec.Codec {
 
 	return cdc
 }
-
 // nolint: deadcode unused
 func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64) (sdk.Context, []auth.Account, Keeper) {
 	keyAcc := sdk.NewKVStoreKey(auth.StoreKey)
@@ -81,6 +81,7 @@ func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64)
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName: nil,
 		types.StakedPoolName:  {supply.Burner, supply.Staking, supply.Minter},
+		types.DAOPoolName: {supply.Burner, supply.Staking, supply.Minter},
 	}
 	modAccAddrs := make(map[string]bool)
 	for acc := range maccPerms {
