@@ -129,3 +129,19 @@ func createTestAccs(ctx sdk.Context, numAccs int, initialCoins sdk.Coins, ak *au
 	}
 	return
 }
+
+func addMintedCoinsToModule(t *testing.T, ctx sdk.Context, k *Keeper, module string) {
+	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), sdk.NewInt(100)))
+	mintErr := k.supplyKeeper.MintCoins(ctx, module, coins.Add(coins))
+	if mintErr != nil {
+		t.Fail()
+	}
+}
+
+func sendFromModuleToAccount(t *testing.T, ctx sdk.Context ,k *Keeper, module string, address sdk.ValAddress, amount sdk.Int){
+	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), amount))
+	err := k.supplyKeeper.SendCoinsFromModuleToAccount(ctx, module, sdk.AccAddress(address),  coins)
+	if err != nil {
+		t.Fail()
+	}
+}

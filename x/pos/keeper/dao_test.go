@@ -52,18 +52,11 @@ func TestCoinsFromDAOToValidator(t *testing.T) {
 				}()
 				keeper.coinsFromDAOToValidator(context, types.Validator{Address: test.address}, test.amount)
 			default:
-				AddMintedCoins(t, context, &keeper)
+				addMintedCoinsToModule(t, context, &keeper, types.DAOPoolName)
 				keeper.coinsFromDAOToValidator(context, types.Validator{Address: test.address}, test.amount)
 				coins := keeper.coinKeeper.GetCoins(context, sdk.AccAddress(test.address))
 				assert.Equal(t, sdk.NewCoins(sdk.NewCoin(keeper.StakeDenom(context), test.amount)), coins, "coins should match")
 			}
 		})
-	}
-}
-func AddMintedCoins(t *testing.T, ctx sdk.Context, k *Keeper) {
-	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), sdk.NewInt(100)))
-	mintErr := k.supplyKeeper.MintCoins(ctx, types.DAOPoolName, coins.Add(coins))
-	if mintErr != nil {
-		t.Fail()
 	}
 }
