@@ -59,7 +59,7 @@ func (k Keeper) coinsFromUnstakedToStaked(ctx sdk.Context, validator types.Valid
 
 // burnStakedTokens removes coins from the staked pool module account
 func (k Keeper) burnStakedTokens(ctx sdk.Context, amt sdk.Int) sdk.Error {
-	if !amt.IsPositive() {
+	if !amt.IsPositive() { // TODO: return sdk Error for trying to burn a negative ammount
 		return nil
 	}
 	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), amt))
