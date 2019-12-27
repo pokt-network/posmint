@@ -2,9 +2,6 @@ package auth
 
 import (
 	"encoding/json"
-	"github.com/pokt-network/posmint/crypto/keys"
-	"github.com/tendermint/tendermint/node"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/pokt-network/posmint/codec"
@@ -51,8 +48,6 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 type AppModule struct {
 	AppModuleBasic
 	accountKeeper AccountKeeper
-	node          *node.Node
-	keybase       *keys.Keybase
 }
 
 // NewAppModule creates a new AppModule object
@@ -85,22 +80,6 @@ func (AppModule) QuerierRoute() string {
 // NewQuerierHandler module querier
 func (am AppModule) NewQuerierHandler() sdk.Querier {
 	return NewQuerier(am.accountKeeper)
-}
-
-func (am AppModule) SetTendermintNode(n *node.Node) {
-	am.node = n
-}
-
-func (am AppModule) GetTendermintNode() *node.Node {
-	return am.node
-}
-
-func (am AppModule) SetKeybase(k *keys.Keybase) {
-	am.keybase = k
-}
-
-func (am AppModule) GetKeybase() *keys.Keybase {
-	return am.keybase
 }
 
 // InitGenesis module init-genesis
