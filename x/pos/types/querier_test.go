@@ -2,6 +2,8 @@ package types
 
 import (
 	"github.com/pokt-network/posmint/types"
+	"github.com/tendermint/tendermint/crypto/ed25519"
+	"math/rand"
 	"reflect"
 	"testing"
 )
@@ -10,12 +12,16 @@ func TestNewQuerySigningInfoParams(t *testing.T) {
 	type args struct {
 		consAddr types.ConsAddress
 	}
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+	ca := types.ConsAddress(pub.Address())
+
 	tests := []struct {
 		name string
 		args args
 		want QuerySigningInfoParams
 	}{
-		// TODO: Add test cases.
+		{"default Test", args{ca}, QuerySigningInfoParams{ConsAddress: ca}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -36,7 +42,7 @@ func TestNewQuerySigningInfosParams(t *testing.T) {
 		args args
 		want QuerySigningInfosParams
 	}{
-		// TODO: Add test cases.
+		{"Default Test", args{limit: 1, page: 1}, QuerySigningInfosParams{Page: 1, Limit: 1}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -57,7 +63,7 @@ func TestNewQueryStakedValidatorsParams(t *testing.T) {
 		args args
 		want QueryStakedValidatorsParams
 	}{
-		// TODO: Add test cases.
+		{"Default Test", args{page: 1, limit: 1}, QueryStakedValidatorsParams{Page: 1, Limit: 1}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -78,7 +84,7 @@ func TestNewQueryUnstakedValidatorsParams(t *testing.T) {
 		args args
 		want QueryUnstakedValidatorsParams
 	}{
-		// TODO: Add test cases.
+		{"Default Test", args{page: 1, limit: 1}, QueryUnstakedValidatorsParams{Page: 1, Limit: 1}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -99,7 +105,7 @@ func TestNewQueryUnstakingValidatorsParams(t *testing.T) {
 		args args
 		want QueryUnstakingValidatorsParams
 	}{
-		// TODO: Add test cases.
+		{"Default Test", args{page: 1, limit: 1}, QueryUnstakingValidatorsParams{Page: 1, Limit: 1}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -114,12 +120,16 @@ func TestNewQueryValidatorParams(t *testing.T) {
 	type args struct {
 		validatorAddr types.ValAddress
 	}
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+	va := types.ValAddress(pub.Address())
+
 	tests := []struct {
 		name string
 		args args
 		want QueryValidatorParams
 	}{
-		// TODO: Add test cases.
+		{"default Test", args{va}, QueryValidatorParams{Address: va}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -140,7 +150,7 @@ func TestNewQueryValidatorsParams(t *testing.T) {
 		args args
 		want QueryValidatorsParams
 	}{
-		// TODO: Add test cases.
+		{"Default Test", args{page: 1, limit: 1}, QueryValidatorsParams{Page: 1, Limit: 1}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
