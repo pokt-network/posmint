@@ -5,6 +5,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
+	tmtypes "github.com/tendermint/tendermint/types"
 	"math/rand"
 	"reflect"
 	"testing"
@@ -53,12 +54,36 @@ func TestValidator_ABCIValidatorUpdate(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	tests := []struct {
 		name   string
 		fields fields
 		want   abci.ValidatorUpdate
 	}{
-		// TODO: Add test cases.
+		{"testingABCIValidatorUpdate Unbonded", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Unbonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, abci.ValidatorUpdate{
+			PubKey: tmtypes.TM2PB.PubKey(pub),
+			Power:  int64(0),
+		}},
+		{"testingABCIValidatorUpdate Bonded", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, abci.ValidatorUpdate{
+			PubKey: tmtypes.TM2PB.PubKey(pub),
+			Power:  int64(0),
+		}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -86,12 +111,36 @@ func TestValidator_ABCIValidatorUpdateZero(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	tests := []struct {
 		name   string
 		fields fields
 		want   abci.ValidatorUpdate
 	}{
-		// TODO: Add test cases.
+		{"testingABCIValidatorUpdate Unbonded", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Unbonded,
+			StakedTokens:            sdk.OneInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, abci.ValidatorUpdate{
+			PubKey: tmtypes.TM2PB.PubKey(pub),
+			Power:  int64(0),
+		}},
+		{"testingABCIValidatorUpdate Bonded", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.OneInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, abci.ValidatorUpdate{
+			PubKey: tmtypes.TM2PB.PubKey(pub),
+			Power:  int64(0),
+		}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -119,6 +168,9 @@ func TestValidator_AddStakedTokens(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	type args struct {
 		tokens sdk.Int
 	}
@@ -128,7 +180,22 @@ func TestValidator_AddStakedTokens(t *testing.T) {
 		args   args
 		want   Validator
 	}{
-		// TODO: Add test cases.
+		{"Default Add Token Test", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, args{tokens: sdk.NewInt(100)},
+			Validator{
+				Address:                 sdk.ValAddress(pub.Address()),
+				ConsPubKey:              pub,
+				Jailed:                  false,
+				Status:                  sdk.Bonded,
+				StakedTokens:            sdk.NewInt(100),
+				UnstakingCompletionTime: time.Time{},
+			}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -156,12 +223,22 @@ func TestValidator_ConsAddress(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	tests := []struct {
 		name   string
 		fields fields
 		want   sdk.ConsAddress
 	}{
-		// TODO: Add test cases.
+		{"Default Test", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, sdk.ConsAddress(pub.Address())},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -189,12 +266,30 @@ func TestValidator_ConsensusPower(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	tests := []struct {
 		name   string
 		fields fields
 		want   int64
 	}{
-		// TODO: Add test cases.
+		{"Default Test / 0 power", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, 0},
+		{"Default Test / 1 power", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.NewInt(1000000),
+			UnstakingCompletionTime: time.Time{},
+		}, 1},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -222,6 +317,9 @@ func TestValidator_Equals(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	type args struct {
 		v2 Validator
 	}
@@ -231,7 +329,36 @@ func TestValidator_Equals(t *testing.T) {
 		args   args
 		want   bool
 	}{
-		// TODO: Add test cases.
+		{"Default Test Equal", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, args{Validator{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}}, true},
+		{"Default Test Not Equal", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, args{Validator{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Unbonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -259,12 +386,23 @@ func TestValidator_GetAddress(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	tests := []struct {
 		name   string
 		fields fields
 		want   sdk.ValAddress
 	}{
-		// TODO: Add test cases.
+		{"Default Test", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, sdk.ValAddress(pub.Address())},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -292,12 +430,22 @@ func TestValidator_GetConsAddr(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	tests := []struct {
 		name   string
 		fields fields
 		want   sdk.ConsAddress
 	}{
-		// TODO: Add test cases.
+		{"Default Test", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, sdk.ConsAddress(pub.Address())},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -325,12 +473,22 @@ func TestValidator_GetConsPubKey(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	tests := []struct {
 		name   string
 		fields fields
 		want   crypto.PubKey
 	}{
-		// TODO: Add test cases.
+		{"Default Test", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, pub},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -358,12 +516,23 @@ func TestValidator_GetConsensusPower(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	tests := []struct {
 		name   string
 		fields fields
 		want   int64
 	}{
-		// TODO: Add test cases.
+		{"Default Test", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, 0},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -391,12 +560,23 @@ func TestValidator_GetStatus(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	tests := []struct {
 		name   string
 		fields fields
 		want   sdk.BondStatus
 	}{
-		// TODO: Add test cases.
+		{"Default Test", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, sdk.Bonded},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -424,12 +604,23 @@ func TestValidator_GetTokens(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	tests := []struct {
 		name   string
 		fields fields
 		want   sdk.Int
 	}{
-		// TODO: Add test cases.
+		{"Default Test", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, sdk.ZeroInt()},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -457,12 +648,23 @@ func TestValidator_IsJailed(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	tests := []struct {
 		name   string
 		fields fields
 		want   bool
 	}{
-		// TODO: Add test cases.
+		{"Default Test", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -490,12 +692,39 @@ func TestValidator_IsStaked(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	tests := []struct {
 		name   string
 		fields fields
 		want   bool
 	}{
-		// TODO: Add test cases.
+		{"Default Test / bonded true", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, true},
+		{"Default Test / Unbonding false", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Unbonding,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, false},
+		{"Default Test / Unbonded false", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Unbonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -523,12 +752,39 @@ func TestValidator_IsUnstaked(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	tests := []struct {
 		name   string
 		fields fields
 		want   bool
 	}{
-		// TODO: Add test cases.
+		{"Default Test / bonded false", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, false},
+		{"Default Test / Unbonding false", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Unbonding,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, false},
+		{"Default Test / Unbonded true", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Unbonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -556,12 +812,39 @@ func TestValidator_IsUnstaking(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	tests := []struct {
 		name   string
 		fields fields
 		want   bool
 	}{
-		// TODO: Add test cases.
+		{"Default Test / bonded false", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, false},
+		{"Default Test / Unbonding true", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Unbonding,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, true},
+		{"Default Test / Unbonded false", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Unbonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -589,12 +872,23 @@ func TestValidator_PotentialConsensusPower(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	tests := []struct {
 		name   string
 		fields fields
 		want   int64
 	}{
-		// TODO: Add test cases.
+		{"Default Test / potential power 0", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, 0},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -622,6 +916,10 @@ func TestValidator_RemoveStakedTokens(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	type args struct {
 		tokens sdk.Int
 	}
@@ -631,7 +929,36 @@ func TestValidator_RemoveStakedTokens(t *testing.T) {
 		args   args
 		want   Validator
 	}{
-		// TODO: Add test cases.
+		{"Remove 0 tokens having 0 tokens ", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, args{tokens: sdk.ZeroInt()}, Validator{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}},
+		{"Remove 99 tokens having 100 tokens ", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.NewInt(100),
+			UnstakingCompletionTime: time.Time{},
+		}, args{tokens: sdk.NewInt(99)}, Validator{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.OneInt(),
+			UnstakingCompletionTime: time.Time{},
+		}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -659,6 +986,10 @@ func TestValidator_UpdateStatus(t *testing.T) {
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
+
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	type args struct {
 		newStatus sdk.BondStatus
 	}
@@ -668,7 +999,51 @@ func TestValidator_UpdateStatus(t *testing.T) {
 		args   args
 		want   Validator
 	}{
-		// TODO: Add test cases.
+		{"Test Bonded -> Unbonding", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, args{newStatus: sdk.Unbonding}, Validator{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Unbonding,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}},
+		{"Test Unbonding -> Unbonded", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Unbonding,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, args{newStatus: sdk.Unbonded}, Validator{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Unbonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}},
+		{"Test Unbonded -> Bonded", fields{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Unbonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}, args{newStatus: sdk.Bonded}, Validator{
+			Address:                 sdk.ValAddress(pub.Address()),
+			ConsPubKey:              pub,
+			Jailed:                  false,
+			Status:                  sdk.Bonded,
+			StakedTokens:            sdk.ZeroInt(),
+			UnstakingCompletionTime: time.Time{},
+		}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

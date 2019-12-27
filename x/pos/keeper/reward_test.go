@@ -153,11 +153,11 @@ func TestMint(t *testing.T) {
 	}
 
 	tests := []struct {
-		name               string
+		name   string
 		amount sdk.Int
 	}{
 		{
-			name:               "mints a coin",
+			name:   "mints a coin",
 			amount: sdk.NewInt(90),
 		},
 	}
