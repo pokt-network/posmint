@@ -1,9 +1,7 @@
 package types
 
 import (
-	"github.com/pokt-network/posmint/codec"
 	"github.com/pokt-network/posmint/types"
-	"github.com/pokt-network/posmint/x/params"
 	"reflect"
 	"testing"
 	"time"
@@ -14,33 +12,24 @@ func TestDefaultParams(t *testing.T) {
 		name string
 		want Params
 	}{
-		// TODO: Add test cases.
+		{"Default Test", Params{
+			UnstakingTime:            DefaultUnstakingTime,
+			MaxValidators:            DefaultMaxValidators,
+			StakeMinimum:             DefaultMinStake,
+			StakeDenom:               types.DefaultBondDenom,
+			ProposerRewardPercentage: DefaultBaseProposerAwardPercentage,
+			MaxEvidenceAge:           DefaultMaxEvidenceAge,
+			SignedBlocksWindow:       DefaultSignedBlocksWindow,
+			MinSignedPerWindow:       DefaultMinSignedPerWindow,
+			DowntimeJailDuration:     DefaultDowntimeJailDuration,
+			SlashFractionDoubleSign:  DefaultSlashFractionDoubleSign,
+			SlashFractionDowntime:    DefaultSlashFractionDowntime,
+		}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := DefaultParams(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("DefaultParams() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestMustUnmarshalParams(t *testing.T) {
-	type args struct {
-		cdc   *codec.Codec
-		value []byte
-	}
-	tests := []struct {
-		name string
-		args args
-		want Params
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := MustUnmarshalParams(tt.args.cdc, tt.args.value); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("MustUnmarshalParams() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -69,7 +58,54 @@ func TestParams_Equal(t *testing.T) {
 		args   args
 		want   bool
 	}{
-		// TODO: Add test cases.
+		{"Default Test Equal", fields{
+			UnstakingTime:            0,
+			MaxValidators:            0,
+			StakeDenom:               "",
+			StakeMinimum:             0,
+			ProposerRewardPercentage: 0,
+			MaxEvidenceAge:           0,
+			SignedBlocksWindow:       0,
+			MinSignedPerWindow:       types.Dec{},
+			DowntimeJailDuration:     0,
+			SlashFractionDoubleSign:  types.Dec{},
+			SlashFractionDowntime:    types.Dec{},
+		}, args{Params{
+			UnstakingTime:            0,
+			MaxValidators:            0,
+			StakeDenom:               "",
+			StakeMinimum:             0,
+			ProposerRewardPercentage: 0,
+			MaxEvidenceAge:           0,
+			SignedBlocksWindow:       0,
+			MinSignedPerWindow:       types.Dec{},
+			DowntimeJailDuration:     0,
+			SlashFractionDoubleSign:  types.Dec{},
+			SlashFractionDowntime:    types.Dec{}}}, true},
+		{"Default Test False", fields{
+			UnstakingTime:            0,
+			MaxValidators:            0,
+			StakeDenom:               "",
+			StakeMinimum:             0,
+			ProposerRewardPercentage: 0,
+			MaxEvidenceAge:           0,
+			SignedBlocksWindow:       0,
+			MinSignedPerWindow:       types.Dec{},
+			DowntimeJailDuration:     0,
+			SlashFractionDoubleSign:  types.Dec{},
+			SlashFractionDowntime:    types.Dec{},
+		}, args{Params{
+			UnstakingTime:            0,
+			MaxValidators:            0,
+			StakeDenom:               "",
+			StakeMinimum:             0,
+			ProposerRewardPercentage: 0,
+			MaxEvidenceAge:           1,
+			SignedBlocksWindow:       0,
+			MinSignedPerWindow:       types.Dec{},
+			DowntimeJailDuration:     0,
+			SlashFractionDoubleSign:  types.Dec{},
+			SlashFractionDowntime:    types.Dec{}}}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -88,92 +124,6 @@ func TestParams_Equal(t *testing.T) {
 			}
 			if got := p.Equal(tt.args.p2); got != tt.want {
 				t.Errorf("Equal() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestParams_ParamSetPairs(t *testing.T) {
-	type fields struct {
-		UnstakingTime            time.Duration
-		MaxValidators            uint64
-		StakeDenom               string
-		StakeMinimum             int64
-		ProposerRewardPercentage int8
-		MaxEvidenceAge           time.Duration
-		SignedBlocksWindow       int64
-		MinSignedPerWindow       types.Dec
-		DowntimeJailDuration     time.Duration
-		SlashFractionDoubleSign  types.Dec
-		SlashFractionDowntime    types.Dec
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   params.ParamSetPairs
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			p := &Params{
-				UnstakingTime:            tt.fields.UnstakingTime,
-				MaxValidators:            tt.fields.MaxValidators,
-				StakeDenom:               tt.fields.StakeDenom,
-				StakeMinimum:             tt.fields.StakeMinimum,
-				ProposerRewardPercentage: tt.fields.ProposerRewardPercentage,
-				MaxEvidenceAge:           tt.fields.MaxEvidenceAge,
-				SignedBlocksWindow:       tt.fields.SignedBlocksWindow,
-				MinSignedPerWindow:       tt.fields.MinSignedPerWindow,
-				DowntimeJailDuration:     tt.fields.DowntimeJailDuration,
-				SlashFractionDoubleSign:  tt.fields.SlashFractionDoubleSign,
-				SlashFractionDowntime:    tt.fields.SlashFractionDowntime,
-			}
-			if got := p.ParamSetPairs(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ParamSetPairs() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestParams_String(t *testing.T) {
-	type fields struct {
-		UnstakingTime            time.Duration
-		MaxValidators            uint64
-		StakeDenom               string
-		StakeMinimum             int64
-		ProposerRewardPercentage int8
-		MaxEvidenceAge           time.Duration
-		SignedBlocksWindow       int64
-		MinSignedPerWindow       types.Dec
-		DowntimeJailDuration     time.Duration
-		SlashFractionDoubleSign  types.Dec
-		SlashFractionDowntime    types.Dec
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		want   string
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			p := Params{
-				UnstakingTime:            tt.fields.UnstakingTime,
-				MaxValidators:            tt.fields.MaxValidators,
-				StakeDenom:               tt.fields.StakeDenom,
-				StakeMinimum:             tt.fields.StakeMinimum,
-				ProposerRewardPercentage: tt.fields.ProposerRewardPercentage,
-				MaxEvidenceAge:           tt.fields.MaxEvidenceAge,
-				SignedBlocksWindow:       tt.fields.SignedBlocksWindow,
-				MinSignedPerWindow:       tt.fields.MinSignedPerWindow,
-				DowntimeJailDuration:     tt.fields.DowntimeJailDuration,
-				SlashFractionDoubleSign:  tt.fields.SlashFractionDoubleSign,
-				SlashFractionDowntime:    tt.fields.SlashFractionDowntime,
-			}
-			if got := p.String(); got != tt.want {
-				t.Errorf("String() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -198,7 +148,45 @@ func TestParams_Validate(t *testing.T) {
 		fields  fields
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{"Default Validation Test / Wrong All Parameters", fields{
+			UnstakingTime:            0,
+			MaxValidators:            0,
+			StakeDenom:               "",
+			StakeMinimum:             0,
+			ProposerRewardPercentage: 0,
+			MaxEvidenceAge:           0,
+			SignedBlocksWindow:       0,
+			MinSignedPerWindow:       types.Dec{},
+			DowntimeJailDuration:     0,
+			SlashFractionDoubleSign:  types.Dec{},
+			SlashFractionDowntime:    types.Dec{},
+		}, true},
+		{"Default Validation Test / Wrong StakeDenom", fields{
+			UnstakingTime:            0,
+			MaxValidators:            2,
+			StakeDenom:               "",
+			StakeMinimum:             2,
+			ProposerRewardPercentage: 1,
+			MaxEvidenceAge:           0,
+			SignedBlocksWindow:       0,
+			MinSignedPerWindow:       types.Dec{},
+			DowntimeJailDuration:     0,
+			SlashFractionDoubleSign:  types.Dec{},
+			SlashFractionDowntime:    types.Dec{},
+		}, true},
+		{"Default Validation Test / Valid", fields{
+			UnstakingTime:            0,
+			MaxValidators:            1000,
+			StakeDenom:               "3",
+			StakeMinimum:             1,
+			ProposerRewardPercentage: 100,
+			MaxEvidenceAge:           0,
+			SignedBlocksWindow:       0,
+			MinSignedPerWindow:       types.Dec{},
+			DowntimeJailDuration:     0,
+			SlashFractionDoubleSign:  types.Dec{},
+			SlashFractionDowntime:    types.Dec{},
+		}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -217,33 +205,6 @@ func TestParams_Validate(t *testing.T) {
 			}
 			if err := p.Validate(); (err != nil) != tt.wantErr {
 				t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestUnmarshalParams(t *testing.T) {
-	type args struct {
-		cdc   *codec.Codec
-		value []byte
-	}
-	tests := []struct {
-		name       string
-		args       args
-		wantParams Params
-		wantErr    bool
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotParams, err := UnmarshalParams(tt.args.cdc, tt.args.value)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("UnmarshalParams() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(gotParams, tt.wantParams) {
-				t.Errorf("UnmarshalParams() gotParams = %v, want %v", gotParams, tt.wantParams)
 			}
 		})
 	}
