@@ -2,9 +2,6 @@ package supply
 
 import (
 	"encoding/json"
-	"github.com/pokt-network/posmint/crypto/keys"
-	"github.com/tendermint/tendermint/node"
-
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/pokt-network/posmint/codec"
@@ -51,8 +48,6 @@ type AppModule struct {
 	AppModuleBasic
 	keeper  Keeper
 	ak      types.AccountKeeper
-	node    *node.Node
-	keybase *keys.Keybase
 }
 
 // NewAppModule creates a new AppModule object
@@ -67,22 +62,6 @@ func NewAppModule(keeper Keeper, ak types.AccountKeeper) AppModule {
 // module name
 func (AppModule) Name() string {
 	return ModuleName
-}
-
-func (am AppModule) SetTendermintNode(n *node.Node) {
-	am.node = n
-}
-
-func (am AppModule) GetTendermintNode() *node.Node {
-	return am.node
-}
-
-func (am AppModule) SetKeybase(k *keys.Keybase) {
-	am.keybase = k
-}
-
-func (am AppModule) GetKeybase() *keys.Keybase {
-	return am.keybase
 }
 
 // register invariants
