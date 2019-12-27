@@ -35,12 +35,28 @@ func TestNewGenesisState(t *testing.T) {
 		signingInfos     map[string]ValidatorSigningInfo
 		missedBlocks     map[string][]MissedBlock
 	}
+	ca, _ := types.ConsAddressFromHex("ABCDEFGHIJK")
+
 	tests := []struct {
 		name string
 		args args
 		want GenesisState
 	}{
-		// TODO: Add test cases.
+		{"Default Change State Test", args{
+			params:           DefaultParams(),
+			validators:       nil,
+			dao:              DAOPool(NewPool(types.ZeroInt())),
+			previousProposer: ca,
+			signingInfos:     make(map[string]ValidatorSigningInfo),
+			missedBlocks:     make(map[string][]MissedBlock)},
+			GenesisState{
+				Params:           DefaultParams(),
+				Validators:       nil,
+				DAO:              DAOPool(NewPool(types.ZeroInt())),
+				SigningInfos:     make(map[string]ValidatorSigningInfo),
+				MissedBlocks:     make(map[string][]MissedBlock),
+				PreviousProposer: ca,
+			}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
