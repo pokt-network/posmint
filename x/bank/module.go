@@ -2,9 +2,6 @@ package bank
 
 import (
 	"encoding/json"
-	"github.com/pokt-network/posmint/crypto/keys"
-	"github.com/tendermint/tendermint/node"
-
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/types/module"
@@ -48,8 +45,6 @@ type AppModule struct {
 	AppModuleBasic
 	keeper        Keeper
 	accountKeeper types.AccountKeeper
-	node          *node.Node
-	keybase       *keys.Keybase
 }
 
 // NewAppModule creates a new AppModule object
@@ -77,22 +72,6 @@ func (am AppModule) NewHandler() sdk.Handler { return NewHandler(am.keeper) }
 
 // module querier route name
 func (AppModule) QuerierRoute() string { return RouterKey }
-
-func (am AppModule) SetTendermintNode(n *node.Node) {
-	am.node = n
-}
-
-func (am AppModule) GetTendermintNode() *node.Node {
-	return am.node
-}
-
-func (am AppModule) SetKeybase(k *keys.Keybase) {
-	am.keybase = k
-}
-
-func (am AppModule) GetKeybase() *keys.Keybase {
-	return am.keybase
-}
 
 // module querier
 func (am AppModule) NewQuerierHandler() sdk.Querier {
