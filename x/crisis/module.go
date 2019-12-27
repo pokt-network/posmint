@@ -53,8 +53,6 @@ type AppModule struct {
 	// manager is created, the invariants can be properly registered and
 	// executed.
 	keeper  *keeper.Keeper
-	node    *node.Node
-	keybase *keys.Keybase
 }
 
 // NewAppModule creates a new AppModule object
@@ -81,22 +79,6 @@ func (AppModule) Route() string {
 // NewHandler returns an sdk.Handler for the crisis module.
 func (am AppModule) NewHandler() sdk.Handler {
 	return NewHandler(*am.keeper)
-}
-
-func (am AppModule) SetTendermintNode(n *node.Node) {
-	am.node = n
-}
-
-func (am AppModule) GetTendermintNode() *node.Node {
-	return am.node
-}
-
-func (am AppModule) SetKeybase(k *keys.Keybase) {
-	am.keybase = k
-}
-
-func (am AppModule) GetKeybase() *keys.Keybase {
-	return am.keybase
 }
 
 // QuerierRoute returns no querier route.

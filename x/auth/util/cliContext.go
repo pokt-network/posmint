@@ -7,7 +7,6 @@ import (
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	cmn "github.com/tendermint/tendermint/libs/common"
-	"github.com/tendermint/tendermint/node"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
 )
 
@@ -25,9 +24,9 @@ type CLIContext struct { // TODO consider module passing clicontext instead of n
 // NewCLIContext returns a new initialized CLIContext with parameters from the
 // command line using Viper. It takes a key name or address and populates the FromName and
 // FromAddress field accordingly.
-func NewCLIContext(node *node.Node, fromAddress sdk.AccAddress, passphrase string) CLIContext {
+func NewCLIContext(node rpcclient.Client, fromAddress sdk.AccAddress, passphrase string) CLIContext {
 	return CLIContext{
-		Client:      rpcclient.NewLocal(node),
+		Client:      node,
 		Passphrase:  passphrase,
 		FromAddress: fromAddress,
 	}
