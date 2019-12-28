@@ -157,31 +157,31 @@ func TestMint(t *testing.T) {
 		name   string
 		amount sdk.Int
 		expected string
-		address sdk.ValAddress
-		panics bool
+		address  sdk.ValAddress
+		panics   bool
 	}{
 		{
 			name:   "mints a coin",
 			amount: sdk.NewInt(90),
 			expected: fmt.Sprintf("was successfully minted to %s", validatorAddress.String()),
-			address: validatorAddress,
-			panics: false,
+			address:  validatorAddress,
+			panics:   false,
 		},
 		{
-			name:               "panics invalid ammount of coins",
-			amount: sdk.NewInt(-1),
+			name:     "panics invalid ammount of coins",
+			amount:   sdk.NewInt(-1),
 			expected: fmt.Sprintf("negative coin amount: -1"),
-			address: validatorAddress,
-			panics: true,
+			address:  validatorAddress,
+			panics:   true,
 		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			context, _, keeper := createTestInput(t, true, initialPower, nAccs)
 
-			switch test.panics{
+			switch test.panics {
 			case true:
-				defer func () {
+				defer func() {
 					err := recover().(error)
 					assert.Contains(t, err.Error(), test.expected, "error does not match")
 				}()
@@ -195,4 +195,3 @@ func TestMint(t *testing.T) {
 		})
 	}
 }
-
