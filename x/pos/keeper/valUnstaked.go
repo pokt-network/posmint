@@ -119,6 +119,7 @@ func (k Keeper) unstakeAllMatureValidators(ctx sdk.Context) {
 				panic(err)
 			}
 		}
-		store.Delete(unstakingValidatorsIterator.Key())
+		key := unstakingValidatorsIterator.Key()
+		store.Delete(key)
 	}
 }
