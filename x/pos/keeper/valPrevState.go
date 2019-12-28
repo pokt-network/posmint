@@ -7,7 +7,6 @@ import (
 	"github.com/pokt-network/posmint/x/pos/types"
 )
 
-
 // Load the prevState total validator power.
 func (k Keeper) PrevStateValidatorsPower(ctx sdk.Context) (power sdk.Int) {
 	store := ctx.KVStore(k.storeKey)

@@ -1,9 +1,12 @@
 package keeper
 
 import (
+	"bytes"
+	"encoding/hex"
 	"github.com/pokt-network/posmint/types/module"
 	"github.com/pokt-network/posmint/x/supply"
 	"github.com/tendermint/tendermint/crypto/ed25519"
+	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -23,7 +26,6 @@ import (
 
 	sdk "github.com/pokt-network/posmint/types"
 )
-
 
 // nolint: deadcode unused
 var (
@@ -52,6 +54,7 @@ func makeTestCodec() *codec.Codec {
 
 	return cdc
 }
+
 // nolint: deadcode unused
 func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64) (sdk.Context, []auth.Account, Keeper) {
 	keyAcc := sdk.NewKVStoreKey(auth.StoreKey)
@@ -81,7 +84,7 @@ func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64)
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName: nil,
 		types.StakedPoolName:  {supply.Burner, supply.Staking, supply.Minter},
-		types.DAOPoolName: {supply.Burner, supply.Staking, supply.Minter},
+		types.DAOPoolName:     {supply.Burner, supply.Staking, supply.Minter},
 	}
 	modAccAddrs := make(map[string]bool)
 	for acc := range maccPerms {
@@ -138,10 +141,40 @@ func addMintedCoinsToModule(t *testing.T, ctx sdk.Context, k *Keeper, module str
 	}
 }
 
-func sendFromModuleToAccount(t *testing.T, ctx sdk.Context ,k *Keeper, module string, address sdk.ValAddress, amount sdk.Int){
+func sendFromModuleToAccount(t *testing.T, ctx sdk.Context, k *Keeper, module string, address sdk.ValAddress, amount sdk.Int) {
 	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), amount))
-	err := k.supplyKeeper.SendCoinsFromModuleToAccount(ctx, module, sdk.AccAddress(address),  coins)
+	err := k.supplyKeeper.SendCoinsFromModuleToAccount(ctx, module, sdk.AccAddress(address), coins)
 	if err != nil {
 		t.Fail()
+	}
+}
+
+func getRandomValidatorAddress() sdk.ValAddress {
+	baseAddressBytes := []byte("abcdefghijklmnopqrst")
+	shiftBytes := []byte("qrstuvwxyz")
+
+	addressBytes := bytes.Replace(baseAddressBytes, []byte("t"), []byte(string(shiftBytes[rand.Intn(9)])), 1)
+	hexBytes := hex.EncodeToString(addressBytes)
+	validatorAddress, err := sdk.ValAddressFromHex(hexBytes)
+	if err != nil {
+		panic(err)
+	}
+	return validatorAddress
+}
+
+func getBoundedValdiator() types.Validator {
+	return types.Validator{
+		Address:      getRandomValidatorAddress(),
+		StakedTokens: sdk.NewInt(100),
+		Jailed:       false,
+		Status:       sdk.Bonded,
+	}
+}
+func getUnboundedValidator() types.Validator {
+	return types.Validator{
+		Address:      getRandomValidatorAddress(),
+		StakedTokens: sdk.NewInt(100),
+		Jailed:       false,
+		Status:       sdk.Unbonded,
 	}
 }

@@ -15,19 +15,19 @@ func TestGetMissedArray(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	tests := []struct{
-		name string
+	tests := []struct {
+		name     string
 		expected bool
-		address sdk.ConsAddress
+		address  sdk.ConsAddress
 	}{
 		{
-			name: "gets missed block array",
-			address: consAddr,
+			name:     "gets missed block array",
+			address:  consAddr,
 			expected: true,
 		},
 		{
-			name: "gets missed block array",
-			address: consAddr,
+			name:     "gets missed block array",
+			address:  consAddr,
 			expected: false,
 		},
 	}
@@ -40,7 +40,7 @@ func TestGetMissedArray(t *testing.T) {
 	}
 }
 
-func TestClearMissedArray(t *testing.T){
+func TestClearMissedArray(t *testing.T) {
 	initialPower := int64(100)
 	nAccs := int64(4)
 	addressBytes := []byte("abcdefghijklmnopqrst")
@@ -48,14 +48,14 @@ func TestClearMissedArray(t *testing.T){
 	if err != nil {
 		panic(err)
 	}
-	tests := []struct{
-		name string
+	tests := []struct {
+		name     string
 		expected bool
-		address sdk.ConsAddress
+		address  sdk.ConsAddress
 	}{
 		{
-			name: "gets missed block array",
-			address: consAddr,
+			name:     "gets missed block array",
+			address:  consAddr,
 			expected: false,
 		},
 	}
