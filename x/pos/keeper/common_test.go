@@ -163,18 +163,38 @@ func getRandomValidatorAddress() sdk.ValAddress {
 }
 
 func getBoundedValdiator() types.Validator {
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	return types.Validator{
 		Address:      getRandomValidatorAddress(),
 		StakedTokens: sdk.NewInt(100),
+		ConsPubKey:   pub,
 		Jailed:       false,
 		Status:       sdk.Bonded,
 	}
 }
 func getUnboundedValidator() types.Validator {
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
 	return types.Validator{
 		Address:      getRandomValidatorAddress(),
 		StakedTokens: sdk.NewInt(100),
+		ConsPubKey:   pub,
 		Jailed:       false,
 		Status:       sdk.Unbonded,
+	}
+}
+func getUnboundingValidator() types.Validator {
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+
+	return types.Validator{
+		Address:      getRandomValidatorAddress(),
+		StakedTokens: sdk.NewInt(100),
+		ConsPubKey:   pub,
+		Jailed:       false,
+		Status:       sdk.Unbonding,
 	}
 }
