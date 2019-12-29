@@ -11,6 +11,7 @@ require (
 	github.com/spf13/cobra v0.0.5 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/stumble/gorocksdb v0.0.3 // indirect
+	github.com/syndtr/goleveldb v1.0.1-0.20190318030020-c3a204f8e965
 	github.com/tendermint/crypto v0.0.0-20191022145703-50d29ede1e15
 	github.com/tendermint/go-amino v0.15.0
 	github.com/tendermint/iavl v0.12.4

@@ -95,7 +95,8 @@ func (k Keeper) getPrevStatePowerMap(ctx sdk.Context) valPowerMap {
 	for ; iterator.Valid(); iterator.Next() {
 		var valAddr [sdk.AddrLen]byte
 		// extract the validator address from the key (prefix is 1-byte)
-		copy(valAddr[:], iterator.Key()[1:])
+		key := iterator.Key()
+		copy(valAddr[:], key[1:])
 		// power bytes is just the value
 		powerBytes := iterator.Value()
 		prevState[valAddr] = make([]byte, len(powerBytes))
