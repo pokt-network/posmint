@@ -308,9 +308,8 @@ func (k Keeper) burnValidators(ctx sdk.Context) {
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		severity := sdk.Dec{}
-		address := sdk.ValAddress{}
+		address := sdk.ValAddress(types.AddressFromKey(iterator.Key()))
 		amino.MustUnmarshalBinaryBare(iterator.Value(), &severity)
-		k.cdc.MustUnmarshalBinaryLengthPrefixed(iterator.Key(), address)
 		val := k.mustGetValidator(ctx, address)
 		k.slash(ctx, sdk.ConsAddress(address), ctx.BlockHeight(), val.ConsensusPower(), severity)
 		// remove from the burn store
