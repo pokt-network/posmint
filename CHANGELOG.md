@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add unit tests for Keybase and Lazy Keybase [#14]
 
 ### Changed
+- Updated latest changes to this document [#47]
 - Changing Bech32 to Hex [#35]
 - Refactor client [#11]
 - Refactor crypto/keys [#10]
@@ -28,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove CLI and RPC functionality [#3]
 
 ### Fixed
+- Fix Multiple Tests related to x/pos/keepers [#43,#44,#48,#49,#52]
+- Fix ValidateDoubleSign tests [#41]
 - Init Genesis never called if genesis.json isn't completely filled out [#33]
 - Undesirable "negative coin amount" in DecCoin's Sub[#24]
 - Uint.LTE() BUG [#22]
