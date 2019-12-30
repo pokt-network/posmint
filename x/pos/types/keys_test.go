@@ -22,8 +22,8 @@ func TestAddressFromPrevStateValidatorPowerKey(t *testing.T) {
 	}{{"sampleByteArray", args{key: []byte{0x51, 0x41, 0x33}}, []byte{0x41, 0x33}}}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := AddressFromPrevStateValidatorPowerKey(tt.args.key); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("AddressFromPrevStateValidatorPowerKey() = %v, want %v", got, tt.want)
+			if got := AddressFromKey(tt.args.key); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("AddressFromKey() = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -10,7 +10,7 @@ import (
 )
 
 func TestGetAndSetValidatorBurn(t *testing.T) {
-	boundedValidator := getBoundedValdiator()
+	boundedValidator := getBondedValidator()
 
 	type args struct {
 		amount    sdk.Dec
@@ -55,7 +55,7 @@ func TestGetAndSetValidatorBurn(t *testing.T) {
 }
 
 func TestDeleteValidatorBurn(t *testing.T) {
-	boundedValidator := getBoundedValdiator()
+	boundedValidator := getBondedValidator()
 	var emptyCoins sdk.Dec
 
 	type args struct {
@@ -93,7 +93,7 @@ func TestDeleteValidatorBurn(t *testing.T) {
 }
 
 func TestGetAndSetAddrPubKeyRelation(t *testing.T) {
-	boundedValidator := getBoundedValdiator()
+	boundedValidator := getBondedValidator()
 
 	type args struct {
 		validator types.Validator
@@ -140,7 +140,7 @@ func TestGetAndSetAddrPubKeyRelation(t *testing.T) {
 }
 
 func TestDeleteAddrPubKeyRelation(t *testing.T) {
-	boundedValidator := getBoundedValdiator()
+	boundedValidator := getBondedValidator()
 
 	type args struct {
 		validator types.Validator
@@ -179,7 +179,7 @@ func TestDeleteAddrPubKeyRelation(t *testing.T) {
 }
 
 func TestHandleValidatorSignature(t *testing.T) {
-	boundedValidator := getBoundedValdiator()
+	boundedValidator := getBondedValidator()
 
 	type args struct {
 		validator        types.Validator
@@ -290,7 +290,7 @@ func TestHandleValidatorSignature(t *testing.T) {
 }
 
 func TestValidateDoubleSign(t *testing.T) {
-	boundedValidator := getBoundedValdiator()
+	boundedValidator := getBondedValidator()
 
 	type args struct {
 		validator        types.Validator
@@ -379,7 +379,7 @@ func TestValidateDoubleSign(t *testing.T) {
 }
 
 func TestHandleDoubleSign(t *testing.T) {
-	boundedValidator := getBoundedValdiator()
+	boundedValidator := getBondedValidator()
 	supplySize := sdk.NewInt(100)
 
 	type args struct {
@@ -486,8 +486,8 @@ func TestHandleDoubleSign(t *testing.T) {
 }
 
 func TestValidateSlash(t *testing.T) {
-	boundedValidator := getBoundedValdiator()
-	unboundedValidator := getUnboundedValidator()
+	boundedValidator := getBondedValidator()
+	unboundedValidator := getUnbondedValidator()
 	supplySize := sdk.NewInt(100)
 
 	type args struct {
@@ -634,7 +634,7 @@ func TestValidateSlash(t *testing.T) {
 }
 
 func TestSlash(t *testing.T) {
-	boundedValidator := getBoundedValdiator()
+	boundedValidator := getBondedValidator()
 	supplySize := sdk.NewInt(100)
 
 	type args struct {
@@ -718,59 +718,52 @@ func TestSlash(t *testing.T) {
 	}
 }
 
-//func TestBurnValidators(t *testing.T) {
-//	initialPower := int64(100)
-//	nAccs := int64(4)
-//	primaryBoundedValidator := getBoundedValdiator()
-//	supplySize := sdk.NewInt(100)
-//
-//	type args struct {
-//		amount             sdk.Dec
-//		validator   types.Validator
-//	}
-//	type expected struct {
-//		amount             sdk.Dec
-//		found              bool
-//		validator   types.Validator
-//	}
-//	tests := []struct {
-//		name string
-//		args
-//		expected
-//	}{
-//		{
-//			name: "can get and set validator burn",
-//			args: args{
-//				amount:             sdk.NewDec(10),
-//				validator:   primaryBoundedValidator,
-//			},
-//			expected: expected{
-//				amount:             sdk.NewDec(0),
-//				found:              true,
-//				validator:   primaryBoundedValidator,
-//			},
-//		},
-//	}
-//	for _, test := range tests {
-//		t.Run(test.name, func(t *testing.T) {
-//			context, _, keeper := createTestInput(t, true, initialPower, nAccs)
-//			keeper.SetValidator(context, test.args.validator)
-//			keeper.SetValidatorByConsAddr(context, test.args.validator)
-//
-//			addMintedCoinsToModule(t, context, &keeper, types.StakedPoolName)
-//			sendFromModuleToAccount(t, context, &keeper, types.StakedPoolName, test.args.validator.Address, supplySize)
-//
-//			keeper.setValidatorBurn(context, test.args.amount, test.args.validator.Address)
-//			keeper.burnValidators(context)
-//
-//			primaryCryptoAddr := test.args.validator.GetConsPubKey().Address()
-//
-//			primaryValidator, found := keeper.GetValidatorByConsAddr(context, sdk.ConsAddress(primaryCryptoAddr))
-//			if !found {
-//				t.Fail()
-//			}
-//			assert.Equal(t, test.expected.amount, primaryValidator.StakedTokens)
-//		})
-//	}
-//}
-//
+func TestBurnValidators(t *testing.T) {
+	primaryBoundedValidator := getBondedValidator()
+
+	type args struct {
+		amount             sdk.Dec
+		validator   types.Validator
+	}
+	type expected struct {
+		amount             sdk.Dec
+		found              bool
+		validator   types.Validator
+	}
+	tests := []struct {
+		name string
+		args
+		expected
+	}{
+		{
+			name: "can get and set validator burn",
+			args: args{
+				amount:             sdk.NewDec(100),
+				validator:   primaryBoundedValidator,
+			},
+			expected: expected{
+				amount:             sdk.NewDec(0),
+				found:              true,
+				validator:   primaryBoundedValidator,
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			context, _, keeper := createTestInput(t, true)
+			keeper.SetValidator(context, test.args.validator)
+			keeper.SetValidatorByConsAddr(context, test.args.validator)
+			keeper.setValidatorBurn(context, test.args.amount, test.args.validator.Address)
+			keeper.burnValidators(context)
+
+			primaryCryptoAddr := test.args.validator.GetConsPubKey().Address()
+
+			primaryValidator, found := keeper.GetValidatorByConsAddr(context, sdk.ConsAddress(primaryCryptoAddr))
+			if !found {
+				t.Fail()
+			}
+			assert.Equal(t, test.expected.amount, primaryValidator.StakedTokens)
+		})
+	}
+}
+
