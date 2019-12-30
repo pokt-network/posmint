@@ -719,7 +719,7 @@ func TestSlash(t *testing.T) {
 			if !found {
 				t.Fail()
 			}
-			assert.Equal(t, validator.StakedTokens, test.expected.stakedTokens, "tokens were not slashed")
+			assert.True(t, validator.StakedTokens.Equal(test.expected.stakedTokens), "tokens were not slashed")
 		})
 	}
 }
