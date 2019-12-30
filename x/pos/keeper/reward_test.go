@@ -42,7 +42,7 @@ func TestSetandGetValidatorAward(t *testing.T) {
 
 			keeper.setValidatorAward(context, test.args.amount, test.args.valAddress)
 			coins, found := keeper.getValidatorAward(context, test.args.valAddress)
-			assert.Equal(t, test.expectedCoins, coins, "coins don't match")
+			assert.True(t, test.expectedCoins.Equal(coins), "coins don't match")
 			assert.Equal(t, test.expectedFind, found, "finds don't match")
 
 		})
@@ -71,7 +71,7 @@ func TestSetAndGetProposer(t *testing.T) {
 
 			keeper.SetPreviousProposer(context, test.args.consAddress)
 			receivedAddress := keeper.GetPreviousProposer(context)
-			assert.Equal(t, test.expectedAddress, receivedAddress, "addresses do not match ")
+			assert.True(t, test.expectedAddress.Equals(receivedAddress), "addresses do not match ")
 		})
 	}
 }
@@ -121,7 +121,7 @@ func TestGetProposerRewardPercentage(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 
 			percentage := keeper.getProposerRewardPercentage(context) // TODO: replace with  sdk.Dec isntead of sdk.Int
-			assert.Equal(t, test.expectedPercentage, percentage, "percentages do not match")
+			assert.True(t, test.expectedPercentage.Equal(percentage), "percentages do not match")
 		})
 	}
 }
@@ -167,7 +167,7 @@ func TestMint(t *testing.T) {
 				result := keeper.mint(context, test.amount, test.address)
 				assert.Contains(t, result.Log, test.expected, "does not contain message")
 				coins := keeper.coinKeeper.GetCoins(context, sdk.AccAddress(test.address))
-				assert.Equal(t, sdk.NewCoins(sdk.NewCoin(keeper.StakeDenom(context), test.amount)), coins, "coins should match")
+				assert.True(t, sdk.NewCoins(sdk.NewCoin(keeper.StakeDenom(context), test.amount)).IsEqual(coins), "coins should match")
 			}
 		})
 	}
@@ -197,7 +197,7 @@ func TestMintValidatorAwards(t *testing.T) {
 
 			keeper.mintValidatorAwards(context)
 			coins := keeper.coinKeeper.GetCoins(context, sdk.AccAddress(test.address))
-			assert.Equal(t, sdk.NewCoins(sdk.NewCoin(keeper.StakeDenom(context), test.amount)), coins, "coins should match")
+			assert.True(t, sdk.NewCoins(sdk.NewCoin(keeper.StakeDenom(context), test.amount)).IsEqual(coins), "coins should match")
 		})
 	}
 }

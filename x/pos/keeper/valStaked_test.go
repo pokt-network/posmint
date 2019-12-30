@@ -100,7 +100,7 @@ func TestRemoveStakedValidatorTokens(t *testing.T) {
 				_ = keeper.removeValidatorTokens(context, test.validator, test.amount)
 			default:
 				validator := keeper.removeValidatorTokens(context, test.validator, test.amount)
-				assert.Equal(t, validator.StakedTokens, test.expected.tokens, "validator staked tokens is not as expected")
+				assert.True(t, validator.StakedTokens.Equal(test.expected.tokens), "validator staked tokens is not as expected")
 
 				store := context.KVStore(keeper.storeKey)
 				assert.NotNil(t, store.Get(types.KeyForValidatorInStakingSet(validator)))
