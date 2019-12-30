@@ -78,9 +78,8 @@ func (k Keeper) mintValidatorAwards(ctx sdk.Context) {
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
 		amount := sdk.Int{}
-		address := sdk.ValAddress{}
+		address := sdk.ValAddress(types.AddressFromKey(iterator.Key()))
 		k.cdc.MustUnmarshalBinaryBare(iterator.Value(), &amount)
-		k.cdc.MustUnmarshalBinaryLengthPrefixed(iterator.Key(), &address)
 		k.mint(ctx, amount, address)
 		// remove from the award store
 		store.Delete(iterator.Key())

@@ -9,7 +9,7 @@ import (
 )
 
 func TestCoinsFromDAOToValidator(t *testing.T) {
-	validator := getBoundedValdiator()
+	validator := getBondedValidator()
 	validatorAddress := validator.Address
 
 	tests := []struct {

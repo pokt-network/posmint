@@ -55,7 +55,7 @@ func (k Keeper) IterateAndExecuteOverPrevStateVals(
 	defer iterator.Close()
 	i := int64(0)
 	for ; iterator.Valid(); iterator.Next() {
-		address := types.AddressFromPrevStateValidatorPowerKey(iterator.Key())
+		address := types.AddressFromKey(iterator.Key())
 		validator, found := k.GetValidator(ctx, address)
 		if !found {
 			panic(fmt.Sprintf("validator record not found for address: %v\n", address))
