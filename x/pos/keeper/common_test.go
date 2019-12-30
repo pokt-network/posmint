@@ -137,7 +137,7 @@ func createTestAccs(ctx sdk.Context, numAccs int, initialCoins sdk.Coins, ak *au
 }
 
 func addMintedCoinsToModule(t *testing.T, ctx sdk.Context, k *Keeper, module string) {
-	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), sdk.NewInt(100000)))
+	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), sdk.NewInt(100)))
 	mintErr := k.supplyKeeper.MintCoins(ctx, module, coins.Add(coins))
 	if mintErr != nil {
 		t.Fail()
@@ -171,7 +171,7 @@ func getBondedValidator() types.Validator {
 
 	return types.Validator{
 		Address:      getRandomValidatorAddress(),
-		StakedTokens: sdk.NewInt(1000000000),
+		StakedTokens: sdk.NewInt(100),
 		ConsPubKey:   pub,
 		Jailed:       false,
 		Status:       sdk.Bonded,
