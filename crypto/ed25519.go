@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/tendermint/tendermint/crypto/ed25519"
+	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
 )
 
 type PublicKey ed25519.PubKeyEd25519
@@ -19,12 +20,11 @@ func NewPublicKey(hexString string) (*PublicKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	if len(b) != PubKeySize {
+	pubkey, err := cryptoAmino.PubKeyFromBytes(b)
+	if err != nil {
 		return nil, err
 	}
-	var temp [PubKeySize]byte
-	copy(temp[:], b)
-	pk := PublicKey(ed25519.PubKeyEd25519(temp))
+	pk := PublicKey(pubkey.(ed25519.PubKeyEd25519))
 	return &pk, nil
 }
 
