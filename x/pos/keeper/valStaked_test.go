@@ -8,11 +8,9 @@ import (
 )
 
 func TestGetAndSetStakedValidator(t *testing.T) {
-	initialPower := int64(100)
-	nAccs := int64(4)
-
 	boundedValidator := getBoundedValdiator()
 	unboundedValidator := getUnboundedValidator()
+
 	type expected struct {
 		validators []types.Validator
 		length     int
@@ -41,24 +39,23 @@ func TestGetAndSetStakedValidator(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		context, _, keeper := createTestInput(t, true, initialPower, nAccs)
-		for _, validator := range test.validators {
-			keeper.SetValidator(context, validator)
-			keeper.SetStakedValidator(context, validator)
-		}
-		validators := keeper.getStakedValidators(context)
+		t.Run(test.name, func(t *testing.T){
+			context, _, keeper := createTestInput(t, true)
+			for _, validator := range test.validators {
+				keeper.SetValidator(context, validator)
+				keeper.SetStakedValidator(context, validator)
+			}
+			validators := keeper.getStakedValidators(context)
 
-		if equal := assert.ObjectsAreEqualValues(validators, test.expected.validators); !equal { // note ObjectsAreEqualValues does not assert, manual verification is required
-			t.FailNow()
-		}
-		assert.Equalf(t, len(validators), test.expected.length, "length of the validators does not match expected on %v", test.name)
+			if equal := assert.ObjectsAreEqualValues(validators, test.expected.validators); !equal { // note ObjectsAreEqualValues does not assert, manual verification is required
+				t.FailNow()
+			}
+			assert.Equalf(t, len(validators), test.expected.length, "length of the validators does not match expected on %v", test.name)
+		})
 	}
 }
 
 func TestRemoveStakedValidatorTokens(t *testing.T) {
-	initialPower := int64(100)
-	nAccs := int64(4)
-
 	boundedValidator := getBoundedValdiator()
 
 	type expected struct {
@@ -90,29 +87,29 @@ func TestRemoveStakedValidatorTokens(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		context, _, keeper := createTestInput(t, true, initialPower, nAccs)
-		keeper.SetValidator(context, test.validator)
-		keeper.SetStakedValidator(context, test.validator)
-		switch test.panics {
-		case true:
-			defer func() {
-				err := recover()
-				assert.Contains(t, err, test.expected.errorMessage)
-			}()
-			_ = keeper.removeValidatorTokens(context, test.validator, test.amount)
-		default:
-			validator := keeper.removeValidatorTokens(context, test.validator, test.amount)
-			assert.Equal(t, validator.StakedTokens, test.expected.tokens, "validator staked tokens is not as expected")
+		t.Run(test.name, func(t *testing.T){
+			context, _, keeper := createTestInput(t, true)
+			keeper.SetValidator(context, test.validator)
+			keeper.SetStakedValidator(context, test.validator)
+			switch test.panics {
+			case true:
+				defer func() {
+					err := recover()
+					assert.Contains(t, err, test.expected.errorMessage)
+				}()
+				_ = keeper.removeValidatorTokens(context, test.validator, test.amount)
+			default:
+				validator := keeper.removeValidatorTokens(context, test.validator, test.amount)
+				assert.Equal(t, validator.StakedTokens, test.expected.tokens, "validator staked tokens is not as expected")
 
-			store := context.KVStore(keeper.storeKey)
-			assert.NotNil(t, store.Get(types.KeyForValidatorInStakingSet(validator)))
-		}
+				store := context.KVStore(keeper.storeKey)
+				assert.NotNil(t, store.Get(types.KeyForValidatorInStakingSet(validator)))
+			}
+		})
 	}
 }
-func TestRemoveDeleteFromStakingSet(t *testing.T) {
-	initialPower := int64(100)
-	nAccs := int64(4)
 
+func TestRemoveDeleteFromStakingSet(t *testing.T) {
 	boundedValidator := getBoundedValdiator()
 	unboundedValidator := getUnboundedValidator()
 
@@ -136,23 +133,23 @@ func TestRemoveDeleteFromStakingSet(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		context, _, keeper := createTestInput(t, true, initialPower, nAccs)
-		for _, validator := range test.validators {
-			keeper.SetValidator(context, validator)
-			keeper.SetStakedValidator(context, validator)
-		}
-		for _, validator := range test.validators {
-			keeper.deleteValidatorFromStakingSet(context, validator)
-		}
+		t.Run(test.name, func(t *testing.T){
+			context, _, keeper := createTestInput(t, true)
+			for _, validator := range test.validators {
+				keeper.SetValidator(context, validator)
+				keeper.SetStakedValidator(context, validator)
+			}
+			for _, validator := range test.validators {
+				keeper.deleteValidatorFromStakingSet(context, validator)
+			}
 
-		validators := keeper.getStakedValidators(context)
-		assert.Empty(t, validators, "there should not be any validators in the set")
+			validators := keeper.getStakedValidators(context)
+			assert.Empty(t, validators, "there should not be any validators in the set")
+		})
 	}
 }
-func TestGetValsIterator(t *testing.T) {
-	initialPower := int64(100)
-	nAccs := int64(4)
 
+func TestGetValsIterator(t *testing.T) {
 	boundedValidator := getBoundedValdiator()
 	unboundedValidator := getUnboundedValidator()
 
@@ -170,13 +167,15 @@ func TestGetValsIterator(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		context, _, keeper := createTestInput(t, true, initialPower, nAccs)
-		for _, validator := range test.validators {
-			keeper.SetValidator(context, validator)
-			keeper.SetStakedValidator(context, validator)
-		}
+		t.Run(test.name, func(t *testing.T){
+			context, _, keeper := createTestInput(t, true)
+			for _, validator := range test.validators {
+				keeper.SetValidator(context, validator)
+				keeper.SetStakedValidator(context, validator)
+			}
 
-		it := keeper.stakedValsIterator(context)
-		assert.Implements(t, (*sdk.Iterator)(nil), it, "does not implement interface")
+			it := keeper.stakedValsIterator(context)
+			assert.Implements(t, (*sdk.Iterator)(nil), it, "does not implement interface")
+		})
 	}
 }

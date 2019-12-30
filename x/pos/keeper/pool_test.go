@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"encoding/hex"
 	"fmt"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/pos/types"
@@ -11,13 +10,10 @@ import (
 )
 
 func TestCoinsFromUnstakedToStaked(t *testing.T) {
-	initialPower := int64(100)
-	nAccs := int64(4)
-	addressBytes := []byte("abcdefghijklmnopqrst")
-	validatorAddress, err := sdk.ValAddressFromHex(hex.EncodeToString(addressBytes))
-	if err != nil {
-		panic(err)
-	}
+	validator := getBoundedValdiator()
+	validatorAddress := validator.Address
+
+
 	tests := []struct {
 		name      string
 		expected  string
@@ -47,7 +43,7 @@ func TestCoinsFromUnstakedToStaked(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			context, _, keeper := createTestInput(t, true, initialPower, nAccs)
+			context, _, keeper := createTestInput(t, true)
 
 			switch test.panics {
 			case true:
@@ -72,13 +68,9 @@ func TestCoinsFromUnstakedToStaked(t *testing.T) {
 }
 
 func TestCoinsFromStakedToUnstaked(t *testing.T) {
-	initialPower := int64(100)
-	nAccs := int64(4)
-	addressBytes := []byte("abcdefghijklmnopqrst")
-	validatorAddress, err := sdk.ValAddressFromHex(hex.EncodeToString(addressBytes))
-	if err != nil {
-		panic(err)
-	}
+	validator := getBoundedValdiator()
+	validatorAddress := validator.Address
+
 	tests := []struct {
 		name      string
 		amount    sdk.Int
@@ -102,7 +94,7 @@ func TestCoinsFromStakedToUnstaked(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			context, _, keeper := createTestInput(t, true, initialPower, nAccs)
+			context, _, keeper := createTestInput(t, true)
 
 			switch test.panics {
 			case true:
@@ -127,14 +119,10 @@ func TestCoinsFromStakedToUnstaked(t *testing.T) {
 }
 
 func TestBurnStakedTokens(t *testing.T) {
-	initialPower := int64(100)
-	nAccs := int64(4)
-	addressBytes := []byte("abcdefghijklmnopqrst")
-	validatorAddress, err := sdk.ValAddressFromHex(hex.EncodeToString(addressBytes))
+	validator := getBoundedValdiator()
+	validatorAddress := validator.Address
+
 	supplySize := sdk.NewInt(100)
-	if err != nil {
-		panic(err)
-	}
 	tests := []struct {
 		name       string
 		expected   string
@@ -160,7 +148,7 @@ func TestBurnStakedTokens(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			context, _, keeper := createTestInput(t, true, initialPower, nAccs)
+			context, _, keeper := createTestInput(t, true)
 
 			switch test.errs {
 			case true:
