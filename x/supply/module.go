@@ -46,8 +46,8 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 // app module
 type AppModule struct {
 	AppModuleBasic
-	keeper  Keeper
-	ak      types.AccountKeeper
+	keeper Keeper
+	ak     types.AccountKeeper
 }
 
 // NewAppModule creates a new AppModule object

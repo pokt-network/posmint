@@ -190,7 +190,7 @@ func TestValidatorCaching(t *testing.T) {
 			store := context.KVStore(keeper.storeKey)
 			bz := store.Get(types.KeyForValByAllVals(test.args.validator.Address))
 			validator := keeper.validatorCaching(bz, test.args.validator.Address)
-			assert.Equal(t, validator.Equals(test.expected.validator), "validator does not match")
+			assert.True(t, validator.Equals(test.expected.validator), "validator does not match")
 		})
 	}
 

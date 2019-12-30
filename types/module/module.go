@@ -119,6 +119,7 @@ func NewGenesisOnlyAppModule(amg AppModuleGenesis) AppModule {
 		AppModuleGenesis: amg,
 	}
 }
+
 // register invariants
 func (GenesisOnlyAppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
 

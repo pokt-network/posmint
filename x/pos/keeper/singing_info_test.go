@@ -28,7 +28,7 @@ func TestGetMissedArray(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T){
+		t.Run(test.name, func(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			keeper.SetMissedBlockArray(context, test.address, 1, test.expected)
 			missed := keeper.getMissedBlockArray(context, test.address, 1)
@@ -54,7 +54,7 @@ func TestClearMissedArray(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T){
+		t.Run(test.name, func(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			keeper.SetMissedBlockArray(context, test.address, 1, true)
 			keeper.clearMissedArray(context, test.address)
