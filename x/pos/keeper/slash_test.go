@@ -45,10 +45,10 @@ func TestGetAndSetValidatorBurn(t *testing.T) {
 			coins, found := keeper.getValidatorBurn(context, test.args.validator.Address)
 			assert.Equal(t, test.expected.found, found, "found does not match expected")
 			if test.expected.found {
-				assert.Equal(t, test.expected.amount, coins, "received coins are not the expected coins")
+				assert.True(t, test.expected.amount.Equal(coins), "received coins are not the expected coins")
 			} else {
 				var expectedCoins sdk.Dec
-				assert.Equal(t, coins, expectedCoins, "did not get empty coins")
+				assert.True(t, coins.Equal(expectedCoins), "did not get empty coins")
 			}
 		})
 	}
@@ -87,7 +87,7 @@ func TestDeleteValidatorBurn(t *testing.T) {
 			keeper.deleteValidatorBurn(context, test.args.validator.Address)
 			coins, found := keeper.getValidatorBurn(context, test.args.validator.Address)
 			assert.Equal(t, test.expected.found, found, "found does not match expected")
-			assert.Equal(t, test.expected.amount, coins, "received coins are not the expected coins")
+			assert.True(t, test.expected.amount.Equal(coins), "received coins are not the expected coins")
 		})
 	}
 }
@@ -133,7 +133,7 @@ func TestGetAndSetAddrPubKeyRelation(t *testing.T) {
 			if err != nil {
 				assert.Equal(t, test.expected.message, fmt.Sprintf("%s", err), "error message doe sno tmatch expected$")
 			} else {
-				assert.Equal(t, test.expected.validator.GetConsPubKey(), key, "do not match")
+				assert.True(t, test.expected.validator.GetConsPubKey().Equals(key), "do not match")
 			}
 		})
 	}
