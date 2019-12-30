@@ -1,27 +1,25 @@
 package types
 
 import (
+	"github.com/pokt-network/posmint/types"
 	"reflect"
 	"testing"
-
-	sdk "github.com/pokt-network/posmint/types"
-	"github.com/pokt-network/posmint/x/auth/types"
 )
 
 func TestDefaultGenesisState(t *testing.T) {
 	tests := []struct {
 		name string
-		want types.GenesisState
-	}{{"defaultState", types.GenesisState{
+		want GenesisState
+	}{{"defaultState", GenesisState{
 		Params:       DefaultParams(),
 		SigningInfos: make(map[string]ValidatorSigningInfo),
 		MissedBlocks: make(map[string][]MissedBlock),
-		DAO:          DAOPool(NewPool(sdk.ZeroInt())),
+		DAO:          DAOPool(NewPool(types.ZeroInt())),
 	}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := types.DefaultGenesisState(); !reflect.DeepEqual(got, tt.want) {
+			if got := DefaultGenesisState(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("DefaultGenesisState() = %v, want %v", got, tt.want)
 			}
 		})
@@ -30,19 +28,35 @@ func TestDefaultGenesisState(t *testing.T) {
 
 func TestNewGenesisState(t *testing.T) {
 	type args struct {
-		params           types.Params
-		validators       []types.Validator
-		dao              types.DAOPool
-		previousProposer sdk.ConsAddress
-		signingInfos     map[string]types.ValidatorSigningInfo
-		missedBlocks     map[string][]types.MissedBlock
+		params           Params
+		validators       []Validator
+		dao              DAOPool
+		previousProposer types.ConsAddress
+		signingInfos     map[string]ValidatorSigningInfo
+		missedBlocks     map[string][]MissedBlock
 	}
+	ca, _ := types.ConsAddressFromHex("ABCDEFGHIJK")
+
 	tests := []struct {
 		name string
 		args args
 		want GenesisState
 	}{
-		// TODO: Add test cases.
+		{"Default Change State Test", args{
+			params:           DefaultParams(),
+			validators:       nil,
+			dao:              DAOPool(NewPool(types.ZeroInt())),
+			previousProposer: ca,
+			signingInfos:     make(map[string]ValidatorSigningInfo),
+			missedBlocks:     make(map[string][]MissedBlock)},
+			GenesisState{
+				Params:           DefaultParams(),
+				Validators:       nil,
+				DAO:              DAOPool(NewPool(types.ZeroInt())),
+				SigningInfos:     make(map[string]ValidatorSigningInfo),
+				MissedBlocks:     make(map[string][]MissedBlock),
+				PreviousProposer: ca,
+			}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -58,7 +58,7 @@ func TestMsgSendGetSignBytes(t *testing.T) {
 	var msg = NewMsgSend(addr1, addr2, coins)
 	res := msg.GetSignBytes()
 
-	expected := `{"type":"posmint/MsgSend","value":{"amount":[{"amount":"10","denom":"atom"}],"from_address":"cosmos1d9h8qat57ljhcm","to_address":"cosmos1da6hgur4wsmpnjyg"}}`
+	expected := `{"type":"posmint/MsgSend","value":{"amount":[{"amount":"10","denom":"atom"}],"from_address":"696e707574","to_address":"6f7574707574"}}`
 	require.Equal(t, expected, string(res))
 }
 
@@ -224,7 +224,7 @@ func TestMsgMultiSendGetSignBytes(t *testing.T) {
 	}
 	res := msg.GetSignBytes()
 
-	expected := `{"type":"posmint/MsgMultiSend","value":{"inputs":[{"address":"cosmos1d9h8qat57ljhcm","coins":[{"amount":"10","denom":"atom"}]}],"outputs":[{"address":"cosmos1da6hgur4wsmpnjyg","coins":[{"amount":"10","denom":"atom"}]}]}}`
+	expected := `{"type":"posmint/MsgMultiSend","value":{"inputs":[{"address":"696e707574","coins":[{"amount":"10","denom":"atom"}]}],"outputs":[{"address":"6f7574707574","coins":[{"amount":"10","denom":"atom"}]}]}}`
 	require.Equal(t, expected, string(res))
 }
 
