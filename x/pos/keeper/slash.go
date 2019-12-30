@@ -59,7 +59,7 @@ func (k Keeper) validateSlash(ctx sdk.Context, consAddr sdk.ConsAddress, infract
 		panic(fmt.Errorf("attempted to slash with a negative slash factor: %v", slashFactor))
 	}
 	if infractionHeight > ctx.BlockHeight() {
-		panic(fmt.Sprintf( // Can't slash infractions in the future
+		panic(fmt.Errorf( // Can't slash infractions in the future
 			"impossible attempt to slash future infraction at height %d but we are at height %d",
 			infractionHeight, ctx.BlockHeight()))
 	}
@@ -80,7 +80,7 @@ func (k Keeper) validateSlash(ctx sdk.Context, consAddr sdk.ConsAddress, infract
 	}
 	// should not be slashing an unstaked validator
 	if validator.IsUnstaked() {
-		panic(fmt.Sprintf("should not be slashing unstaked validator: %s", validator.GetAddress()))
+		panic(fmt.Errorf("should not be slashing unstaked validator: %s", validator.GetAddress()))
 	}
 	return validator
 }
@@ -309,7 +309,7 @@ func (k Keeper) burnValidators(ctx sdk.Context) {
 	for ; iterator.Valid(); iterator.Next() {
 		severity := sdk.Dec{}
 		address := sdk.ValAddress{}
-		k.cdc.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &severity)
+		amino.MustUnmarshalBinaryBare(iterator.Value(), &severity)
 		k.cdc.MustUnmarshalBinaryLengthPrefixed(iterator.Key(), address)
 		val := k.mustGetValidator(ctx, address)
 		k.slash(ctx, sdk.ConsAddress(address), ctx.BlockHeight(), val.ConsensusPower(), severity)
@@ -330,7 +330,8 @@ func (k Keeper) getValidatorBurn(ctx sdk.Context, address sdk.ValAddress) (coins
 	if value == nil {
 		return coins, false
 	}
-	k.cdc.MustUnmarshalBinaryLengthPrefixed(value, &coins)
+	found = true
+	k.cdc.MustUnmarshalBinaryBare(value, &coins)
 	return
 }
 
