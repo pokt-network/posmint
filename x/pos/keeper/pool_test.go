@@ -65,7 +65,7 @@ func TestCoinsFromUnstakedToStaked(t *testing.T) {
 				sendFromModuleToAccount(t, context, &keeper, types.StakedPoolName, test.validator.Address, sdk.NewInt(100))
 				keeper.coinsFromUnstakedToStaked(context, test.validator, test.amount)
 				staked := keeper.GetStakedTokens(context)
-				assert.Equal(t, test.amount, staked, "values do not match")
+				assert.Equal(t, test.amount.Add(sdk.NewInt(100)), staked, "values do not match")
 			}
 		})
 	}
@@ -143,15 +143,15 @@ func TestBurnStakedTokens(t *testing.T) {
 		amount     sdk.Int
 		errs       bool
 	}{
-		//{
-		//	name: "burn coins from pool",
-		//	validator: types.Validator{Address: validatorAddress},
-		//	burnAmount: sdk.NewInt(5),
-		//	amount: sdk.NewInt(10),
-		//	errs: false,
-		//},
 		{
-			name:       "burn coins from pool",
+			name: "burn coins from pool",
+			validator: types.Validator{Address: validatorAddress},
+			burnAmount: sdk.NewInt(5),
+			amount: sdk.NewInt(10),
+			errs: false,
+		},
+		{
+			name:       "errs trying to burn from pool",
 			validator:  types.Validator{Address: validatorAddress},
 			burnAmount: sdk.NewInt(-1),
 			amount:     sdk.NewInt(10),

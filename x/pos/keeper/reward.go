@@ -14,7 +14,6 @@ func (k Keeper) AwardCoinsTo(ctx sdk.Context, amount sdk.Int, address sdk.ValAdd
 	k.setValidatorAward(ctx, award.Add(amount), address)
 }
 
-//  TODO TEST
 // rewardFromFees handles distribution of the collected fees
 func (k Keeper) rewardFromFees(ctx sdk.Context, previousProposer sdk.ConsAddress) {
 	logger := k.Logger(ctx)
@@ -72,7 +71,6 @@ func (k Keeper) rewardFromFees(ctx sdk.Context, previousProposer sdk.ConsAddress
 	}
 }
 
-// todo test
 // called on begin blocker
 func (k Keeper) mintValidatorAwards(ctx sdk.Context) {
 	store := ctx.KVStore(k.storeKey)
@@ -81,8 +79,8 @@ func (k Keeper) mintValidatorAwards(ctx sdk.Context) {
 	for ; iterator.Valid(); iterator.Next() {
 		amount := sdk.Int{}
 		address := sdk.ValAddress{}
-		k.cdc.MustUnmarshalBinaryLengthPrefixed(iterator.Value(), &amount)
-		k.cdc.MustUnmarshalBinaryLengthPrefixed(iterator.Key(), address)
+		k.cdc.MustUnmarshalBinaryBare(iterator.Value(), &amount)
+		k.cdc.MustUnmarshalBinaryLengthPrefixed(iterator.Key(), &address)
 		k.mint(ctx, amount, address)
 		// remove from the award store
 		store.Delete(iterator.Key())
