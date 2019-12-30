@@ -57,7 +57,7 @@ func makeTestCodec() *codec.Codec {
 
 // nolint: deadcode unused
 func createTestInput(t *testing.T, isCheckTx bool) (sdk.Context, []auth.Account, Keeper) {
-	initPower := int64(100)
+	initPower := int64(100000000000)
 	nAccs := int64(4)
 
 	keyAcc := sdk.NewKVStoreKey(auth.StoreKey)
@@ -137,7 +137,7 @@ func createTestAccs(ctx sdk.Context, numAccs int, initialCoins sdk.Coins, ak *au
 }
 
 func addMintedCoinsToModule(t *testing.T, ctx sdk.Context, k *Keeper, module string) {
-	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), sdk.NewInt(100)))
+	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), sdk.NewInt(100000000000)))
 	mintErr := k.supplyKeeper.MintCoins(ctx, module, coins.Add(coins))
 	if mintErr != nil {
 		t.Fail()
@@ -170,8 +170,8 @@ func getBondedValidator() types.Validator {
 	rand.Read(pub[:])
 
 	return types.Validator{
-		Address:      getRandomValidatorAddress(),
-		StakedTokens: sdk.NewInt(100),
+		Address:      sdk.ValAddress(pub.Address()),
+		StakedTokens: sdk.NewInt(100000000000),
 		ConsPubKey:   pub,
 		Jailed:       false,
 		Status:       sdk.Bonded,
@@ -183,7 +183,7 @@ func getUnbondedValidator() types.Validator {
 
 	return types.Validator{
 		Address:      getRandomValidatorAddress(),
-		StakedTokens: sdk.NewInt(100),
+		StakedTokens: sdk.NewInt(100000000000),
 		ConsPubKey:   pub,
 		Jailed:       false,
 		Status:       sdk.Unbonded,
@@ -195,7 +195,7 @@ func getUnboindingValidator() types.Validator {
 
 	return types.Validator{
 		Address:      getRandomValidatorAddress(),
-		StakedTokens: sdk.NewInt(100),
+		StakedTokens: sdk.NewInt(100000000000),
 		ConsPubKey:   pub,
 		Jailed:       false,
 		Status:       sdk.Unbonding,
