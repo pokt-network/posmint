@@ -47,8 +47,7 @@ func TestGetAndSetValidatorBurn(t *testing.T) {
 			if test.expected.found {
 				assert.True(t, test.expected.amount.Equal(coins), "received coins are not the expected coins")
 			} else {
-				var expectedCoins sdk.Dec
-				assert.True(t, coins.Equal(expectedCoins), "did not get empty coins")
+				assert.True(t, coins.IsNil(), "did not get empty coins")
 			}
 		})
 	}
@@ -87,7 +86,7 @@ func TestDeleteValidatorBurn(t *testing.T) {
 			keeper.deleteValidatorBurn(context, test.args.validator.Address)
 			coins, found := keeper.getValidatorBurn(context, test.args.validator.Address)
 			assert.Equal(t, test.expected.found, found, "found does not match expected")
-			assert.True(t, test.expected.amount.Equal(coins), "received coins are not the expected coins")
+			assert.True(t, coins.IsNil(), "received coins are not the expected coins")
 		})
 	}
 }
@@ -682,7 +681,7 @@ func TestSlash(t *testing.T) {
 				keeper.SetValidatorByConsAddr(context, test.args.validator)
 				addMintedCoinsToModule(t, context, &keeper, types.StakedPoolName)
 				sendFromModuleToAccount(t, context, &keeper, types.StakedPoolName, test.args.validator.Address, supplySize)
-				v, found:=  keeper.GetValidatorByConsAddr(context, sdk.ConsAddress(cryptoAddr))
+				v, found := keeper.GetValidatorByConsAddr(context, sdk.ConsAddress(cryptoAddr))
 				if !found {
 					t.FailNow()
 				}
@@ -728,13 +727,13 @@ func TestBurnValidators(t *testing.T) {
 	primaryBoundedValidator := getBondedValidator()
 
 	type args struct {
-		amount             sdk.Dec
-		validator   types.Validator
+		amount    sdk.Dec
+		validator types.Validator
 	}
 	type expected struct {
-		amount             sdk.Dec
-		found              bool
-		validator   types.Validator
+		amount    sdk.Dec
+		found     bool
+		validator types.Validator
 	}
 	tests := []struct {
 		name string
@@ -744,13 +743,13 @@ func TestBurnValidators(t *testing.T) {
 		{
 			name: "can get and set validator burn",
 			args: args{
-				amount:             sdk.NewDec(100),
-				validator:   primaryBoundedValidator,
+				amount:    sdk.NewDec(100),
+				validator: primaryBoundedValidator,
 			},
 			expected: expected{
-				amount:             sdk.ZeroDec(),
-				found:              true,
-				validator:   primaryBoundedValidator,
+				amount:    sdk.ZeroDec(),
+				found:     true,
+				validator: primaryBoundedValidator,
 			},
 		},
 	}
@@ -774,4 +773,3 @@ func TestBurnValidators(t *testing.T) {
 		})
 	}
 }
-

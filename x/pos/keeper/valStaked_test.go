@@ -39,7 +39,7 @@ func TestGetAndSetStakedValidator(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T){
+		t.Run(test.name, func(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			for _, validator := range test.validators {
 				keeper.SetValidator(context, validator)
@@ -75,19 +75,19 @@ func TestRemoveStakedValidatorTokens(t *testing.T) {
 			validator: boundedValidator,
 			amount:    sdk.NewInt(5),
 			panics:    false,
-			expected:  expected{tokens: sdk.NewInt(95), validators: []types.Validator{}},
+			expected:  expected{tokens: sdk.NewInt(99999999995), validators: []types.Validator{}},
 		},
 		{
 			name:      "removes tokens from validator validators",
 			validator: boundedValidator,
 			amount:    sdk.NewInt(-5),
 			panics:    true,
-			expected:  expected{tokens: sdk.NewInt(95), validators: []types.Validator{}, errorMessage: "trying to remove negative tokens"},
+			expected:  expected{tokens: sdk.NewInt(99999999995), validators: []types.Validator{}, errorMessage: "trying to remove negative tokens"},
 		},
 	}
 
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T){
+		t.Run(test.name, func(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			keeper.SetValidator(context, test.validator)
 			keeper.SetStakedValidator(context, test.validator)
@@ -113,27 +113,21 @@ func TestRemoveDeleteFromStakingSet(t *testing.T) {
 	boundedValidator := getBondedValidator()
 	unboundedValidator := getUnbondedValidator()
 
-	type expected struct {
-		tokens       sdk.Int
-		errorMessage string
-	}
 	tests := []struct {
 		name       string
 		validators []types.Validator
 		panics     bool
 		amount     sdk.Int
-		expected
 	}{
 		{
 			name:       "removes validators from set",
 			validators: []types.Validator{boundedValidator, unboundedValidator},
 			panics:     false,
-			expected:   expected{tokens: sdk.NewInt(95)},
 		},
 	}
 
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T){
+		t.Run(test.name, func(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			for _, validator := range test.validators {
 				keeper.SetValidator(context, validator)
@@ -167,7 +161,7 @@ func TestGetValsIterator(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T){
+		t.Run(test.name, func(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			for _, validator := range test.validators {
 				keeper.SetValidator(context, validator)
