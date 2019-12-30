@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"encoding/hex"
 	"fmt"
 	sdk "github.com/pokt-network/posmint/types"
 	types "github.com/pokt-network/posmint/x/pos/types"
@@ -10,13 +9,8 @@ import (
 )
 
 func TestCoinsFromDAOToValidator(t *testing.T) {
-	initialPower := int64(100)
-	nAccs := int64(4)
-	addressBytes := []byte("abcdefghijklmnopqrst")
-	validatorAddress, err := sdk.ValAddressFromHex(hex.EncodeToString(addressBytes))
-	if err != nil {
-		panic(err)
-	}
+	validator := getBoundedValdiator()
+	validatorAddress := validator.Address
 
 	tests := []struct {
 		name     string
@@ -42,7 +36,7 @@ func TestCoinsFromDAOToValidator(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			context, _, keeper := createTestInput(t, true, initialPower, nAccs)
+			context, _, keeper := createTestInput(t, true)
 
 			switch test.panics {
 			case true:

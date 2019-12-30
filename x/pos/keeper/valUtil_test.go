@@ -9,9 +9,8 @@ import (
 )
 
 func TestMustGetValidator(t *testing.T) {
-	initialPower := int64(100)
-	nAccs := int64(4)
 	boundedValidator := getBoundedValdiator()
+
 	type args struct {
 		validator types.Validator
 	}
@@ -40,26 +39,27 @@ func TestMustGetValidator(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		context, _, keeper := createTestInput(t, true, initialPower, nAccs)
-		switch test.panics {
-		case true:
-			defer func() {
-				err := recover()
-				assert.Contains(t, test.expected.message, err, "does not cointain error message")
-			}()
-			_ = keeper.mustGetValidator(context, test.args.validator.Address)
-		default:
-			keeper.SetValidator(context, test.args.validator)
-			keeper.SetStakedValidator(context, test.args.validator)
-			validator := keeper.mustGetValidator(context, test.args.validator.Address)
-			assert.Equal(t, validator, test.expected.validator, "validator does not match")
-		}
+		t.Run(test.name, func(t *testing.T){
+			context, _, keeper := createTestInput(t, true)
+			switch test.panics {
+			case true:
+				defer func() {
+					err := recover()
+					assert.Contains(t, test.expected.message, err, "does not cointain error message")
+				}()
+				_ = keeper.mustGetValidator(context, test.args.validator.Address)
+			default:
+				keeper.SetValidator(context, test.args.validator)
+				keeper.SetStakedValidator(context, test.args.validator)
+				validator := keeper.mustGetValidator(context, test.args.validator.Address)
+				assert.Equal(t, validator, test.expected.validator, "validator does not match")
+			}
+		})
 	}
 
 }
+
 func TestMustGetValidatorByConsAddr(t *testing.T) {
-	initialPower := int64(100)
-	nAccs := int64(4)
 	boundedValidator := getBoundedValdiator()
 	type args struct {
 		validator types.Validator
@@ -89,28 +89,30 @@ func TestMustGetValidatorByConsAddr(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		context, _, keeper := createTestInput(t, true, initialPower, nAccs)
-		switch test.panics {
-		case true:
-			defer func() {
-				err := recover().(error)
-				assert.Equal(t, test.expected.message, err.Error(), "messages don't match")
-			}()
-			_ = keeper.mustGetValidatorByConsAddr(context, test.args.validator.ConsAddress())
-		default:
-			keeper.SetValidator(context, test.args.validator)
-			keeper.SetValidatorByConsAddr(context, test.args.validator)
-			keeper.SetStakedValidator(context, test.args.validator)
-			validator := keeper.mustGetValidatorByConsAddr(context, test.args.validator.ConsAddress())
-			assert.Equal(t, validator, test.expected.validator, "validator does not match")
-		}
+		t.Run(test.name, func(t *testing.T){
+			context, _, keeper := createTestInput(t, true)
+			switch test.panics {
+			case true:
+				defer func() {
+					err := recover().(error)
+					assert.Equal(t, test.expected.message, err.Error(), "messages don't match")
+				}()
+				_ = keeper.mustGetValidatorByConsAddr(context, test.args.validator.ConsAddress())
+			default:
+				keeper.SetValidator(context, test.args.validator)
+				keeper.SetValidatorByConsAddr(context, test.args.validator)
+				keeper.SetStakedValidator(context, test.args.validator)
+				validator := keeper.mustGetValidatorByConsAddr(context, test.args.validator.ConsAddress())
+				assert.Equal(t, validator, test.expected.validator, "validator does not match")
+			}
+		})
 	}
 
 }
+
 func TestValidatorByConsAddr(t *testing.T) {
-	initialPower := int64(100)
-	nAccs := int64(4)
 	boundedValidator := getBoundedValdiator()
+
 	type args struct {
 		validator types.Validator
 	}
@@ -138,24 +140,26 @@ func TestValidatorByConsAddr(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		context, _, keeper := createTestInput(t, true, initialPower, nAccs)
-		switch test.expected.null {
-		case true:
-			validator := keeper.validatorByConsAddr(context, test.args.validator.ConsAddress())
-			assert.Nil(t, validator)
-		default:
-			keeper.SetValidator(context, test.args.validator)
-			keeper.SetValidatorByConsAddr(context, test.args.validator)
-			keeper.SetStakedValidator(context, test.args.validator)
-			validator := keeper.validatorByConsAddr(context, test.args.validator.ConsAddress())
-			assert.Equal(t, validator, test.expected.validator, "validator does not match")
-		}
+		t.Run(test.name, func(t *testing.T){
+			context, _, keeper := createTestInput(t, true)
+			switch test.expected.null {
+			case true:
+				validator := keeper.validatorByConsAddr(context, test.args.validator.ConsAddress())
+				assert.Nil(t, validator)
+			default:
+				keeper.SetValidator(context, test.args.validator)
+				keeper.SetValidatorByConsAddr(context, test.args.validator)
+				keeper.SetStakedValidator(context, test.args.validator)
+				validator := keeper.validatorByConsAddr(context, test.args.validator.ConsAddress())
+				assert.Equal(t, validator, test.expected.validator, "validator does not match")
+			}
+		})
 	}
 }
+
 func TestValidatorCaching(t *testing.T) {
-	initialPower := int64(100)
-	nAccs := int64(4)
 	boundedValidator := getBoundedValdiator()
+
 	type args struct {
 		bz        []byte
 		validator types.Validator
@@ -179,20 +183,22 @@ func TestValidatorCaching(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		context, _, keeper := createTestInput(t, true, initialPower, nAccs)
-		keeper.SetValidator(context, test.args.validator)
-		keeper.SetStakedValidator(context, test.args.validator)
-		store := context.KVStore(keeper.storeKey)
-		bz := store.Get(types.KeyForValByAllVals(test.args.validator.Address))
-		validator := keeper.validatorCaching(bz, test.args.validator.Address)
-		assert.Equal(t, validator, test.expected.validator, "validator does not match")
+		t.Run(test.name, func(t *testing.T){
+			context, _, keeper := createTestInput(t, true)
+			keeper.SetValidator(context, test.args.validator)
+			keeper.SetStakedValidator(context, test.args.validator)
+			store := context.KVStore(keeper.storeKey)
+			bz := store.Get(types.KeyForValByAllVals(test.args.validator.Address))
+			validator := keeper.validatorCaching(bz, test.args.validator.Address)
+			assert.Equal(t, validator, test.expected.validator, "validator does not match")
+		})
 	}
 
 }
+
 func TestNewValidatorCaching(t *testing.T) {
-	initialPower := int64(100)
-	nAccs := int64(4)
 	boundedValidator := getBoundedValdiator()
+
 	type args struct {
 		bz        []byte
 		validator types.Validator
@@ -217,22 +223,24 @@ func TestNewValidatorCaching(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		context, _, keeper := createTestInput(t, true, initialPower, nAccs)
-		keeper.SetValidator(context, test.args.validator)
-		keeper.SetStakedValidator(context, test.args.validator)
-		store := context.KVStore(keeper.storeKey)
-		key := types.KeyForValidatorPrevStateStateByPower(test.args.validator.Address)
-		store.Set(key, test.args.validator.Address)
-		powermap := keeper.getPrevStatePowerMap(context)
-		assert.Len(t, powermap, test.expected.length, "does not have correct length")
-		var valAddr [sdk.AddrLen]byte
-		copy(valAddr[:], key[1:])
+		t.Run(test.name, func(t *testing.T){
+			context, _, keeper := createTestInput(t, true)
+			keeper.SetValidator(context, test.args.validator)
+			keeper.SetStakedValidator(context, test.args.validator)
+			store := context.KVStore(keeper.storeKey)
+			key := types.KeyForValidatorPrevStateStateByPower(test.args.validator.Address)
+			store.Set(key, test.args.validator.Address)
+			powermap := keeper.getPrevStatePowerMap(context)
+			assert.Len(t, powermap, test.expected.length, "does not have correct length")
+			var valAddr [sdk.AddrLen]byte
+			copy(valAddr[:], key[1:])
 
-		for mapKey, value := range powermap {
-			assert.Equal(t, valAddr, mapKey, "key is not correct")
-			bz := make([]byte, len(test.args.validator.Address))
-			copy(bz, test.args.validator.Address)
-			assert.Equal(t, bz, value, "key is not correct")
-		}
+			for mapKey, value := range powermap {
+				assert.Equal(t, valAddr, mapKey, "key is not correct")
+				bz := make([]byte, len(test.args.validator.Address))
+				copy(bz, test.args.validator.Address)
+				assert.Equal(t, bz, value, "key is not correct")
+			}
+		})
 	}
 }
