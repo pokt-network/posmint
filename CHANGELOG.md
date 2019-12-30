@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Changing Bech32 to Hex [#35]
+- Refactor client [#11]
 - Refactor crypto/keys [#10]
 - Replace Distribution/Staking/Slashing/Minting with single POS module [#1]
 
