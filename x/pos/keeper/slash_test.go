@@ -86,7 +86,11 @@ func TestDeleteValidatorBurn(t *testing.T) {
 			keeper.deleteValidatorBurn(context, test.args.validator.Address)
 			coins, found := keeper.getValidatorBurn(context, test.args.validator.Address)
 			assert.Equal(t, test.expected.found, found, "found does not match expected")
+<<<<<<< HEAD
 			assert.True(t, coins.IsNil(), "received coins are not the expected coins")
+=======
+			assert.True(t, test.expected.amount.Equal(coins), "received coins are not the expected coins")
+>>>>>>> fixed all assertions
 		})
 	}
 }
