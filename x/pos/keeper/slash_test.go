@@ -748,7 +748,7 @@ func TestBurnValidators(t *testing.T) {
 				validator:   primaryBoundedValidator,
 			},
 			expected: expected{
-				amount:             sdk.NewDec(0),
+				amount:             sdk.ZeroDec(),
 				found:              true,
 				validator:   primaryBoundedValidator,
 			},
@@ -759,16 +759,18 @@ func TestBurnValidators(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			keeper.SetValidator(context, test.args.validator)
 			keeper.SetValidatorByConsAddr(context, test.args.validator)
+			addMintedCoinsToModule(t, context, &keeper, types.StakedPoolName)
+			sendFromModuleToAccount(t, context, &keeper, types.StakedPoolName, test.args.validator.Address, test.args.validator.StakedTokens)
 			keeper.setValidatorBurn(context, test.args.amount, test.args.validator.Address)
 			keeper.burnValidators(context)
 
-			primaryCryptoAddr := test.args.validator.GetConsPubKey().Address()
+			primaryCryptoAddr := test.args.validator.ConsAddress()
 
-			primaryValidator, found := keeper.GetValidatorByConsAddr(context, sdk.ConsAddress(primaryCryptoAddr))
+			primaryValidator, found := keeper.GetValidatorByConsAddr(context, primaryCryptoAddr)
 			if !found {
 				t.Fail()
 			}
-			assert.Equal(t, test.expected.amount, primaryValidator.StakedTokens)
+			assert.True(t, test.expected.amount.Equal(primaryValidator.StakedTokens.ToDec()))
 		})
 	}
 }
