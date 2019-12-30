@@ -32,7 +32,7 @@ func (k Keeper) rewardFromFees(ctx sdk.Context, previousProposer sdk.ConsAddress
 	// calculate previous proposer reward
 	baseProposerRewardPercentage := k.getProposerRewardPercentage(ctx)
 	// divide up the reward from the proposer reward and the dao reward
-	proposerReward := baseProposerRewardPercentage.Mul(totalReward)
+	proposerReward := baseProposerRewardPercentage.Mul(totalReward).Quo(sdk.NewInt(100))
 	daoReward := totalReward.Sub(proposerReward)
 	// get the validator structure
 	proposerValidator := k.validatorByConsAddr(ctx, previousProposer)
@@ -149,6 +149,5 @@ func (k Keeper) SetPreviousProposer(ctx sdk.Context, consAddr sdk.ConsAddress) {
 // returns the current BaseProposerReward rate from the global param store
 // nolint: errcheck
 func (k Keeper) getProposerRewardPercentage(ctx sdk.Context) sdk.Int {
-	reward := sdk.NewInt(int64(k.ProposerRewardPercentage(ctx))).Quo(sdk.NewInt(100)) // TODO replace sdk.NewInt to sdk.NewDec
-	return reward
+	return sdk.NewInt(int64(k.ProposerRewardPercentage(ctx)))
 }
