@@ -49,7 +49,7 @@ func TestCoinsFromDAOToValidator(t *testing.T) {
 				addMintedCoinsToModule(t, context, &keeper, types.DAOPoolName)
 				keeper.coinsFromDAOToValidator(context, types.Validator{Address: test.address}, test.amount)
 				coins := keeper.coinKeeper.GetCoins(context, sdk.AccAddress(test.address))
-				assert.Equal(t, sdk.NewCoins(sdk.NewCoin(keeper.StakeDenom(context), test.amount)), coins, "coins should match")
+				assert.True(t, sdk.NewCoins(sdk.NewCoin(keeper.StakeDenom(context), test.amount)).IsEqual(coins), "coins should match")
 			}
 		})
 	}
