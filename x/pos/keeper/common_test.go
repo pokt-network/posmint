@@ -137,7 +137,7 @@ func createTestAccs(ctx sdk.Context, numAccs int, initialCoins sdk.Coins, ak *au
 }
 
 func addMintedCoinsToModule(t *testing.T, ctx sdk.Context, k *Keeper, module string) {
-	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), sdk.NewInt(100)))
+	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), sdk.NewInt(100000)))
 	mintErr := k.supplyKeeper.MintCoins(ctx, module, coins.Add(coins))
 	if mintErr != nil {
 		t.Fail()
