@@ -61,7 +61,7 @@ func TestCoinsFromUnstakedToStaked(t *testing.T) {
 				sendFromModuleToAccount(t, context, &keeper, types.StakedPoolName, test.validator.Address, sdk.NewInt(100))
 				keeper.coinsFromUnstakedToStaked(context, test.validator, test.amount)
 				staked := keeper.GetStakedTokens(context)
-				assert.Equal(t, test.amount.Add(sdk.NewInt(100)), staked, "values do not match")
+				assert.True(t, test.amount.Add(sdk.NewInt(100)).Equal(staked), "values do not match")
 			}
 		})
 	}
@@ -112,7 +112,7 @@ func TestCoinsFromStakedToUnstaked(t *testing.T) {
 				sendFromModuleToAccount(t, context, &keeper, types.StakedPoolName, test.validator.Address, sdk.NewInt(100))
 				keeper.coinsFromStakedToUnstaked(context, test.validator)
 				unstaked := keeper.GetUnstakedTokens(context)
-				assert.Equal(t, test.amount, unstaked, "values do not match")
+				assert.True(t, test.amount.Equal(unstaked), "values do not match")
 			}
 		})
 	}
@@ -166,7 +166,7 @@ func TestBurnStakedTokens(t *testing.T) {
 					t.Fail()
 				}
 				staked := keeper.GetStakedTokens(context)
-				assert.Equal(t, test.amount.Sub(test.burnAmount).Add((supplySize)), staked, "values do not match")
+				assert.True(t, test.amount.Sub(test.burnAmount).Add(supplySize).Equal(staked), "values do not match")
 			}
 		})
 	}
