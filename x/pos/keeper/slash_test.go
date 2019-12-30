@@ -635,7 +635,7 @@ func TestValidateSlash(t *testing.T) {
 
 func TestSlash(t *testing.T) {
 	boundedValidator := getBondedValidator()
-	supplySize := sdk.NewInt(100)
+	supplySize := sdk.NewInt(50001)
 
 	type args struct {
 		validator        types.Validator
@@ -669,7 +669,7 @@ func TestSlash(t *testing.T) {
 				found:          true,
 				pubKeyRelation: true,
 				tombstoned:     false,
-				stakedTokens:   sdk.NewInt(0),
+				stakedTokens:   boundedValidator.StakedTokens.Sub(sdk.NewInt(50000)),
 			},
 		},
 	}
@@ -682,6 +682,12 @@ func TestSlash(t *testing.T) {
 				keeper.SetValidatorByConsAddr(context, test.args.validator)
 				addMintedCoinsToModule(t, context, &keeper, types.StakedPoolName)
 				sendFromModuleToAccount(t, context, &keeper, types.StakedPoolName, test.args.validator.Address, supplySize)
+				v, found:=  keeper.GetValidatorByConsAddr(context, sdk.ConsAddress(cryptoAddr))
+				if !found {
+					t.FailNow()
+				}
+
+				fmt.Println(v)
 			}
 			signingInfo := types.ValidatorSigningInfo{
 				Address:     test.args.validator.ConsAddress(),
