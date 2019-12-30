@@ -321,7 +321,7 @@ func TestValidateDoubleSign(t *testing.T) {
 		},
 		{
 			name:   "ignores double signature on tombstoned validator",
-			panics: false,
+			panics: true,
 			args:   args{validator: boundedValidator},
 			expected: expected{
 				validator:      boundedValidator,
@@ -332,7 +332,7 @@ func TestValidateDoubleSign(t *testing.T) {
 		},
 		{
 			name:   "ignores double signature on tombstoned validator",
-			panics: false,
+			panics: true,
 			args:   args{validator: boundedValidator},
 			expected: expected{
 				validator:      boundedValidator,
