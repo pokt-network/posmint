@@ -131,15 +131,15 @@ func TestMint(t *testing.T) {
 	validatorAddress := validator.Address
 
 	tests := []struct {
-		name   string
-		amount sdk.Int
+		name     string
+		amount   sdk.Int
 		expected string
 		address  sdk.ValAddress
 		panics   bool
 	}{
 		{
-			name:   "mints a coin",
-			amount: sdk.NewInt(90),
+			name:     "mints a coin",
+			amount:   sdk.NewInt(90),
 			expected: fmt.Sprintf("was successfully minted to %s", validatorAddress.String()),
 			address:  validatorAddress,
 			panics:   false,

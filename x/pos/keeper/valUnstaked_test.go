@@ -48,7 +48,7 @@ func TestGetAndSetlUnstaking(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T){
+		t.Run(test.name, func(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			for _, validator := range test.args.validators {
 				keeper.SetValidator(context, validator)
@@ -96,7 +96,7 @@ func TestDeleteUnstakingValidator(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T){
+		t.Run(test.name, func(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			for _, validator := range test.args.validators {
 				keeper.SetValidator(context, validator)
@@ -144,7 +144,7 @@ func TestDeleteUnstakingValidators(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T){
+		t.Run(test.name, func(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			for _, validator := range test.args.validators {
 				keeper.SetValidator(context, validator)
@@ -192,7 +192,7 @@ func TestGetAllMatureValidators(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T){
+		t.Run(test.name, func(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			for _, validator := range test.args.validators {
 				keeper.SetValidator(context, validator)
@@ -234,7 +234,7 @@ func TestUnstakeAllMatureValidators(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T){
+		t.Run(test.name, func(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			for _, validator := range test.args.validators {
 				keeper.SetValidator(context, validator)
@@ -267,7 +267,7 @@ func TestUnstakingValidatorsIterator(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T){
+		t.Run(test.name, func(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			for _, validator := range test.validators {
 				keeper.SetValidator(context, validator)
