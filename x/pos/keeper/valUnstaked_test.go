@@ -160,7 +160,7 @@ func TestDeleteUnstakingValidators(t *testing.T) {
 }
 
 func TestGetAllMatureValidators(t *testing.T) {
-	unboundingValidator := getUnboindingValidator()
+	unboundingValidator := getUnbondingValidator()
 
 	type expected struct {
 		validators       []types.Validator
@@ -207,7 +207,7 @@ func TestGetAllMatureValidators(t *testing.T) {
 }
 
 func TestUnstakeAllMatureValidators(t *testing.T) {
-	unboundingValidator := getUnboindingValidator()
+	unboundingValidator := getUnbondingValidator()
 
 	type expected struct {
 		validators       []types.Validator

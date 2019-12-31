@@ -1,12 +1,12 @@
 package pos
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/auth/util"
 	"github.com/pokt-network/posmint/x/pos/types"
-
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
@@ -91,7 +91,7 @@ func QueryUnstakingValidators(cdc *codec.Codec, tmNode rpcclient.Client, height 
 	return validators, nil
 }
 
-func QuerySigningInfo(cdc *codec.Codec, tmNode rpcclient.Client, height int64, ctx sdk.Context, consAddr sdk.ConsAddress) (types.ValidatorSigningInfo, error) {
+func QuerySigningInfo(cdc *codec.Codec, tmNode rpcclient.Client, height int64, consAddr sdk.ConsAddress) (types.ValidatorSigningInfo, error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
 	key := types.GetValidatorSigningInfoKey(consAddr)
 	res, _, err := cliCtx.QueryStore(key, types.StoreKey)
@@ -152,8 +152,20 @@ func QueryPOSParams(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (ty
 	return params, nil
 }
 
+func QueryTransaction(tmNode rpcclient.Client, hash string) (*ctypes.ResultTx, error) {
+	res, err := hex.DecodeString(hash)
+	if err != nil {
+		return nil, err
+	}
+	tx, err := (tmNode).Tx(res, false)
+	if err != nil {
+		return nil, err
+	}
+	return tx, nil
+}
+
 func QueryBlock(tmNode rpcclient.Client, height *int64) ([]byte, error) {
-	res, err := tmNode.Block(height)
+	res, err := (tmNode).Block(height)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +175,8 @@ func QueryBlock(tmNode rpcclient.Client, height *int64) ([]byte, error) {
 
 // get the current blockchain height
 func QueryChainHeight(tmNode rpcclient.Client) (int64, error) {
-	status, err := tmNode.Status()
+	client := (tmNode)
+	status, err := client.Status()
 	if err != nil {
 		return -1, err
 	}
@@ -173,7 +186,7 @@ func QueryChainHeight(tmNode rpcclient.Client) (int64, error) {
 }
 
 func QueryNodeStatus(tmNode rpcclient.Client) (*ctypes.ResultStatus, error) {
-	res, err := tmNode.Status()
+	res, err := (tmNode).Status()
 	if err != nil {
 		return nil, nil
 	}

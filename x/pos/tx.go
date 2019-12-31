@@ -10,34 +10,86 @@ import (
 	"github.com/tendermint/tendermint/rpc/client"
 )
 
-func StakeTx(cdc *codec.Codec, tmNode client.Client, txBuilder auth.TxBuilder, kp keys.KeyPair, passphrase string, amount sdk.Int) (*sdk.TxResponse, error) {
-	cliCtx := util.NewCLIContext(tmNode, kp.GetAddress(), passphrase).WithCodec(cdc)
+func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, amount sdk.Int, kp keys.KeyPair, passphrase string) (*sdk.TxResponse, error) {
+	txBuilder, cliCtx := newTx(cdc, tmNode, keybase, passphrase)
 	msg := types.MsgStake{
-		Address: sdk.ValAddress(kp.GetAddress()),
-		PubKey:  kp.PubKey,
-		Value:   amount,
+		Address:    sdk.ValAddress(kp.GetAddress()),
+		PubKey:     kp.PubKey,
+		Value:      amount,
+	}
+	err := msg.ValidateBasic()
+	if err != nil {
+		return nil, err
 	}
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
 }
 
-func UnstakeTx(cdc *codec.Codec, tmNode client.Client, txBuilder auth.TxBuilder, address sdk.ValAddress, passphrase string) (*sdk.TxResponse, error) {
-	cliCtx := util.NewCLIContext(tmNode, sdk.AccAddress(address), passphrase).WithCodec(cdc)
+func UnstakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, address sdk.ValAddress, passphrase string) (*sdk.TxResponse, error) {
+	txBuilder, cliCtx := newTx(cdc, tmNode, keybase, passphrase)
 	msg := types.MsgBeginUnstake{Address: address}
+	err := msg.ValidateBasic()
+	if err != nil {
+		return nil, err
+	}
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
 }
 
-func UnjailTx(cdc *codec.Codec, tmNode client.Client, txBuilder auth.TxBuilder, address sdk.ValAddress, passphrase string) (*sdk.TxResponse, error) {
-	cliCtx := util.NewCLIContext(tmNode, sdk.AccAddress(address), passphrase).WithCodec(cdc)
+func UnjailTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, address sdk.ValAddress, passphrase string) (*sdk.TxResponse, error) {
+	txBuilder, cliCtx := newTx(cdc, tmNode, keybase, passphrase)
 	msg := types.MsgUnjail{ValidatorAddr: address}
+	err := msg.ValidateBasic()
+	if err != nil {
+		return nil, err
+	}
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
 }
 
-func Send(cdc *codec.Codec, tmNode client.Client, fromAddr, toAddr sdk.ValAddress, txBuilder auth.TxBuilder, passphrase string, amount sdk.Int) (*sdk.TxResponse, error) {
-	cliCtx := util.NewCLIContext(tmNode, sdk.AccAddress(fromAddr), passphrase).WithCodec(cdc)
+func Send(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, fromAddr, toAddr sdk.ValAddress, passphrase string, amount sdk.Int) (*sdk.TxResponse, error) {
+	txBuilder, cliCtx := newTx(cdc, tmNode, keybase, passphrase)
 	msg := types.MsgSend{
 		FromAddress: fromAddr,
 		ToAddress:   toAddr,
 		Amount:      amount,
 	}
+	err := msg.ValidateBasic()
+	if err != nil {
+		return nil, err
+	}
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
+}
+
+func RawTx(cdc *codec.Codec, tmNode client.Client, fromAddr sdk.ValAddress, txBytes []byte) (sdk.TxResponse, error) {
+	return util.CLIContext{
+		Codec:       cdc,
+		Client:      tmNode,
+		FromAddress: sdk.AccAddress(fromAddr),
+	}.BroadcastTx(txBytes)
+}
+
+func newTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, passphrase string) (txBuilder auth.TxBuilder, cliCtx util.CLIContext) {
+	genDoc, err := tmNode.Genesis()
+	if err != nil {
+		panic(err)
+	}
+	kp, err := keybase.List()
+	if err != nil {
+		panic(err)
+	}
+	chainID := genDoc.Genesis.ChainID
+	fromAddr := kp[0].GetAddress()
+	cliCtx = util.NewCLIContext(tmNode, fromAddr, passphrase).WithCodec(cdc)
+	accGetter := auth.NewAccountRetriever(cliCtx)
+	err = accGetter.EnsureExists(fromAddr)
+	account, err := accGetter.GetAccount(fromAddr)
+	if err != nil {
+		panic(err)
+	}
+	txBuilder = auth.NewTxBuilder(
+		auth.DefaultTxEncoder(cdc),
+		account.GetAccountNumber(),
+		account.GetSequence(),
+		chainID,
+		"",
+		sdk.NewCoins(sdk.NewCoin("stake", sdk.NewInt(10)))).WithKeybase(keybase) // todo get stake denom
+	return
 }

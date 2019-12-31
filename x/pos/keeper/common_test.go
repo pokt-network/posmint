@@ -1,8 +1,6 @@
 package keeper
 
 import (
-	"bytes"
-	"encoding/hex"
 	"github.com/pokt-network/posmint/types/module"
 	"github.com/pokt-network/posmint/x/supply"
 	"github.com/tendermint/tendermint/crypto/ed25519"
@@ -152,23 +150,18 @@ func sendFromModuleToAccount(t *testing.T, ctx sdk.Context, k *Keeper, module st
 	}
 }
 
-func getRandomValidatorAddress() sdk.ValAddress {
-	baseAddressBytes := []byte("abcdefghijklmnopqrst")
-	shiftBytes := []byte("qrstuvwxyz")
-
-	addressBytes := bytes.Replace(baseAddressBytes, []byte("t"), []byte(string(shiftBytes[rand.Intn(9)])), 1)
-	hexBytes := hex.EncodeToString(addressBytes)
-	validatorAddress, err := sdk.ValAddressFromHex(hexBytes)
-	if err != nil {
-		panic(err)
-	}
-	return validatorAddress
-}
-
-func getBondedValidator() types.Validator {
+func getRandomPubKey() ed25519.PubKeyEd25519 {
 	var pub ed25519.PubKeyEd25519
 	rand.Read(pub[:])
+	return pub
+}
 
+func getRandomValidatorAddress() sdk.ValAddress {
+	return sdk.ValAddress(getRandomPubKey().Address())
+}
+
+func getValidator() types.Validator {
+	pub := getRandomPubKey()
 	return types.Validator{
 		Address:      sdk.ValAddress(pub.Address()),
 		StakedTokens: sdk.NewInt(100000000000),
@@ -177,27 +170,17 @@ func getBondedValidator() types.Validator {
 		Status:       sdk.Bonded,
 	}
 }
-func getUnbondedValidator() types.Validator {
-	var pub ed25519.PubKeyEd25519
-	rand.Read(pub[:])
 
-	return types.Validator{
-		Address:      getRandomValidatorAddress(),
-		StakedTokens: sdk.NewInt(100000000000),
-		ConsPubKey:   pub,
-		Jailed:       false,
-		Status:       sdk.Unbonded,
-	}
+func getBondedValidator() types.Validator {
+	return getValidator()
 }
-func getUnboindingValidator() types.Validator {
-	var pub ed25519.PubKeyEd25519
-	rand.Read(pub[:])
 
-	return types.Validator{
-		Address:      getRandomValidatorAddress(),
-		StakedTokens: sdk.NewInt(100000000000),
-		ConsPubKey:   pub,
-		Jailed:       false,
-		Status:       sdk.Unbonding,
-	}
+func getUnbondedValidator() types.Validator {
+	v := getValidator()
+	return v.UpdateStatus(sdk.Unbonded)
+}
+
+func getUnbondingValidator() types.Validator {
+	v := getValidator()
+	return v.UpdateStatus(sdk.Unbonding)
 }

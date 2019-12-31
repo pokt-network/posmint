@@ -103,6 +103,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, data json.RawMessage) []abci.Va
 	} else {
 		types.ModuleCdc.MustUnmarshalJSON(data, &genesisState)
 	}
+	genesisState.Params = types.DefaultParams()
 	return InitGenesis(ctx, am.keeper, am.supplyKeeper, genesisState)
 }
 
