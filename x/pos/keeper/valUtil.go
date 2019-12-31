@@ -73,6 +73,18 @@ func (k Keeper) Validator(ctx sdk.Context, address sdk.ValAddress) exported.Vali
 	return val
 }
 
+func (k Keeper) AllValidators(ctx sdk.Context) (validators []exported.ValidatorI) {
+	store := ctx.KVStore(k.storeKey)
+	iterator := sdk.KVStorePrefixIterator(store, types.AllValidatorsKey)
+	defer iterator.Close()
+
+	for ; iterator.Valid(); iterator.Next() {
+		validator := types.MustUnmarshalValidator(k.cdc, iterator.Value())
+		validators = append(validators, validator)
+	}
+	return validators
+}
+
 // wrapper for GetValidatorByConsAddress call
 func (k Keeper) validatorByConsAddr(ctx sdk.Context, addr sdk.ConsAddress) exported.ValidatorI {
 	val, found := k.GetValidatorByConsAddr(ctx, addr)
@@ -95,8 +107,7 @@ func (k Keeper) getPrevStatePowerMap(ctx sdk.Context) valPowerMap {
 	for ; iterator.Valid(); iterator.Next() {
 		var valAddr [sdk.AddrLen]byte
 		// extract the validator address from the key (prefix is 1-byte)
-		key := iterator.Key()
-		copy(valAddr[:], key[1:])
+		copy(valAddr[:], iterator.Key()[1:])
 		// power bytes is just the value
 		powerBytes := iterator.Value()
 		prevState[valAddr] = make([]byte, len(powerBytes))
@@ -124,3 +135,4 @@ func sortNoLongerStakedValidators(prevState valPowerMap) [][]byte {
 	})
 	return noLongerStaked
 }
+
