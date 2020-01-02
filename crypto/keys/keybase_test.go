@@ -188,3 +188,28 @@ func TestRawExportImport(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, fetchedKp, importedKp)
 }
+
+func TestCoinbase(t *testing.T) {
+	// make the storage with reasonable defaults
+	cstore := NewInMemory()
+
+	// Create an account
+	passphrase := "1234"
+	_, err := cstore.Create(passphrase)
+	require.NoError(t, err)
+	coinbase, err := cstore.GetCoinbase()
+	require.NoError(t, err)
+	require.NotEmpty(t, coinbase)
+	_, err = cstore.Create(passphrase)
+	require.NoError(t, err)
+	_, err = cstore.Create(passphrase)
+	require.NoError(t, err)
+	kp, err := cstore.Create(passphrase)
+	require.NoError(t, err)
+	err = cstore.SetCoinbase(kp.GetAddress())
+	require.NoError(t, err)
+	coinbase, err = cstore.GetCoinbase()
+	require.NoError(t, err)
+	require.NotEmpty(t, coinbase)
+	require.Equal(t, coinbase, kp)
+}
