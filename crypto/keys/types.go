@@ -18,7 +18,8 @@ type Keybase interface {
 	Get(address types.AccAddress) (KeyPair, error)
 	Delete(address types.AccAddress, passphrase string) error
 	Update(address types.AccAddress, oldpass string, newpass string) error
-
+	GetCoinbase() (KeyPair, error)
+	SetCoinbase(address types.AccAddress) error
 	// Sign some bytes, looking up the private key to use
 	Sign(address types.AccAddress, passphrase string, msg []byte) ([]byte, crypto.PubKey, error)
 

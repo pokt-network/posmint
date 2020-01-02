@@ -10,11 +10,12 @@ import (
 	sdk "github.com/pokt-network/posmint/types"
 )
 
-var _ Keybase = lazyKeybase{}
+var _ Keybase = &lazyKeybase{}
 
 type lazyKeybase struct {
-	name string
-	dir  string
+	name     string
+	dir      string
+	coinbase KeyPair
 }
 
 // New creates a new instance of a lazy keybase.
@@ -23,7 +24,30 @@ func New(name, dir string) Keybase {
 		panic(fmt.Sprintf("failed to create Keybase directory: %s", err))
 	}
 
-	return lazyKeybase{name: name, dir: dir}
+	return &lazyKeybase{name: name, dir: dir}
+}
+
+func (kb *lazyKeybase) GetCoinbase() (KeyPair, error) {
+	if kb.coinbase.PrivKeyArmor == "" {
+		kps, err := kb.List()
+		if err != nil {
+			return KeyPair{}, err
+		}
+		if len(kps) == 0 {
+			return KeyPair{}, fmt.Errorf("0 keypairs in the keybase, so could not get a coinbase")
+		}
+		kb.coinbase = kps[0]
+	}
+	return kb.coinbase, nil
+}
+
+func (kb *lazyKeybase) SetCoinbase(address types.AccAddress) error {
+	kp, err := kb.Get(address)
+	if err != nil {
+		return err
+	}
+	kb.coinbase = kp
+	return nil
 }
 
 func (lkb lazyKeybase) List() ([]KeyPair, error) {

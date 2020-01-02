@@ -15,24 +15,48 @@ import (
 	dbm "github.com/tendermint/tm-db"
 )
 
-var _ Keybase = dbKeybase{}
+var _ Keybase = &dbKeybase{}
 
 // dbKeybase combines encryption and storage implementation to provide
 // a full-featured key manager
 type dbKeybase struct {
-	db dbm.DB
+	db       dbm.DB
+	coinbase KeyPair
 }
 
 // newDbKeybase creates a new keybase instance using the passed DB for reading and writing keys.
 func newDbKeybase(db dbm.DB) Keybase {
-	return dbKeybase{
+	return &dbKeybase{
 		db: db,
 	}
 }
 
 // NewInMemory creates a transient keybase on top of in-memory storage
 // instance useful for testing purposes and on-the-fly key generation.
-func NewInMemory() Keybase { return dbKeybase{dbm.NewMemDB()} }
+func NewInMemory() Keybase { return &dbKeybase{db: dbm.NewMemDB()} }
+
+func (kb *dbKeybase) GetCoinbase() (KeyPair, error) {
+	if kb.coinbase.PrivKeyArmor == "" {
+		kps, err := kb.List()
+		if err != nil {
+			return KeyPair{}, err
+		}
+		if len(kps) == 0 {
+			return KeyPair{}, fmt.Errorf("0 keypairs in the keybase, so could not get a coinbase")
+		}
+		kb.coinbase = kps[0]
+	}
+	return kb.coinbase, nil
+}
+
+func (kb *dbKeybase) SetCoinbase(address types.AccAddress) error {
+	kp, err := kb.Get(address)
+	if err != nil {
+		return err
+	}
+	kb.coinbase = kp
+	return nil
+}
 
 // List returns the keys from storage in alphabetical order.
 func (kb dbKeybase) List() ([]KeyPair, error) {
