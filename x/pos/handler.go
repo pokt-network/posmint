@@ -61,10 +61,7 @@ func stakeNewValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keeper) sdk
 	// register the validator in the world state
 	k.RegisterValidator(ctx, validator)
 	// change the validator state to staked
-	err := k.StakeValidator(ctx, validator, msg.Value)
-	if err != nil {
-		return err.Result()
-	}
+	k.StakeValidator(ctx, validator, msg.Value)
 	// create the event
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
@@ -97,10 +94,7 @@ func stakeRegisteredValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keep
 	if err != nil {
 		return err.Result()
 	}
-	err = k.StakeValidator(ctx, validator, msg.Value)
-	if err != nil {
-		return err.Result()
-	}
+	k.StakeValidator(ctx, validator, msg.Value)
 	// create the event
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(

@@ -98,7 +98,7 @@ func (k Keeper) ValidateValidatorStaking(ctx sdk.Context, validator types.Valida
 }
 
 // store ops when a validator stakes
-func (k Keeper) StakeValidator(ctx sdk.Context, validator types.Validator, amount sdk.Int) sdk.Error {
+func (k Keeper) StakeValidator(ctx sdk.Context, validator types.Validator, amount sdk.Int) {
 	// call the before hook
 	k.BeforeValidatorStaked(ctx, validator.ConsAddress(), validator.Address)
 	// send the coins from address to staked module account
@@ -123,7 +123,6 @@ func (k Keeper) StakeValidator(ctx sdk.Context, validator types.Validator, amoun
 	}
 	// call the after hook
 	k.AfterValidatorStaked(ctx, validator.ConsAddress(), validator.Address)
-	return nil
 }
 
 func (k Keeper) ValidateValidatorBeginUnstaking(ctx sdk.Context, validator types.Validator) sdk.Error {

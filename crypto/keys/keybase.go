@@ -152,13 +152,7 @@ func (kb dbKeybase) Sign(address types.AccAddress, passphrase string, msg []byte
 
 // Create a new KeyPair and encrypt it to disk using encryptPassphrase
 func (kb dbKeybase) Create(encryptPassphrase string) (KeyPair, error) {
-	//_, privKey, err := ed25519.GenerateKey(nil)
 	privKey := tmed25519.GenPrivKey()
-	//if err != nil {
-	//	return KeyPair{}, err
-	//}
-	//var privKeyBytes [64]byte
-	//copy(privKeyBytes[:], privKey.Bytes())
 	kp := kb.writeLocalKeyPair(privKey, encryptPassphrase)
 	return kp, nil
 }
