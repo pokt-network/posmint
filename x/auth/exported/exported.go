@@ -15,8 +15,8 @@ import (
 //
 // Many complex conditions can be used in the concrete struct which implements Account.
 type Account interface {
-	GetAddress() sdk.AccAddress
-	SetAddress(sdk.AccAddress) error // errors if already set.
+	GetAddress() sdk.Address
+	SetAddress(sdk.Address) error // errors if already set.
 
 	GetPubKey() crypto.PubKey // can return nil.
 	SetPubKey(crypto.PubKey) error

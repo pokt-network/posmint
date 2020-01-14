@@ -49,7 +49,7 @@ func (ak AccountKeeper) Logger(ctx sdk.Context) log.Logger {
 }
 
 // NewAccountWithAddress implements sdk.AccountKeeper.
-func (ak AccountKeeper) NewAccountWithAddress(ctx sdk.Context, addr sdk.AccAddress) exported.Account {
+func (ak AccountKeeper) NewAccountWithAddress(ctx sdk.Context, addr sdk.Address) exported.Account {
 	acc := ak.proto()
 	err := acc.SetAddress(addr)
 	if err != nil {
@@ -73,7 +73,7 @@ func (ak AccountKeeper) NewAccount(ctx sdk.Context, acc exported.Account) export
 }
 
 // GetAccount implements sdk.AccountKeeper.
-func (ak AccountKeeper) GetAccount(ctx sdk.Context, addr sdk.AccAddress) exported.Account {
+func (ak AccountKeeper) GetAccount(ctx sdk.Context, addr sdk.Address) exported.Account {
 	store := ctx.KVStore(ak.key)
 	bz := store.Get(types.AddressStoreKey(addr))
 	if bz == nil {
@@ -132,7 +132,7 @@ func (ak AccountKeeper) IterateAccounts(ctx sdk.Context, process func(exported.A
 }
 
 // GetPubKey Returns the PubKey of the account at address
-func (ak AccountKeeper) GetPubKey(ctx sdk.Context, addr sdk.AccAddress) (crypto.PubKey, sdk.Error) {
+func (ak AccountKeeper) GetPubKey(ctx sdk.Context, addr sdk.Address) (crypto.PubKey, sdk.Error) {
 	acc := ak.GetAccount(ctx, addr)
 	if acc == nil {
 		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))
@@ -141,7 +141,7 @@ func (ak AccountKeeper) GetPubKey(ctx sdk.Context, addr sdk.AccAddress) (crypto.
 }
 
 // GetSequence Returns the Sequence of the account at address
-func (ak AccountKeeper) GetSequence(ctx sdk.Context, addr sdk.AccAddress) (uint64, sdk.Error) {
+func (ak AccountKeeper) GetSequence(ctx sdk.Context, addr sdk.Address) (uint64, sdk.Error) {
 	acc := ak.GetAccount(ctx, addr)
 	if acc == nil {
 		return 0, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))

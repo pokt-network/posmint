@@ -17,7 +17,7 @@ import (
 
 var (
 	priv = ed25519.GenPrivKey()
-	addr = sdk.AccAddress(priv.PubKey().Address())
+	addr = sdk.Address(priv.PubKey().Address())
 )
 
 func TestStdTx(t *testing.T) {
@@ -139,11 +139,11 @@ func TestStdSignatureMarshalYAML(t *testing.T) {
 		},
 		{
 			StdSignature{PubKey: pubKey, Signature: []byte("dummySig")},
-			fmt.Sprintf("|\n  pubkey: %s\n  signature: dummySig\n", sdk.HexAccPub(pubKey)),
+			fmt.Sprintf("|\n  pubkey: %s\n  signature: dummySig\n", sdk.HexAddressPubKey(pubKey)),
 		},
 		{
 			StdSignature{PubKey: pubKey, Signature: nil},
-			fmt.Sprintf("|\n  pubkey: %s\n  signature: \"\"\n", sdk.HexAccPub(pubKey)),
+			fmt.Sprintf("|\n  pubkey: %s\n  signature: \"\"\n", sdk.HexAddressPubKey(pubKey)),
 		},
 	}
 

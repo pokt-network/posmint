@@ -9,8 +9,8 @@ import (
 	"github.com/tendermint/tendermint/rpc/client"
 )
 
-func InvariantBroken(cdc *codec.Codec, tmNode client.Client, moduleName, route string, txBuilder auth.TxBuilder, address sdk.ValAddress, passphrase string) (*sdk.TxResponse, error) {
-	cliCtx := util.NewCLIContext(tmNode, sdk.AccAddress(address), passphrase).WithCodec(cdc)
+func InvariantBroken(cdc *codec.Codec, tmNode client.Client, moduleName, route string, txBuilder auth.TxBuilder, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
+	cliCtx := util.NewCLIContext(tmNode, sdk.Address(address), passphrase).WithCodec(cdc)
 	senderAddr := cliCtx.GetFromAddress()
 	msg := types.NewMsgVerifyInvariant(senderAddr, moduleName, route)
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})

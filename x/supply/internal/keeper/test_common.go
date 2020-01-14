@@ -99,7 +99,7 @@ func createTestAccs(ctx sdk.Context, numAccs int, initialCoins sdk.Coins, ak *au
 	for i := 0; i < numAccs; i++ {
 		privKey := secp256k1.GenPrivKey()
 		pubKey := privKey.PubKey()
-		addr := sdk.AccAddress(pubKey.Address())
+		addr := sdk.Address(pubKey.Address())
 		acc := auth.NewBaseAccountWithAddress(addr)
 		acc.Coins = initialCoins
 		acc.PubKey = pubKey

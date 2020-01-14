@@ -18,7 +18,7 @@ import (
 
 var (
 	priv = ed25519.GenPrivKey()
-	addr = sdk.AccAddress(priv.PubKey().Address())
+	addr = sdk.Address(priv.PubKey().Address())
 )
 
 func TestParseQueryResponse(t *testing.T) {

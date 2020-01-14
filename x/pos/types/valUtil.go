@@ -40,7 +40,7 @@ func UnmarshalValidator(cdc *codec.Codec, valBytes []byte) (validator Validator,
 
 // String returns a human readable string representation of a validator.
 func (v Validator) String() string {
-	bechConsPubKey := sdk.HexConsPub(v.ConsPubKey)
+	bechConsPubKey := sdk.HexAddressPubKey(v.ConsPubKey)
 
 	return fmt.Sprintf(`Validator
   Address:           		  %s
@@ -55,7 +55,7 @@ func (v Validator) String() string {
 
 // this is a helper struct used for JSON de- and encoding only
 type hexValidator struct {
-	Address                 sdk.ValAddress `json:"operator_address" yaml:"operator_address"` // the hex address of the validator
+	Address                 sdk.Address    `json:"operator_address" yaml:"operator_address"` // the hex address of the validator
 	ConsPubKey              string         `json:"cons_pubkey" yaml:"cons_pubkey"`           // the hex consensus public key of the validator
 	Jailed                  bool           `json:"jailed" yaml:"jailed"`                     // has the validator been jailed from staked status?
 	Status                  sdk.BondStatus `json:"status" yaml:"status"`                     // validator status (bonded/unbonding/unbonded)
@@ -65,7 +65,7 @@ type hexValidator struct {
 
 // MarshalJSON marshals the validator to JSON using Hex
 func (v Validator) MarshalJSON() ([]byte, error) {
-	bechConsPubKey := sdk.HexConsPub(v.ConsPubKey)
+	bechConsPubKey := sdk.HexAddressPubKey(v.ConsPubKey)
 	return codec.Cdc.MarshalJSON(hexValidator{
 		Address:                 v.Address,
 		ConsPubKey:              bechConsPubKey,
@@ -82,7 +82,7 @@ func (v *Validator) UnmarshalJSON(data []byte) error {
 	if err := codec.Cdc.UnmarshalJSON(data, bv); err != nil {
 		return err
 	}
-	consPubKey, err := sdk.GetConsPubKeyHex(bv.ConsPubKey)
+	consPubKey, err := sdk.GetAddressPubKeyFromHex(bv.ConsPubKey)
 	if err != nil {
 		return err
 	}

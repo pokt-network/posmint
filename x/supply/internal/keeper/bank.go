@@ -7,9 +7,9 @@ import (
 	"github.com/pokt-network/posmint/x/supply/internal/types"
 )
 
-// SendCoinsFromModuleToAccount transfers coins from a ModuleAccount to an AccAddress
+// SendCoinsFromModuleToAccount transfers coins from a ModuleAccount to an Address
 func (k Keeper) SendCoinsFromModuleToAccount(ctx sdk.Context, senderModule string,
-	recipientAddr sdk.AccAddress, amt sdk.Coins) sdk.Error {
+	recipientAddr sdk.Address, amt sdk.Coins) sdk.Error {
 
 	senderAddr := k.GetModuleAddress(senderModule)
 	if senderAddr == nil {
@@ -36,8 +36,8 @@ func (k Keeper) SendCoinsFromModuleToModule(ctx sdk.Context, senderModule, recip
 	return k.bk.SendCoins(ctx, senderAddr, recipientAcc.GetAddress(), amt)
 }
 
-// SendCoinsFromAccountToModule transfers coins from an AccAddress to a ModuleAccount
-func (k Keeper) SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.AccAddress,
+// SendCoinsFromAccountToModule transfers coins from an Address to a ModuleAccount
+func (k Keeper) SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.Address,
 	recipientModule string, amt sdk.Coins) sdk.Error {
 
 	// create the account if it doesn't yet exist

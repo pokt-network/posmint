@@ -22,17 +22,17 @@ var _ exported.Account = (*BaseAccount)(nil)
 // However one doesn't have to use BaseAccount as long as your struct
 // implements Account.
 type BaseAccount struct {
-	Address       sdk.AccAddress `json:"address" yaml:"address"`
-	Coins         sdk.Coins      `json:"coins" yaml:"coins"`
-	PubKey        crypto.PubKey  `json:"public_key" yaml:"public_key"`
-	AccountNumber uint64         `json:"account_number" yaml:"account_number"`
-	Sequence      uint64         `json:"sequence" yaml:"sequence"`
+	Address       sdk.Address   `json:"address" yaml:"address"`
+	Coins         sdk.Coins     `json:"coins" yaml:"coins"`
+	PubKey        crypto.PubKey `json:"public_key" yaml:"public_key"`
+	AccountNumber uint64        `json:"account_number" yaml:"account_number"`
+	Sequence      uint64        `json:"sequence" yaml:"sequence"`
 }
 
 type Accounts []exported.Account
 
 // NewBaseAccount creates a new BaseAccount object
-func NewBaseAccount(address sdk.AccAddress, coins sdk.Coins,
+func NewBaseAccount(address sdk.Address, coins sdk.Coins,
 	pubKey crypto.PubKey, accountNumber uint64, sequence uint64) *BaseAccount {
 
 	return &BaseAccount{
@@ -49,7 +49,7 @@ func (acc BaseAccount) String() string {
 	var pubkey string
 
 	if acc.PubKey != nil {
-		pubkey = sdk.HexAccPub(acc.PubKey)
+		pubkey = sdk.HexAddressPubKey(acc.PubKey)
 	}
 
 	return fmt.Sprintf(`Account:
@@ -68,19 +68,19 @@ func ProtoBaseAccount() exported.Account {
 }
 
 // NewBaseAccountWithAddress - returns a new base account with a given address
-func NewBaseAccountWithAddress(addr sdk.AccAddress) BaseAccount {
+func NewBaseAccountWithAddress(addr sdk.Address) BaseAccount {
 	return BaseAccount{
 		Address: addr,
 	}
 }
 
 // GetAddress - Implements sdk.Account.
-func (acc BaseAccount) GetAddress() sdk.AccAddress {
+func (acc BaseAccount) GetAddress() sdk.Address {
 	return acc.Address
 }
 
 // SetAddress - Implements sdk.Account.
-func (acc *BaseAccount) SetAddress(addr sdk.AccAddress) error {
+func (acc *BaseAccount) SetAddress(addr sdk.Address) error {
 	if len(acc.Address) != 0 {
 		return errors.New("cannot override BaseAccount address")
 	}
@@ -145,11 +145,11 @@ func (acc BaseAccount) MarshalYAML() (interface{}, error) {
 	var pubkey string
 
 	if acc.PubKey != nil {
-		pubkey = sdk.HexAccPub(acc.PubKey)
+		pubkey = sdk.HexAddressPubKey(acc.PubKey)
 	}
 
 	bs, err = yaml.Marshal(struct {
-		Address       sdk.AccAddress
+		Address       sdk.Address
 		Coins         sdk.Coins
 		PubKey        string
 		AccountNumber uint64

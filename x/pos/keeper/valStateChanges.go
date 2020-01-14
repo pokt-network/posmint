@@ -25,7 +25,7 @@ func (k Keeper) UpdateTendermintValidators(ctx sdk.Context) (updates []abci.Vali
 	defer iterator.Close()
 	for count := 0; iterator.Valid() && count < int(maxValidators); iterator.Next() {
 		// get the validator address
-		valAddr := sdk.ValAddress(iterator.Value())
+		valAddr := sdk.Address(iterator.Value())
 		// return the validator from the current store
 		validator := k.mustGetValidator(ctx, valAddr)
 		// sanity check for no jailed validators
@@ -91,7 +91,7 @@ func (k Keeper) ValidateValidatorStaking(ctx sdk.Context, validator types.Valida
 	if amount.LT(sdk.NewInt(k.MinimumStake(ctx))) {
 		return types.ErrMinimumStake(k.codespace)
 	}
-	if !k.coinKeeper.HasCoins(ctx, sdk.AccAddress(validator.Address), coin) {
+	if !k.coinKeeper.HasCoins(ctx, sdk.Address(validator.Address), coin) {
 		return types.ErrNotEnoughCoins(k.codespace)
 	}
 	return nil
@@ -100,7 +100,7 @@ func (k Keeper) ValidateValidatorStaking(ctx sdk.Context, validator types.Valida
 // store ops when a validator stakes
 func (k Keeper) StakeValidator(ctx sdk.Context, validator types.Validator, amount sdk.Int) {
 	// call the before hook
-	k.BeforeValidatorStaked(ctx, validator.ConsAddress(), validator.Address)
+	k.BeforeValidatorStaked(ctx, validator.GetConsAddr(), validator.Address)
 	// send the coins from address to staked module account
 	k.coinsFromUnstakedToStaked(ctx, validator, amount)
 	// add coins to the staked field
@@ -112,17 +112,17 @@ func (k Keeper) StakeValidator(ctx sdk.Context, validator types.Validator, amoun
 	// save in the staked store
 	k.SetStakedValidator(ctx, validator)
 	// ensure there's a signing info entry for the validator (used in slashing)
-	_, found := k.GetValidatorSigningInfo(ctx, validator.ConsAddress())
+	_, found := k.GetValidatorSigningInfo(ctx, validator.GetConsAddr())
 	if !found {
 		signingInfo := types.ValidatorSigningInfo{
-			Address:     validator.ConsAddress(),
+			Address:     validator.GetConsAddr(),
 			StartHeight: ctx.BlockHeight(),
 			JailedUntil: time.Unix(0, 0),
 		}
-		k.SetValidatorSigningInfo(ctx, validator.ConsAddress(), signingInfo)
+		k.SetValidatorSigningInfo(ctx, validator.GetConsAddr(), signingInfo)
 	}
 	// call the after hook
-	k.AfterValidatorStaked(ctx, validator.ConsAddress(), validator.Address)
+	k.AfterValidatorStaked(ctx, validator.GetConsAddr(), validator.Address)
 }
 
 func (k Keeper) ValidateValidatorBeginUnstaking(ctx sdk.Context, validator types.Validator) sdk.Error {
@@ -140,7 +140,7 @@ func (k Keeper) ValidateValidatorBeginUnstaking(ctx sdk.Context, validator types
 // store ops when validator begins to unstake -> starts the unbonding timer
 func (k Keeper) BeginUnstakingValidator(ctx sdk.Context, validator types.Validator) sdk.Error {
 	// call before unstaking hook
-	k.BeforeValidatorBeginUnstaking(ctx, validator.ConsAddress(), validator.Address)
+	k.BeforeValidatorBeginUnstaking(ctx, validator.GetConsAddr(), validator.Address)
 	// get params
 	params := k.GetParams(ctx)
 	// delete the validator from the staking set, as it is technically staked but not going to participate
@@ -154,7 +154,7 @@ func (k Keeper) BeginUnstakingValidator(ctx sdk.Context, validator types.Validat
 	// Adds to unstaking validator queue
 	k.SetUnstakingValidator(ctx, validator)
 	// call after hook
-	k.AfterValidatorBeginUnstaking(ctx, validator.ConsAddress(), validator.Address)
+	k.AfterValidatorBeginUnstaking(ctx, validator.GetConsAddr(), validator.Address)
 	return nil
 }
 
@@ -172,7 +172,7 @@ func (k Keeper) ValidateValidatorFinishUnstaking(ctx sdk.Context, validator type
 // store ops to unstake a validator -> called after unbonding time is up
 func (k Keeper) FinishUnstakingValidator(ctx sdk.Context, validator types.Validator) sdk.Error {
 	// call the before hook
-	k.BeforeValidatorUnstaked(ctx, validator.ConsAddress(), validator.Address)
+	k.BeforeValidatorUnstaked(ctx, validator.GetConsAddr(), validator.Address)
 	// delete the validator from the unstaking queue
 	k.deleteUnstakingValidator(ctx, validator)
 	// amount unstaked = stakedTokens
@@ -186,7 +186,7 @@ func (k Keeper) FinishUnstakingValidator(ctx sdk.Context, validator types.Valida
 	// update the validator in the main store
 	k.SetValidator(ctx, validator)
 	// call the after hook
-	k.AfterValidatorUnstaked(ctx, validator.ConsAddress(), validator.Address)
+	k.AfterValidatorUnstaked(ctx, validator.GetConsAddr(), validator.Address)
 	// create the event
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
@@ -206,7 +206,7 @@ func (k Keeper) FinishUnstakingValidator(ctx sdk.Context, validator types.Valida
 // force unstake (called when slashed below the minimum)
 func (k Keeper) ForceValidatorUnstake(ctx sdk.Context, validator types.Validator) sdk.Error {
 	// call the before unstaked hook
-	k.BeforeValidatorUnstaked(ctx, validator.ConsAddress(), validator.Address)
+	k.BeforeValidatorUnstaked(ctx, validator.GetConsAddr(), validator.Address)
 	// delete the validator from staking set as they are unstaked
 	k.deleteValidatorFromStakingSet(ctx, validator)
 	// amount unstaked = stakedTokens
@@ -221,7 +221,7 @@ func (k Keeper) ForceValidatorUnstake(ctx sdk.Context, validator types.Validator
 	// set the validator in store
 	k.SetValidator(ctx, validator)
 	// call after hook
-	k.AfterValidatorUnstaked(ctx, validator.ConsAddress(), validator.Address)
+	k.AfterValidatorUnstaked(ctx, validator.GetConsAddr(), validator.Address)
 	// create the event
 	ctx.EventManager().EmitEvents(sdk.Events{
 		sdk.NewEvent(
@@ -239,7 +239,7 @@ func (k Keeper) ForceValidatorUnstake(ctx sdk.Context, validator types.Validator
 }
 
 // send a validator to jail
-func (k Keeper) JailValidator(ctx sdk.Context, addr sdk.ConsAddress) {
+func (k Keeper) JailValidator(ctx sdk.Context, addr sdk.Address) {
 	validator := k.mustGetValidatorByConsAddr(ctx, addr)
 	if validator.Jailed {
 		panic(fmt.Sprintf("cannot jail already jailed validator, validator: %v\n", validator))
@@ -252,7 +252,7 @@ func (k Keeper) JailValidator(ctx sdk.Context, addr sdk.ConsAddress) {
 }
 
 // remove a validator from jail
-func (k Keeper) UnjailValidator(ctx sdk.Context, addr sdk.ConsAddress) {
+func (k Keeper) UnjailValidator(ctx sdk.Context, addr sdk.Address) {
 	validator := k.mustGetValidatorByConsAddr(ctx, addr)
 	if !validator.Jailed {
 		panic(fmt.Sprintf("cannot unjail already unjailed validator, validator: %v\n", validator))

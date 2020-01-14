@@ -15,13 +15,13 @@ type SigningAlgo string
 type Keybase interface {
 	// CRUD on the keystore
 	List() ([]KeyPair, error)
-	Get(address types.AccAddress) (KeyPair, error)
-	Delete(address types.AccAddress, passphrase string) error
-	Update(address types.AccAddress, oldpass string, newpass string) error
+	Get(address types.Address) (KeyPair, error)
+	Delete(address types.Address, passphrase string) error
+	Update(address types.Address, oldpass string, newpass string) error
 	GetCoinbase() (KeyPair, error)
-	SetCoinbase(address types.AccAddress) error
+	SetCoinbase(address types.Address) error
 	// Sign some bytes, looking up the private key to use
-	Sign(address types.AccAddress, passphrase string, msg []byte) ([]byte, crypto.PubKey, error)
+	Sign(address types.Address, passphrase string, msg []byte) ([]byte, crypto.PubKey, error)
 
 	// Create a new KeyPair and encrypt it to disk using encryptPassphrase
 	Create(encryptPassphrase string) (KeyPair, error)
@@ -30,13 +30,13 @@ type Keybase interface {
 	ImportPrivKey(armor, decryptPassphrase, encryptPassphrase string) (KeyPair, error)
 
 	// ExportPrivKeyArmor using Armored private key string. Decrypts armor with decryptPassphrase, and encrypts result armor using the encryptPassphrase
-	ExportPrivKeyEncryptedArmor(address types.AccAddress, decryptPassphrase, encryptPassphrase string) (armor string, err error)
+	ExportPrivKeyEncryptedArmor(address types.Address, decryptPassphrase, encryptPassphrase string) (armor string, err error)
 
 	// ImportPrivateKeyObject using the raw unencrypted privateKey string and encrypts it to disk using encryptPassphrase
 	ImportPrivateKeyObject(privateKey [64]byte, encryptPassphrase string) (KeyPair, error)
 
 	// ExportPrivateKeyObject exports raw PrivKey object.
-	ExportPrivateKeyObject(address types.AccAddress, passphrase string) (crypto.PrivKey, error)
+	ExportPrivateKeyObject(address types.Address, passphrase string) (crypto.PrivKey, error)
 
 	// CloseDB closes the database.
 	CloseDB()
@@ -57,7 +57,7 @@ func NewKeyPair(pub crypto.PubKey, privArmor string) KeyPair {
 }
 
 // GetAddress for the given KeyPair
-func (kp KeyPair) GetAddress() types.AccAddress {
+func (kp KeyPair) GetAddress() types.Address {
 	return kp.PubKey.Address().Bytes()
 }
 

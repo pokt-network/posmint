@@ -10,18 +10,18 @@ import (
 
 func TestNewQuerySigningInfoParams(t *testing.T) {
 	type args struct {
-		consAddr types.ConsAddress
+		consAddr types.Address
 	}
 	var pub ed25519.PubKeyEd25519
 	rand.Read(pub[:])
-	ca := types.ConsAddress(pub.Address())
+	ca := types.Address(pub.Address())
 
 	tests := []struct {
 		name string
 		args args
 		want QuerySigningInfoParams
 	}{
-		{"default Test", args{ca}, QuerySigningInfoParams{ConsAddress: ca}},
+		{"default Test", args{ca}, QuerySigningInfoParams{Address: ca}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -118,11 +118,11 @@ func TestNewQueryUnstakingValidatorsParams(t *testing.T) {
 
 func TestNewQueryValidatorParams(t *testing.T) {
 	type args struct {
-		validatorAddr types.ValAddress
+		validatorAddr types.Address
 	}
 	var pub ed25519.PubKeyEd25519
 	rand.Read(pub[:])
-	va := types.ValAddress(pub.Address())
+	va := types.Address(pub.Address())
 
 	tests := []struct {
 		name string

@@ -11,10 +11,10 @@ const (
 
 // QueryAccountParams defines the params for querying accounts.
 type QueryAccountParams struct {
-	Address sdk.AccAddress
+	Address sdk.Address
 }
 
 // NewQueryAccountParams creates a new instance of QueryAccountParams.
-func NewQueryAccountParams(addr sdk.AccAddress) QueryAccountParams {
+func NewQueryAccountParams(addr sdk.Address) QueryAccountParams {
 	return QueryAccountParams{Address: addr}
 }

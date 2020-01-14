@@ -86,7 +86,7 @@ func SignStdTx(txBldr auth.TxBuilder, cliCtx CLIContext, stdTx auth.StdTx, appen
 
 	if !offline {
 		var err error
-		txBldr, err = populateAccountFromState(txBldr, cliCtx, sdk.AccAddress(addr))
+		txBldr, err = populateAccountFromState(txBldr, cliCtx, sdk.Address(addr))
 		if err != nil {
 			return signedStdTx, err
 		}
@@ -116,7 +116,7 @@ func ReadStdTxFromFile(cdc *codec.Codec, filename string) (stdTx auth.StdTx, err
 }
 
 func populateAccountFromState(
-	txBldr auth.TxBuilder, cliCtx CLIContext, addr sdk.AccAddress,
+	txBldr auth.TxBuilder, cliCtx CLIContext, addr sdk.Address,
 ) (auth.TxBuilder, error) {
 
 	num, seq, err := auth.NewAccountRetriever(cliCtx).GetAccountNumberSequence(addr)
@@ -201,7 +201,7 @@ func buildUnsignedStdTxOffline(txBldr auth.TxBuilder, cliCtx CLIContext, msgs []
 	return auth.NewStdTx(stdSignMsg.Msgs, stdSignMsg.Fee, nil, stdSignMsg.Memo), nil
 }
 
-func isTxSigner(user sdk.AccAddress, signers []sdk.AccAddress) bool {
+func isTxSigner(user sdk.Address, signers []sdk.Address) bool {
 	for _, s := range signers {
 		if bytes.Equal(user.Bytes(), s.Bytes()) {
 			return true

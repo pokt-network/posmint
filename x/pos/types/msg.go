@@ -17,14 +17,14 @@ var (
 //----------------------------------------------------------------------------------------------------------------------
 // MsgStake - struct for staking transactions
 type MsgStake struct {
-	Address sdk.ValAddress `json:"validator_address" yaml:"validator_address"`
-	PubKey  crypto.PubKey  `json:"pubkey" yaml:"pubkey"`
-	Value   sdk.Int        `json:"value" yaml:"value"`
+	Address sdk.Address   `json:"validator_address" yaml:"validator_address"`
+	PubKey  crypto.PubKey `json:"pubkey" yaml:"pubkey"`
+	Value   sdk.Int       `json:"value" yaml:"value"`
 }
 
 // Return address(es) that must sign over msg.GetSignBytes()
-func (msg MsgStake) GetSigners() []sdk.AccAddress {
-	addrs := []sdk.AccAddress{sdk.AccAddress(msg.Address)}
+func (msg MsgStake) GetSigners() []sdk.Address {
+	addrs := []sdk.Address{sdk.Address(msg.Address)}
 	return addrs
 }
 
@@ -52,11 +52,11 @@ func (msg MsgStake) Type() string  { return "stake_validator" }
 //----------------------------------------------------------------------------------------------------------------------
 // MsgBeginUnstake - struct for unstaking transaciton
 type MsgBeginUnstake struct {
-	Address sdk.ValAddress `json:"validator_address" yaml:"validator_address"`
+	Address sdk.Address `json:"validator_address" yaml:"validator_address"`
 }
 
-func (msg MsgBeginUnstake) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{sdk.AccAddress(msg.Address)}
+func (msg MsgBeginUnstake) GetSigners() []sdk.Address {
+	return []sdk.Address{sdk.Address(msg.Address)}
 }
 
 func (msg MsgBeginUnstake) GetSignBytes() []byte {
@@ -78,14 +78,14 @@ func (msg MsgBeginUnstake) Type() string  { return "begin_unstaking_validator" }
 //----------------------------------------------------------------------------------------------------------------------
 // MsgUnjail - struct for unjailing jailed validator
 type MsgUnjail struct {
-	ValidatorAddr sdk.ValAddress `json:"address" yaml:"address"` // address of the validator operator
+	ValidatorAddr sdk.Address `json:"address" yaml:"address"` // address of the validator operator
 }
 
 //nolint
 func (msg MsgUnjail) Route() string { return RouterKey }
 func (msg MsgUnjail) Type() string  { return "unjail" }
-func (msg MsgUnjail) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{sdk.AccAddress(msg.ValidatorAddr)}
+func (msg MsgUnjail) GetSigners() []sdk.Address {
+	return []sdk.Address{sdk.Address(msg.ValidatorAddr)}
 }
 
 func (msg MsgUnjail) GetSignBytes() []byte {
@@ -103,16 +103,16 @@ func (msg MsgUnjail) ValidateBasic() sdk.Error {
 //----------------------------------------------------------------------------------------------------------------------
 // MsgSend structure for sending coins
 type MsgSend struct {
-	FromAddress sdk.ValAddress
-	ToAddress   sdk.ValAddress
+	FromAddress sdk.Address
+	ToAddress   sdk.Address
 	Amount      sdk.Int
 }
 
 //nolint
 func (msg MsgSend) Route() string { return RouterKey }
 func (msg MsgSend) Type() string  { return "send" }
-func (msg MsgSend) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{sdk.AccAddress(msg.FromAddress)}
+func (msg MsgSend) GetSigners() []sdk.Address {
+	return []sdk.Address{sdk.Address(msg.FromAddress)}
 }
 
 func (msg MsgSend) GetSignBytes() []byte {

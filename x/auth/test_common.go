@@ -91,7 +91,7 @@ func NewDummySupplyKeeper(ak AccountKeeper) DummySupplyKeeper {
 }
 
 // SendCoinsFromAccountToModule for the dummy supply keeper
-func (sk DummySupplyKeeper) SendCoinsFromAccountToModule(ctx sdk.Context, fromAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) sdk.Error {
+func (sk DummySupplyKeeper) SendCoinsFromAccountToModule(ctx sdk.Context, fromAddr sdk.Address, recipientModule string, amt sdk.Coins) sdk.Error {
 
 	fromAcc := sk.ak.GetAccount(ctx, fromAddr)
 	moduleAcc := sk.GetModuleAccount(ctx, recipientModule)
@@ -145,6 +145,6 @@ func (sk DummySupplyKeeper) GetModuleAccount(ctx sdk.Context, moduleName string)
 }
 
 // GetModuleAddress for dummy supply keeper
-func (sk DummySupplyKeeper) GetModuleAddress(moduleName string) sdk.AccAddress {
-	return sdk.AccAddress(crypto.AddressHash([]byte(moduleName)))
+func (sk DummySupplyKeeper) GetModuleAddress(moduleName string) sdk.Address {
+	return sdk.Address(crypto.AddressHash([]byte(moduleName)))
 }

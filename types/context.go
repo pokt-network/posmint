@@ -105,7 +105,7 @@ func (c Context) WithBlockTime(newTime time.Time) Context {
 	return c.WithBlockHeader(newHeader)
 }
 
-func (c Context) WithProposer(addr ConsAddress) Context {
+func (c Context) WithProposer(addr Address) Context {
 	newHeader := c.BlockHeader()
 	newHeader.ProposerAddress = addr.Bytes()
 	return c.WithBlockHeader(newHeader)

@@ -21,9 +21,9 @@ type ModuleAccount struct {
 	Permissions []string `json:"permissions" yaml:"permissions"` // permissions of module account
 }
 
-// NewModuleAddress creates an AccAddress from the hash of the module's name
-func NewModuleAddress(name string) sdk.AccAddress {
-	return sdk.AccAddress(crypto.AddressHash([]byte(name)))
+// NewModuleAddress creates an Address from the hash of the module's name
+func NewModuleAddress(name string) sdk.Address {
+	return sdk.Address(crypto.AddressHash([]byte(name)))
 }
 
 func NewEmptyModuleAccount(name string, permissions ...string) *ModuleAccount {
@@ -98,7 +98,7 @@ func (ma ModuleAccount) String() string {
 // MarshalYAML returns the YAML representation of a ModuleAccount.
 func (ma ModuleAccount) MarshalYAML() (interface{}, error) {
 	bs, err := yaml.Marshal(struct {
-		Address       sdk.AccAddress
+		Address       sdk.Address
 		Coins         sdk.Coins
 		PubKey        string
 		AccountNumber uint64

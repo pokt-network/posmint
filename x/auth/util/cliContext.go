@@ -15,7 +15,7 @@ import (
 type CLIContext struct { // TODO consider module passing clicontext instead of node and keybase
 	Codec         *codec.Codec
 	Client        rpcclient.Client
-	FromAddress   sdk.AccAddress
+	FromAddress   sdk.Address
 	Passphrase    string
 	Height        int64
 	BroadcastMode BroadcastType
@@ -24,7 +24,7 @@ type CLIContext struct { // TODO consider module passing clicontext instead of n
 // NewCLIContext returns a new initialized CLIContext with parameters from the
 // command line using Viper. It takes a key name or address and populates the FromName and
 // FromAddress field accordingly.
-func NewCLIContext(node rpcclient.Client, fromAddress sdk.AccAddress, passphrase string) CLIContext {
+func NewCLIContext(node rpcclient.Client, fromAddress sdk.Address, passphrase string) CLIContext {
 	return CLIContext{
 		Client:      node,
 		Passphrase:  passphrase,
@@ -47,8 +47,8 @@ func (ctx CLIContext) WithClient(client rpcclient.Client) CLIContext {
 
 // WithFromAddress returns a copy of the context with an updated from account
 // address.
-func (ctx CLIContext) WithFromAddress(addr sdk.ValAddress) CLIContext {
-	ctx.FromAddress = sdk.AccAddress(addr)
+func (ctx CLIContext) WithFromAddress(addr sdk.Address) CLIContext {
+	ctx.FromAddress = sdk.Address(addr)
 	return ctx
 }
 
@@ -59,7 +59,7 @@ func (ctx CLIContext) WithHeight(height int64) CLIContext {
 }
 
 // GetFromAddress returns the from address from the context's name.
-func (ctx CLIContext) GetFromAddress() sdk.AccAddress {
+func (ctx CLIContext) GetFromAddress() sdk.Address {
 	return ctx.FromAddress
 }
 
