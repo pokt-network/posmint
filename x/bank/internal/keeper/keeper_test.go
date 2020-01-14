@@ -13,9 +13,9 @@ func TestKeeper(t *testing.T) {
 	input := setupTestInput()
 	ctx := input.ctx
 
-	addr := sdk.AccAddress([]byte("addr1"))
-	addr2 := sdk.AccAddress([]byte("addr2"))
-	addr3 := sdk.AccAddress([]byte("addr3"))
+	addr := sdk.Address([]byte("addr1"))
+	addr2 := sdk.Address([]byte("addr2"))
+	addr3 := sdk.Address([]byte("addr3"))
 	acc := input.ak.NewAccountWithAddress(ctx, addr)
 
 	// Test GetCoins/SetCoins
@@ -97,8 +97,8 @@ func TestSendKeeper(t *testing.T) {
 	sendKeeper := NewBaseSendKeeper(input.ak, paramSpace, types.DefaultCodespace, blacklistedAddrs)
 	input.k.SetSendEnabled(ctx, true)
 
-	addr := sdk.AccAddress([]byte("addr1"))
-	addr2 := sdk.AccAddress([]byte("addr2"))
+	addr := sdk.Address([]byte("addr1"))
+	addr2 := sdk.Address([]byte("addr2"))
 	acc := input.ak.NewAccountWithAddress(ctx, addr)
 
 	// Test GetCoins/SetCoins
@@ -144,7 +144,7 @@ func TestViewKeeper(t *testing.T) {
 	//paramSpace := input.pk.Subspace(types.DefaultParamspace)
 	viewKeeper := NewBaseViewKeeper(input.ak, types.DefaultCodespace)
 
-	addr := sdk.AccAddress([]byte("addr1"))
+	addr := sdk.Address([]byte("addr1"))
 	acc := input.ak.NewAccountWithAddress(ctx, addr)
 
 	// Test GetCoins/SetCoins
@@ -170,8 +170,8 @@ func TestViewKeeper(t *testing.T) {
 // 	origCoins := sdk.NewCoins(sdk.NewInt64Coin("stake", 100))
 // 	sendCoins := sdk.NewCoins(sdk.NewInt64Coin("stake", 50))
 
-// 	addr1 := sdk.AccAddress([]byte("addr1"))
-// 	addr2 := sdk.AccAddress([]byte("addr2"))
+// 	addr1 := sdk.Address([]byte("addr1"))
+// 	addr2 := sdk.Address([]byte("addr2"))
 // 	bacc := auth.NewBaseAccountWithAddress(addr1)
 // 	bacc.SetCoins(origCoins)
 // 	vacc := auth.NewContinuousVestingAccount(&bacc, ctx.BlockHeader().Time.Unix(), endTime.Unix())
@@ -202,8 +202,8 @@ func TestViewKeeper(t *testing.T) {
 // 	origCoins := sdk.NewCoins(sdk.NewInt64Coin("stake", 100))
 // 	sendCoins := sdk.NewCoins(sdk.NewInt64Coin("stake", 50))
 
-// 	addr1 := sdk.AccAddress([]byte("addr1"))
-// 	addr2 := sdk.AccAddress([]byte("addr2"))
+// 	addr1 := sdk.Address([]byte("addr1"))
+// 	addr2 := sdk.Address([]byte("addr2"))
 
 // 	bacc := auth.NewBaseAccountWithAddress(addr1)
 // 	bacc.SetCoins(origCoins)

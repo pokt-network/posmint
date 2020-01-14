@@ -10,7 +10,7 @@ import (
 
 func TestAccountMapperGetSet(t *testing.T) {
 	input := setupTestInput()
-	addr := sdk.AccAddress([]byte("some-address"))
+	addr := sdk.Address([]byte("some-address"))
 
 	// no account before its created
 	acc := input.ak.GetAccount(input.ctx, addr)
@@ -39,8 +39,8 @@ func TestAccountMapperGetSet(t *testing.T) {
 
 func TestAccountMapperRemoveAccount(t *testing.T) {
 	input := setupTestInput()
-	addr1 := sdk.AccAddress([]byte("addr1"))
-	addr2 := sdk.AccAddress([]byte("addr2"))
+	addr1 := sdk.Address([]byte("addr1"))
+	addr2 := sdk.Address([]byte("addr2"))
 
 	// create accounts
 	acc1 := input.ak.NewAccountWithAddress(input.ctx, addr1)

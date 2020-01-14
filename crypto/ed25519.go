@@ -41,8 +41,8 @@ func (pub PublicKey) String() string {
 	return hex.EncodeToString(pub.Bytes())
 }
 
-func (pub PublicKey) Address() sdk.ValAddress {
-	return sdk.ValAddress(ed25519.PubKeyEd25519(pub).Address())
+func (pub PublicKey) Address() sdk.Address {
+	return sdk.Address(ed25519.PubKeyEd25519(pub).Address())
 }
 
 func (pub PublicKey) VerifySignature(msg []byte, sig []byte) bool {

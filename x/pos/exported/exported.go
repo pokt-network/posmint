@@ -12,9 +12,9 @@ type ValidatorI interface {
 	IsStaked() bool               // check if has a bonded status
 	IsUnstaked() bool             // check if has status unbonded
 	IsUnstaking() bool            // check if has status unbonding
-	GetAddress() sdk.ValAddress   // operator address to receive/return validators coins
+	GetAddress() sdk.Address      // operator address to receive/return validators coins
 	GetConsPubKey() crypto.PubKey // validation consensus pubkey
-	GetConsAddr() sdk.ConsAddress // validation consensus address
+	GetConsAddr() sdk.Address     // validation consensus address
 	GetTokens() sdk.Int           // validation tokens
 	GetConsensusPower() int64     // validation power in tendermint
 }

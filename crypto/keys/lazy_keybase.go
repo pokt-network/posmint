@@ -41,7 +41,7 @@ func (kb *lazyKeybase) GetCoinbase() (KeyPair, error) {
 	return kb.coinbase, nil
 }
 
-func (kb *lazyKeybase) SetCoinbase(address types.AccAddress) error {
+func (kb *lazyKeybase) SetCoinbase(address types.Address) error {
 	kp, err := kb.Get(address)
 	if err != nil {
 		return err
@@ -60,7 +60,7 @@ func (lkb lazyKeybase) List() ([]KeyPair, error) {
 	return newDbKeybase(db).List()
 }
 
-func (lkb lazyKeybase) Get(address types.AccAddress) (KeyPair, error) {
+func (lkb lazyKeybase) Get(address types.Address) (KeyPair, error) {
 	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
 	if err != nil {
 		return KeyPair{}, err
@@ -70,7 +70,7 @@ func (lkb lazyKeybase) Get(address types.AccAddress) (KeyPair, error) {
 	return newDbKeybase(db).Get(address)
 }
 
-func (lkb lazyKeybase) Delete(address types.AccAddress, passphrase string) error {
+func (lkb lazyKeybase) Delete(address types.Address, passphrase string) error {
 	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
 	if err != nil {
 		return err
@@ -80,7 +80,7 @@ func (lkb lazyKeybase) Delete(address types.AccAddress, passphrase string) error
 	return newDbKeybase(db).Delete(address, passphrase)
 }
 
-func (lkb lazyKeybase) Update(address types.AccAddress, oldpass string, newpass string) error {
+func (lkb lazyKeybase) Update(address types.Address, oldpass string, newpass string) error {
 	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
 	if err != nil {
 		return err
@@ -90,7 +90,7 @@ func (lkb lazyKeybase) Update(address types.AccAddress, oldpass string, newpass 
 	return newDbKeybase(db).Update(address, oldpass, newpass)
 }
 
-func (lkb lazyKeybase) Sign(address types.AccAddress, passphrase string, msg []byte) ([]byte, crypto.PubKey, error) {
+func (lkb lazyKeybase) Sign(address types.Address, passphrase string, msg []byte) ([]byte, crypto.PubKey, error) {
 	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
 	if err != nil {
 		return nil, nil, err
@@ -120,7 +120,7 @@ func (lkb lazyKeybase) ImportPrivKey(armor, decryptPassphrase, encryptPassphrase
 	return newDbKeybase(db).ImportPrivKey(armor, decryptPassphrase, encryptPassphrase)
 }
 
-func (lkb lazyKeybase) ExportPrivKeyEncryptedArmor(address types.AccAddress, decryptPassphrase, encryptPassphrase string) (armor string, err error) {
+func (lkb lazyKeybase) ExportPrivKeyEncryptedArmor(address types.Address, decryptPassphrase, encryptPassphrase string) (armor string, err error) {
 	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
 	if err != nil {
 		return "", err
@@ -140,7 +140,7 @@ func (lkb lazyKeybase) ImportPrivateKeyObject(privateKey [64]byte, encryptPassph
 	return newDbKeybase(db).ImportPrivateKeyObject(privateKey, encryptPassphrase)
 }
 
-func (lkb lazyKeybase) ExportPrivateKeyObject(address types.AccAddress, passphrase string) (crypto.PrivKey, error) {
+func (lkb lazyKeybase) ExportPrivateKeyObject(address types.Address, passphrase string) (crypto.PrivKey, error) {
 	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
 	if err != nil {
 		return nil, err

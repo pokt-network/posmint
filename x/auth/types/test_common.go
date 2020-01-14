@@ -8,7 +8,7 @@ import (
 	sdk "github.com/pokt-network/posmint/types"
 )
 
-func NewTestMsg(addrs ...sdk.AccAddress) *sdk.TestMsg {
+func NewTestMsg(addrs ...sdk.Address) *sdk.TestMsg {
 	return sdk.NewTestMsg(addrs...)
 }
 
@@ -25,10 +25,10 @@ func NewTestCoins() sdk.Coins {
 	}
 }
 
-func KeyTestPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.AccAddress) {
+func KeyTestPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.Address) {
 	key := secp256k1.GenPrivKey()
 	pub := key.PubKey()
-	addr := sdk.AccAddress(pub.Address())
+	addr := sdk.Address(pub.Address())
 	return key, pub, addr
 }
 

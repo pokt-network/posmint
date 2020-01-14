@@ -34,7 +34,7 @@ func TestKeyManagement(t *testing.T) {
 	// Fetching a non existent address should throw an error
 	var pub ed25519.PubKeyEd25519
 	rand.Read(pub[:])
-	blankAddress := types.AccAddress(pub.Address())
+	blankAddress := types.Address(pub.Address())
 	_, err = cstore.Get(blankAddress)
 	require.Error(t, err)
 

@@ -49,7 +49,7 @@ func (kb *dbKeybase) GetCoinbase() (KeyPair, error) {
 	return kb.coinbase, nil
 }
 
-func (kb *dbKeybase) SetCoinbase(address types.AccAddress) error {
+func (kb *dbKeybase) SetCoinbase(address types.Address) error {
 	kp, err := kb.Get(address)
 	if err != nil {
 		return err
@@ -74,7 +74,7 @@ func (kb dbKeybase) List() ([]KeyPair, error) {
 }
 
 // Get returns the public information about one key.
-func (kb dbKeybase) Get(address types.AccAddress) (KeyPair, error) {
+func (kb dbKeybase) Get(address types.Address) (KeyPair, error) {
 	ik := kb.db.Get(addrKey(address))
 	if len(ik) == 0 {
 		return KeyPair{}, fmt.Errorf("key with address %s not found", address)
@@ -86,7 +86,7 @@ func (kb dbKeybase) Get(address types.AccAddress) (KeyPair, error) {
 // proper passphrase before deleting it (for security).
 // It returns an error if the key doesn't exist or
 // passphrases don't match.
-func (kb dbKeybase) Delete(address types.AccAddress, passphrase string) error {
+func (kb dbKeybase) Delete(address types.Address, passphrase string) error {
 	// verify we have the key in the keybase
 	kp, err := kb.Get(address)
 	if err != nil {
@@ -108,7 +108,7 @@ func (kb dbKeybase) Delete(address types.AccAddress, passphrase string) error {
 // oldpass must be the current passphrase used for encryption,
 // getNewpass is a function to get the passphrase to permanently replace
 // the current passphrase
-func (kb dbKeybase) Update(address types.AccAddress, oldpass string, newpass string) error {
+func (kb dbKeybase) Update(address types.Address, oldpass string, newpass string) error {
 	kp, err := kb.Get(address)
 	if err != nil {
 		return err
@@ -125,7 +125,7 @@ func (kb dbKeybase) Update(address types.AccAddress, oldpass string, newpass str
 
 // Sign signs the msg with the named key.
 // It returns an error if the key doesn't exist or the decryption fails.
-func (kb dbKeybase) Sign(address types.AccAddress, passphrase string, msg []byte) ([]byte, tmcrypto.PubKey, error) {
+func (kb dbKeybase) Sign(address types.Address, passphrase string, msg []byte) ([]byte, tmcrypto.PubKey, error) {
 	kp, err := kb.Get(address)
 	if err != nil {
 		return nil, nil, err
@@ -166,13 +166,13 @@ func (kb dbKeybase) ImportPrivKey(armor, decryptPassphrase, encryptPassphrase st
 		return KeyPair{}, err
 	}
 
-	accAddress, err := types.AccAddressFromHex(privKey.PubKey().Address().String())
+	Address, err := types.AddressFromHex(privKey.PubKey().Address().String())
 	if err != nil {
 		return KeyPair{}, err
 	}
 
-	if _, err := kb.Get(accAddress); err == nil {
-		return KeyPair{}, errors.New("Cannot overwrite key with address: " + accAddress.String())
+	if _, err := kb.Get(Address); err == nil {
+		return KeyPair{}, errors.New("Cannot overwrite key with address: " + Address.String())
 	}
 
 	return kb.writeLocalKeyPair(privKey, encryptPassphrase), nil
@@ -180,7 +180,7 @@ func (kb dbKeybase) ImportPrivKey(armor, decryptPassphrase, encryptPassphrase st
 
 // ExportPrivKeyEncryptedArmor finds the KeyPair by the address, decrypts the armor private key,
 // and returns an encrypted armored private key string
-func (kb dbKeybase) ExportPrivKeyEncryptedArmor(address types.AccAddress, decryptPassphrase, encryptPassphrase string) (armor string, err error) {
+func (kb dbKeybase) ExportPrivKeyEncryptedArmor(address types.Address, decryptPassphrase, encryptPassphrase string) (armor string, err error) {
 	priv, err := kb.ExportPrivateKeyObject(address, decryptPassphrase)
 	if err != nil {
 		return "", err
@@ -191,18 +191,18 @@ func (kb dbKeybase) ExportPrivKeyEncryptedArmor(address types.AccAddress, decryp
 // ImportPrivateKeyObject using the raw unencrypted privateKey string and encrypts it to disk using encryptPassphrase
 func (kb dbKeybase) ImportPrivateKeyObject(privateKey [64]byte, encryptPassphrase string) (KeyPair, error) {
 	ed25519PK := tmed25519.PrivKeyEd25519(privateKey)
-	accAddress, err := types.AccAddressFromHex(ed25519PK.PubKey().Address().String())
+	Address, err := types.AddressFromHex(ed25519PK.PubKey().Address().String())
 	if err != nil {
 		return KeyPair{}, err
 	}
-	if _, err := kb.Get(accAddress); err == nil {
-		return KeyPair{}, errors.New("Cannot overwrite key with address: " + accAddress.String())
+	if _, err := kb.Get(Address); err == nil {
+		return KeyPair{}, errors.New("Cannot overwrite key with address: " + Address.String())
 	}
 	return kb.writeLocalKeyPair(ed25519PK, encryptPassphrase), nil
 }
 
 // ExportPrivateKeyObject exports raw PrivKey object.
-func (kb dbKeybase) ExportPrivateKeyObject(address types.AccAddress, passphrase string) (tmcrypto.PrivKey, error) {
+func (kb dbKeybase) ExportPrivateKeyObject(address types.Address, passphrase string) (tmcrypto.PrivKey, error) {
 	kp, err := kb.Get(address)
 	if err != nil {
 		return nil, err
@@ -243,6 +243,6 @@ func (kb dbKeybase) writeKeyPair(kp KeyPair) {
 	kb.db.SetSync(key, serializedInfo)
 }
 
-func addrKey(address types.AccAddress) []byte {
+func addrKey(address types.Address) []byte {
 	return []byte(fmt.Sprintf("%s", address.String()))
 }

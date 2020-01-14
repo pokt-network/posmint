@@ -13,7 +13,7 @@ func TestGetMissedArray(t *testing.T) {
 	tests := []struct {
 		name     string
 		expected bool
-		address  sdk.ConsAddress
+		address  sdk.Address
 	}{
 		{
 			name:     "gets missed block array",
@@ -44,7 +44,7 @@ func TestClearMissedArray(t *testing.T) {
 	tests := []struct {
 		name     string
 		expected bool
-		address  sdk.ConsAddress
+		address  sdk.Address
 	}{
 		{
 			name:     "gets missed block array",

@@ -124,7 +124,7 @@ func createTestAccs(ctx sdk.Context, numAccs int, initialCoins sdk.Coins, ak *au
 
 		privKey := ed25519.GenPrivKey()
 		pubKey := privKey.PubKey()
-		addr := sdk.AccAddress(pubKey.Address())
+		addr := sdk.Address(pubKey.Address())
 		acc := auth.NewBaseAccountWithAddress(addr)
 		acc.Coins = initialCoins
 		acc.PubKey = pubKey
@@ -142,9 +142,9 @@ func addMintedCoinsToModule(t *testing.T, ctx sdk.Context, k *Keeper, module str
 	}
 }
 
-func sendFromModuleToAccount(t *testing.T, ctx sdk.Context, k *Keeper, module string, address sdk.ValAddress, amount sdk.Int) {
+func sendFromModuleToAccount(t *testing.T, ctx sdk.Context, k *Keeper, module string, address sdk.Address, amount sdk.Int) {
 	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), amount))
-	err := k.supplyKeeper.SendCoinsFromModuleToAccount(ctx, module, sdk.AccAddress(address), coins)
+	err := k.supplyKeeper.SendCoinsFromModuleToAccount(ctx, module, sdk.Address(address), coins)
 	if err != nil {
 		t.Fail()
 	}
@@ -156,14 +156,14 @@ func getRandomPubKey() ed25519.PubKeyEd25519 {
 	return pub
 }
 
-func getRandomValidatorAddress() sdk.ValAddress {
-	return sdk.ValAddress(getRandomPubKey().Address())
+func getRandomValidatorAddress() sdk.Address {
+	return sdk.Address(getRandomPubKey().Address())
 }
 
 func getValidator() types.Validator {
 	pub := getRandomPubKey()
 	return types.Validator{
-		Address:      sdk.ValAddress(pub.Address()),
+		Address:      sdk.Address(pub.Address()),
 		StakedTokens: sdk.NewInt(100000000000),
 		ConsPubKey:   pub,
 		Jailed:       false,

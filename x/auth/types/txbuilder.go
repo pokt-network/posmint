@@ -173,7 +173,7 @@ func (bldr TxBuilder) BuildSignMsg(msgs []sdk.Msg) (StdSignMsg, error) {
 
 // Sign signs a transaction given a address, passphrase, and a single message to
 // signed. An error is returned if signing fails.
-func (bldr TxBuilder) Sign(address sdk.AccAddress, passphrase string, msg StdSignMsg) ([]byte, error) {
+func (bldr TxBuilder) Sign(address sdk.Address, passphrase string, msg StdSignMsg) ([]byte, error) {
 	sig, err := MakeSignature(bldr.keybase, address, passphrase, msg)
 	if err != nil {
 		return nil, err
@@ -184,7 +184,7 @@ func (bldr TxBuilder) Sign(address sdk.AccAddress, passphrase string, msg StdSig
 
 // BuildAndSign builds a single message to be signed, and signs a transaction
 // with the built message given a address, passphrase, and a set of messages.
-func (bldr TxBuilder) BuildAndSign(address sdk.AccAddress, passphrase string, msgs []sdk.Msg) ([]byte, error) {
+func (bldr TxBuilder) BuildAndSign(address sdk.Address, passphrase string, msgs []sdk.Msg) ([]byte, error) {
 	msg, err := bldr.BuildSignMsg(msgs)
 	if err != nil {
 		return nil, err
@@ -208,7 +208,7 @@ func (bldr TxBuilder) BuildTxForSim(msgs []sdk.Msg) ([]byte, error) {
 
 // SignStdTx appends a signature to a StdTx and returns a copy of it. If append
 // is false, it replaces the signatures already attached with the new signature.
-func (bldr TxBuilder) SignStdTx(address sdk.AccAddress, passphrase string, stdTx StdTx, appendSig bool) (signedStdTx StdTx, err error) {
+func (bldr TxBuilder) SignStdTx(address sdk.Address, passphrase string, stdTx StdTx, appendSig bool) (signedStdTx StdTx, err error) {
 	if bldr.chainID == "" {
 		return StdTx{}, fmt.Errorf("chain ID required but not specified")
 	}
@@ -236,7 +236,7 @@ func (bldr TxBuilder) SignStdTx(address sdk.AccAddress, passphrase string, stdTx
 }
 
 // MakeSignature builds a StdSignature given keybase, key address, passphrase, and a StdSignMsg.
-func MakeSignature(keybase crkeys.Keybase, address sdk.AccAddress, passphrase string,
+func MakeSignature(keybase crkeys.Keybase, address sdk.Address, passphrase string,
 	msg StdSignMsg) (sig StdSignature, err error) {
 	if keybase == nil {
 		return StdSignature{}, errors.New("nil keybase error")

@@ -84,7 +84,7 @@ func TestMustGetValidatorByConsAddr(t *testing.T) {
 			name:     "panics if no validator",
 			panics:   true,
 			args:     args{validator: boundedValidator},
-			expected: expected{message: fmt.Sprintf("validator with consensus-Address %s not found", boundedValidator.ConsAddress())},
+			expected: expected{message: fmt.Sprintf("validator with consensus-Address %s not found", boundedValidator.GetConsAddr())},
 		},
 	}
 
@@ -97,12 +97,12 @@ func TestMustGetValidatorByConsAddr(t *testing.T) {
 					err := recover().(error)
 					assert.Equal(t, test.expected.message, err.Error(), "messages don't match")
 				}()
-				_ = keeper.mustGetValidatorByConsAddr(context, test.args.validator.ConsAddress())
+				_ = keeper.mustGetValidatorByConsAddr(context, test.args.validator.GetConsAddr())
 			default:
 				keeper.SetValidator(context, test.args.validator)
 				keeper.SetValidatorByConsAddr(context, test.args.validator)
 				keeper.SetStakedValidator(context, test.args.validator)
-				validator := keeper.mustGetValidatorByConsAddr(context, test.args.validator.ConsAddress())
+				validator := keeper.mustGetValidatorByConsAddr(context, test.args.validator.GetConsAddr())
 				assert.True(t, validator.Equals(test.expected.validator), "validator does not match")
 			}
 		})
@@ -144,13 +144,13 @@ func TestValidatorByConsAddr(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			switch test.expected.null {
 			case true:
-				validator := keeper.validatorByConsAddr(context, test.args.validator.ConsAddress())
+				validator := keeper.validatorByConsAddr(context, test.args.validator.GetConsAddr())
 				assert.Nil(t, validator)
 			default:
 				keeper.SetValidator(context, test.args.validator)
 				keeper.SetValidatorByConsAddr(context, test.args.validator)
 				keeper.SetStakedValidator(context, test.args.validator)
-				validator := keeper.validatorByConsAddr(context, test.args.validator.ConsAddress())
+				validator := keeper.validatorByConsAddr(context, test.args.validator.GetConsAddr())
 				assert.Equal(t, validator, test.expected.validator, "validator does not match")
 			}
 		})

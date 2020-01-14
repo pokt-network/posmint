@@ -9,15 +9,15 @@ const RouterKey = ModuleName
 
 // MsgSend - high level transaction of the coin module
 type MsgSend struct {
-	FromAddress sdk.AccAddress `json:"from_address" yaml:"from_address"`
-	ToAddress   sdk.AccAddress `json:"to_address" yaml:"to_address"`
-	Amount      sdk.Coins      `json:"amount" yaml:"amount"`
+	FromAddress sdk.Address `json:"from_address" yaml:"from_address"`
+	ToAddress   sdk.Address `json:"to_address" yaml:"to_address"`
+	Amount      sdk.Coins   `json:"amount" yaml:"amount"`
 }
 
 var _ sdk.Msg = MsgSend{}
 
 // NewMsgSend - construct arbitrary multi-in, multi-out send msg.
-func NewMsgSend(fromAddr, toAddr sdk.AccAddress, amount sdk.Coins) MsgSend {
+func NewMsgSend(fromAddr, toAddr sdk.Address, amount sdk.Coins) MsgSend {
 	return MsgSend{FromAddress: fromAddr, ToAddress: toAddr, Amount: amount}
 }
 
@@ -50,8 +50,8 @@ func (msg MsgSend) GetSignBytes() []byte {
 }
 
 // GetSigners Implements Msg.
-func (msg MsgSend) GetSigners() []sdk.AccAddress {
-	return []sdk.AccAddress{msg.FromAddress}
+func (msg MsgSend) GetSigners() []sdk.Address {
+	return []sdk.Address{msg.FromAddress}
 }
 
 // MsgMultiSend - high level transaction of the coin module
@@ -93,8 +93,8 @@ func (msg MsgMultiSend) GetSignBytes() []byte {
 }
 
 // GetSigners Implements Msg.
-func (msg MsgMultiSend) GetSigners() []sdk.AccAddress {
-	addrs := make([]sdk.AccAddress, len(msg.Inputs))
+func (msg MsgMultiSend) GetSigners() []sdk.Address {
+	addrs := make([]sdk.Address, len(msg.Inputs))
 	for i, in := range msg.Inputs {
 		addrs[i] = in.Address
 	}
@@ -103,8 +103,8 @@ func (msg MsgMultiSend) GetSigners() []sdk.AccAddress {
 
 // Input models transaction input
 type Input struct {
-	Address sdk.AccAddress `json:"address" yaml:"address"`
-	Coins   sdk.Coins      `json:"coins" yaml:"coins"`
+	Address sdk.Address `json:"address" yaml:"address"`
+	Coins   sdk.Coins   `json:"coins" yaml:"coins"`
 }
 
 // ValidateBasic - validate transaction input
@@ -122,7 +122,7 @@ func (in Input) ValidateBasic() sdk.Error {
 }
 
 // NewInput - create a transaction input, used with MsgMultiSend
-func NewInput(addr sdk.AccAddress, coins sdk.Coins) Input {
+func NewInput(addr sdk.Address, coins sdk.Coins) Input {
 	return Input{
 		Address: addr,
 		Coins:   coins,
@@ -131,8 +131,8 @@ func NewInput(addr sdk.AccAddress, coins sdk.Coins) Input {
 
 // Output models transaction outputs
 type Output struct {
-	Address sdk.AccAddress `json:"address" yaml:"address"`
-	Coins   sdk.Coins      `json:"coins" yaml:"coins"`
+	Address sdk.Address `json:"address" yaml:"address"`
+	Coins   sdk.Coins   `json:"coins" yaml:"coins"`
 }
 
 // ValidateBasic - validate transaction output
@@ -150,7 +150,7 @@ func (out Output) ValidateBasic() sdk.Error {
 }
 
 // NewOutput - create a transaction output, used with MsgMultiSend
-func NewOutput(addr sdk.AccAddress, coins sdk.Coins) Output {
+func NewOutput(addr sdk.Address, coins sdk.Coins) Output {
 	return Output{
 		Address: addr,
 		Coins:   coins,

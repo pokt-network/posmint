@@ -6,10 +6,10 @@ import (
 
 // QueryBalanceParams defines the params for querying an account balance.
 type QueryBalanceParams struct {
-	Address sdk.AccAddress
+	Address sdk.Address
 }
 
 // NewQueryBalanceParams creates a new instance of QueryBalanceParams.
-func NewQueryBalanceParams(addr sdk.AccAddress) QueryBalanceParams {
+func NewQueryBalanceParams(addr sdk.Address) QueryBalanceParams {
 	return QueryBalanceParams{Address: addr}
 }

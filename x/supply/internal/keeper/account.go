@@ -7,7 +7,7 @@ import (
 )
 
 // GetModuleAddress returns an address based on the module name
-func (k Keeper) GetModuleAddress(moduleName string) sdk.AccAddress {
+func (k Keeper) GetModuleAddress(moduleName string) sdk.Address {
 	permAddr, ok := k.permAddrs[moduleName]
 	if !ok {
 		return nil
@@ -16,7 +16,7 @@ func (k Keeper) GetModuleAddress(moduleName string) sdk.AccAddress {
 }
 
 // GetModuleAddressAndPermissions returns an address and permissions based on the module name
-func (k Keeper) GetModuleAddressAndPermissions(moduleName string) (addr sdk.AccAddress, permissions []string) {
+func (k Keeper) GetModuleAddressAndPermissions(moduleName string) (addr sdk.Address, permissions []string) {
 	permAddr, ok := k.permAddrs[moduleName]
 	if !ok {
 		return addr, permissions

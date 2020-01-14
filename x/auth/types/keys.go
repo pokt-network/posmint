@@ -27,6 +27,6 @@ var (
 )
 
 // AddressStoreKey turn an address to key used to get it from the account store
-func AddressStoreKey(addr sdk.AccAddress) []byte {
+func AddressStoreKey(addr sdk.Address) []byte {
 	return append(AddressStoreKeyPrefix, addr.Bytes()...)
 }

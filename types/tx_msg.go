@@ -25,7 +25,7 @@ type Msg interface {
 	// Signers returns the addrs of signers that must sign.
 	// CONTRACT: All signatures must be present to be valid.
 	// CONTRACT: Returns addrs in some deterministic order.
-	GetSigners() []AccAddress
+	GetSigners() []Address
 }
 
 //__________________________________________________________
@@ -54,10 +54,10 @@ var _ Msg = (*TestMsg)(nil)
 
 // msg type for testing
 type TestMsg struct {
-	signers []AccAddress
+	signers []Address
 }
 
-func NewTestMsg(addrs ...AccAddress) *TestMsg {
+func NewTestMsg(addrs ...Address) *TestMsg {
 	return &TestMsg{
 		signers: addrs,
 	}
@@ -74,6 +74,6 @@ func (msg *TestMsg) GetSignBytes() []byte {
 	return MustSortJSON(bz)
 }
 func (msg *TestMsg) ValidateBasic() Error { return nil }
-func (msg *TestMsg) GetSigners() []AccAddress {
+func (msg *TestMsg) GetSigners() []Address {
 	return msg.signers
 }

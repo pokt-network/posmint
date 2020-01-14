@@ -76,9 +76,9 @@ func CountSubKeys(pub crypto.PubKey) int {
 // They are accumulated from the GetSigners method for each Msg
 // in the order they appear in tx.GetMsgs().
 // Duplicate addresses will be omitted.
-func (tx StdTx) GetSigners() []sdk.AccAddress {
+func (tx StdTx) GetSigners() []sdk.Address {
 	seen := map[string]bool{}
-	var signers []sdk.AccAddress
+	var signers []sdk.Address
 	for _, msg := range tx.GetMsgs() {
 		for _, addr := range msg.GetSigners() {
 			if !seen[addr.String()] {
@@ -229,7 +229,7 @@ func (ss StdSignature) MarshalYAML() (interface{}, error) {
 	)
 
 	if ss.PubKey != nil {
-		pubkey = sdk.HexAccPub(ss.PubKey)
+		pubkey = sdk.HexAddressPubKey(ss.PubKey)
 	}
 
 	bz, err = yaml.Marshal(struct {

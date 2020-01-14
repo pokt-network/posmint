@@ -41,7 +41,7 @@ func setupTestInput() testInput {
 	ms.LoadLatestVersion()
 
 	blacklistedAddrs := make(map[string]bool)
-	blacklistedAddrs[sdk.AccAddress([]byte("moduleAcc")).String()] = true
+	blacklistedAddrs[sdk.Address([]byte("moduleAcc")).String()] = true
 
 	pk := params.NewKeeper(cdc, keyParams, tkeyParams, params.DefaultCodespace)
 

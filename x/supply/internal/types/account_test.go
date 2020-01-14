@@ -14,7 +14,7 @@ import (
 func TestModuleAccountMarshalYAML(t *testing.T) {
 	name := "test"
 	moduleAcc := NewEmptyModuleAccount(name, Minter, Burner, Staking)
-	moduleAddress := sdk.AccAddress(crypto.AddressHash([]byte(name)))
+	moduleAddress := sdk.Address(crypto.AddressHash([]byte(name)))
 	bs, err := yaml.Marshal(moduleAcc)
 	require.NoError(t, err)
 

@@ -13,9 +13,9 @@ import (
 func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, amount sdk.Int, kp keys.KeyPair, passphrase string) (*sdk.TxResponse, error) {
 	txBuilder, cliCtx := newTx(cdc, tmNode, keybase, passphrase)
 	msg := types.MsgStake{
-		Address:    sdk.ValAddress(kp.GetAddress()),
-		PubKey:     kp.PubKey,
-		Value:      amount,
+		Address: sdk.Address(kp.GetAddress()),
+		PubKey:  kp.PubKey,
+		Value:   amount,
 	}
 	err := msg.ValidateBasic()
 	if err != nil {
@@ -24,7 +24,7 @@ func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, amoun
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
 }
 
-func UnstakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, address sdk.ValAddress, passphrase string) (*sdk.TxResponse, error) {
+func UnstakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
 	txBuilder, cliCtx := newTx(cdc, tmNode, keybase, passphrase)
 	msg := types.MsgBeginUnstake{Address: address}
 	err := msg.ValidateBasic()
@@ -34,7 +34,7 @@ func UnstakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, add
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
 }
 
-func UnjailTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, address sdk.ValAddress, passphrase string) (*sdk.TxResponse, error) {
+func UnjailTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
 	txBuilder, cliCtx := newTx(cdc, tmNode, keybase, passphrase)
 	msg := types.MsgUnjail{ValidatorAddr: address}
 	err := msg.ValidateBasic()
@@ -44,7 +44,7 @@ func UnjailTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, addr
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
 }
 
-func Send(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, fromAddr, toAddr sdk.ValAddress, passphrase string, amount sdk.Int) (*sdk.TxResponse, error) {
+func Send(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, fromAddr, toAddr sdk.Address, passphrase string, amount sdk.Int) (*sdk.TxResponse, error) {
 	txBuilder, cliCtx := newTx(cdc, tmNode, keybase, passphrase)
 	msg := types.MsgSend{
 		FromAddress: fromAddr,
@@ -58,11 +58,11 @@ func Send(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, fromAddr
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
 }
 
-func RawTx(cdc *codec.Codec, tmNode client.Client, fromAddr sdk.ValAddress, txBytes []byte) (sdk.TxResponse, error) {
+func RawTx(cdc *codec.Codec, tmNode client.Client, fromAddr sdk.Address, txBytes []byte) (sdk.TxResponse, error) {
 	return util.CLIContext{
 		Codec:       cdc,
 		Client:      tmNode,
-		FromAddress: sdk.AccAddress(fromAddr),
+		FromAddress: sdk.Address(fromAddr),
 	}.BroadcastTx(txBytes)
 }
 
