@@ -8,8 +8,6 @@ import (
 	"github.com/pokt-network/posmint/store/gaskv"
 	"github.com/pokt-network/posmint/store/iavl"
 	"github.com/pokt-network/posmint/store/types"
-	sdk "github.com/pokt-network/posmint/types"
-
 	"github.com/stretchr/testify/require"
 
 	tiavl "github.com/tendermint/iavl"
@@ -246,7 +244,6 @@ func mockStoreWithStuff() types.KVStore {
 	store.Set(bz("key3"), bz("value3"))
 	store.Set(bz("something"), bz("else"))
 	store.Set(bz(""), bz(""))
-	store.Set(bz("k"), bz(sdk.PrefixValidator))
 	store.Set(bz("ke"), bz("valu"))
 	store.Set(bz("kee"), bz("valuu"))
 	return store
