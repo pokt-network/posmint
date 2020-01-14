@@ -12,11 +12,11 @@ import (
 )
 
 type Validator struct {
-	Address                 sdk.Address    `json:"address" yaml:"address"`               // address of the validator; bech encoded in JSON
-	ConsPubKey              crypto.PubKey  `json:"cons_pubkey" yaml:"cons_pubkey"`       // the consensus public key of the validator; bech encoded in JSON
+	Address                 sdk.Address    `json:"address" yaml:"address"`               // address of the validator;
+	PublicKey               crypto.PubKey  `json:"public_key" yaml:"public_key"`         // the consensus public key of the validator;
 	Jailed                  bool           `json:"jailed" yaml:"jailed"`                 // has the validator been jailed from bonded status?
 	Status                  sdk.BondStatus `json:"status" yaml:"status"`                 // validator status (bonded/unbonding/unbonded)
-	StakedTokens            sdk.Int        `json:"tokens" yaml:"tokens"`                 // tokens staked in the network // todo edit all json
+	StakedTokens            sdk.Int        `json:"tokens" yaml:"tokens"`                 // tokens staked in the network
 	UnstakingCompletionTime time.Time      `json:"unstaking_time" yaml:"unstaking_time"` // if unstaking, min time for the validator to complete unstaking
 }
 
@@ -24,7 +24,7 @@ type Validator struct {
 func NewValidator(addr sdk.Address, consPubKey crypto.PubKey, tokensToStake sdk.Int) Validator {
 	return Validator{
 		Address:                 addr,
-		ConsPubKey:              consPubKey,
+		PublicKey:               consPubKey,
 		Jailed:                  false,
 		Status:                  sdk.Bonded,
 		StakedTokens:            tokensToStake,
@@ -36,7 +36,7 @@ func NewValidator(addr sdk.Address, consPubKey crypto.PubKey, tokensToStake sdk.
 // with the full validator power
 func (v Validator) ABCIValidatorUpdate() abci.ValidatorUpdate {
 	return abci.ValidatorUpdate{
-		PubKey: tmtypes.TM2PB.PubKey(v.ConsPubKey),
+		PubKey: tmtypes.TM2PB.PubKey(v.PublicKey),
 		Power:  v.ConsensusPower(),
 	}
 }
@@ -45,7 +45,7 @@ func (v Validator) ABCIValidatorUpdate() abci.ValidatorUpdate {
 // with zero power used for validator updates.
 func (v Validator) ABCIValidatorUpdateZero() abci.ValidatorUpdate {
 	return abci.ValidatorUpdate{
-		PubKey: tmtypes.TM2PB.PubKey(v.ConsPubKey),
+		PubKey: tmtypes.TM2PB.PubKey(v.PublicKey),
 		Power:  0,
 	}
 }
@@ -87,7 +87,7 @@ func (v Validator) AddStakedTokens(tokens sdk.Int) Validator {
 
 // compares the vital fields of two validator structures
 func (v Validator) Equals(v2 Validator) bool {
-	return v.ConsPubKey.Equals(v2.ConsPubKey) &&
+	return v.PublicKey.Equals(v2.PublicKey) &&
 		bytes.Equal(v.Address, v2.Address) &&
 		v.Status.Equal(v2.Status) &&
 		v.StakedTokens.Equal(v2.StakedTokens)
@@ -101,13 +101,12 @@ func (v Validator) UpdateStatus(newStatus sdk.BondStatus) Validator {
 
 // return the TM validator address
 
-func (v Validator) IsStaked() bool               { return v.GetStatus().Equal(sdk.Bonded) }
-func (v Validator) IsUnstaked() bool             { return v.GetStatus().Equal(sdk.Unbonded) }
-func (v Validator) IsUnstaking() bool            { return v.GetStatus().Equal(sdk.Unbonding) }
-func (v Validator) IsJailed() bool               { return v.Jailed }
-func (v Validator) GetStatus() sdk.BondStatus    { return v.Status }
-func (v Validator) GetAddress() sdk.Address      { return v.Address }
-func (v Validator) GetConsAddr() sdk.Address     { return sdk.Address(v.ConsPubKey.Address()) }
-func (v Validator) GetConsPubKey() crypto.PubKey { return v.ConsPubKey }
-func (v Validator) GetTokens() sdk.Int           { return v.StakedTokens }
-func (v Validator) GetConsensusPower() int64     { return v.ConsensusPower() }
+func (v Validator) IsStaked() bool              { return v.GetStatus().Equal(sdk.Bonded) }
+func (v Validator) IsUnstaked() bool            { return v.GetStatus().Equal(sdk.Unbonded) }
+func (v Validator) IsUnstaking() bool           { return v.GetStatus().Equal(sdk.Unbonding) }
+func (v Validator) IsJailed() bool              { return v.Jailed }
+func (v Validator) GetStatus() sdk.BondStatus   { return v.Status }
+func (v Validator) GetAddress() sdk.Address     { return v.Address }
+func (v Validator) GetPublicKey() crypto.PubKey { return v.PublicKey }
+func (v Validator) GetTokens() sdk.Int          { return v.StakedTokens }
+func (v Validator) GetConsensusPower() int64    { return v.ConsensusPower() }

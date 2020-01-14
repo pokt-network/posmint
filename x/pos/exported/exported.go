@@ -7,14 +7,13 @@ import (
 
 // ValidatorI expected validator functions
 type ValidatorI interface {
-	IsJailed() bool               // whether the validator is jailed
-	GetStatus() sdk.BondStatus    // status of the validator
-	IsStaked() bool               // check if has a bonded status
-	IsUnstaked() bool             // check if has status unbonded
-	IsUnstaking() bool            // check if has status unbonding
-	GetAddress() sdk.Address      // operator address to receive/return validators coins
-	GetConsPubKey() crypto.PubKey // validation consensus pubkey
-	GetConsAddr() sdk.Address     // validation consensus address
-	GetTokens() sdk.Int           // validation tokens
-	GetConsensusPower() int64     // validation power in tendermint
+	IsStaked() bool              // check if has a bonded status
+	IsUnstaked() bool            // check if has status unbonded
+	IsUnstaking() bool           // check if has status unbonding
+	IsJailed() bool              // whether the validator is jailed
+	GetStatus() sdk.BondStatus   // status of the validator
+	GetAddress() sdk.Address     // operator address to receive/return validators coins
+	GetPublicKey() crypto.PubKey // validation consensus pubkey
+	GetTokens() sdk.Int          // validation tokens
+	GetConsensusPower() int64    // validation power in tendermint
 }

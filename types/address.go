@@ -10,8 +10,6 @@ import (
 
 	"github.com/tendermint/tendermint/crypto"
 	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
-
-	"github.com/tendermint/tendermint/libs/bech32"
 )
 
 const (
@@ -221,24 +219,6 @@ func GetAddressPubKeyFromHex(pubkey string) (pk crypto.PubKey, err error) {
 	}
 
 	return pk, nil
-}
-
-// GetFromBech32 decodes a bytestring from a Bech32 encoded string.
-func GetFromBech32(bech32str, prefix string) ([]byte, error) {
-	if len(bech32str) == 0 {
-		return nil, errors.New("decoding Bech32 address failed: must provide an address")
-	}
-
-	hrp, bz, err := bech32.DecodeAndConvert(bech32str)
-	if err != nil {
-		return nil, err
-	}
-
-	if hrp != prefix {
-		return nil, fmt.Errorf("invalid Bech32 prefix; expected %s, got %s", prefix, hrp)
-	}
-
-	return bz, nil
 }
 
 // GetFromHex decodes a bytestring from a Hex encoded string.
