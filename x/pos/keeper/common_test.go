@@ -165,7 +165,7 @@ func getValidator() types.Validator {
 	return types.Validator{
 		Address:      sdk.Address(pub.Address()),
 		StakedTokens: sdk.NewInt(100000000000),
-		ConsPubKey:   pub,
+		PublicKey:    pub,
 		Jailed:       false,
 		Status:       sdk.Bonded,
 	}

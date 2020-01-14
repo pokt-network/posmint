@@ -38,14 +38,14 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, supplyKeeper types.Suppl
 		keeper.SetValidatorByConsAddr(ctx, validator)
 		keeper.SetStakedValidator(ctx, validator)
 		// ensure there's a signing info entry for the validator (used in slashing)
-		_, found := keeper.GetValidatorSigningInfo(ctx, validator.GetConsAddr())
+		_, found := keeper.GetValidatorSigningInfo(ctx, validator.GetAddress())
 		if !found {
 			signingInfo := types.ValidatorSigningInfo{
-				Address:     validator.GetConsAddr(),
+				Address:     validator.GetAddress(),
 				StartHeight: ctx.BlockHeight(),
 				JailedUntil: time.Unix(0, 0),
 			}
-			keeper.SetValidatorSigningInfo(ctx, validator.GetConsAddr(), signingInfo)
+			keeper.SetValidatorSigningInfo(ctx, validator.GetAddress(), signingInfo)
 		}
 		// Call the creation hook if not exported
 		if !data.Exported {
@@ -113,7 +113,7 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, supplyKeeper types.Suppl
 	// add public key relationship to address
 	keeper.IterateAndExecuteOverVals(ctx,
 		func(index int64, validator exported.ValidatorI) bool {
-			keeper.AddPubKeyRelation(ctx, validator.GetConsPubKey())
+			keeper.AddPubKeyRelation(ctx, validator.GetPublicKey())
 			return false
 		},
 	)
@@ -233,12 +233,12 @@ func validateGenesisStateValidators(validators []types.Validator, minimumStake s
 	addrMap := make(map[string]bool, len(validators))
 	for i := 0; i < len(validators); i++ {
 		val := validators[i]
-		strKey := string(val.ConsPubKey.Bytes())
+		strKey := string(val.PublicKey.Bytes())
 		if _, ok := addrMap[strKey]; ok {
-			return fmt.Errorf("duplicate validator in genesis state: address %v", val.GetConsAddr())
+			return fmt.Errorf("duplicate validator in genesis state: address %v", val.GetAddress())
 		}
 		if val.Jailed && val.IsStaked() {
-			return fmt.Errorf("validator is staked and jailed in genesis state: address %v", val.GetConsAddr())
+			return fmt.Errorf("validator is staked and jailed in genesis state: address %v", val.GetAddress())
 		}
 		if val.StakedTokens.IsZero() && !val.IsUnstaked() {
 			return fmt.Errorf("staked/unstaked genesis validator cannot have zero stake, validator: %v", val)

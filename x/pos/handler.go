@@ -176,7 +176,7 @@ func validateUnjailMessage(ctx sdk.Context, msg types.MsgUnjail, k keeper.Keeper
 	if !validator.IsJailed() {
 		return nil, types.ErrValidatorNotJailed(k.Codespace())
 	}
-	consAddr = sdk.Address(validator.GetConsPubKey().Address())
+	consAddr = sdk.Address(validator.GetPublicKey().Address())
 	info, found := k.GetValidatorSigningInfo(ctx, consAddr)
 	if !found {
 		return nil, types.ErrNoValidatorForAddress(k.Codespace())

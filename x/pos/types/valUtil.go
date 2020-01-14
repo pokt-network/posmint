@@ -40,7 +40,7 @@ func UnmarshalValidator(cdc *codec.Codec, valBytes []byte) (validator Validator,
 
 // String returns a human readable string representation of a validator.
 func (v Validator) String() string {
-	bechConsPubKey := sdk.HexAddressPubKey(v.ConsPubKey)
+	bechConsPubKey := sdk.HexAddressPubKey(v.PublicKey)
 
 	return fmt.Sprintf(`Validator
   Address:           		  %s
@@ -65,7 +65,7 @@ type hexValidator struct {
 
 // MarshalJSON marshals the validator to JSON using Hex
 func (v Validator) MarshalJSON() ([]byte, error) {
-	bechConsPubKey := sdk.HexAddressPubKey(v.ConsPubKey)
+	bechConsPubKey := sdk.HexAddressPubKey(v.PublicKey)
 	return codec.Cdc.MarshalJSON(hexValidator{
 		Address:                 v.Address,
 		ConsPubKey:              bechConsPubKey,
@@ -88,7 +88,7 @@ func (v *Validator) UnmarshalJSON(data []byte) error {
 	}
 	*v = Validator{
 		Address:                 bv.Address,
-		ConsPubKey:              consPubKey,
+		PublicKey:               consPubKey,
 		Jailed:                  bv.Jailed,
 		StakedTokens:            bv.StakedTokens,
 		Status:                  bv.Status,

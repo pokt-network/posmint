@@ -50,7 +50,7 @@ func TestSetandGetValidatorAward(t *testing.T) {
 
 func TestSetAndGetProposer(t *testing.T) {
 	validator := getBondedValidator()
-	Address := validator.GetConsAddr()
+	Address := validator.GetAddress()
 
 	tests := []struct {
 		name            string
