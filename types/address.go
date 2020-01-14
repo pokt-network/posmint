@@ -67,7 +67,7 @@ func VerifyAddressFormat(bz []byte) error {
 }
 
 // Address a wrapper around bytes meant to represent an address.
-// When marshaled to a string or JSON, it uses Bech32.
+// When marshaled to a string or JSON.
 type Address []byte
 
 // AddressFromHex creates an Address from a hex string.
@@ -120,17 +120,17 @@ func (aa *Address) Unmarshal(data []byte) error {
 	return nil
 }
 
-// MarshalJSON marshals to JSON using Bech32.
+// MarshalJSON marshals to JSON.
 func (aa Address) MarshalJSON() ([]byte, error) {
 	return json.Marshal(aa.String())
 }
 
-// MarshalYAML marshals to YAML using Bech32.
+// MarshalYAML marshals to YAML.
 func (aa Address) MarshalYAML() (interface{}, error) {
 	return aa.String(), nil
 }
 
-// UnmarshalJSON unmarshals from JSON assuming Bech32 encoding.
+// UnmarshalJSON unmarshals from JSON.
 func (aa *Address) UnmarshalJSON(data []byte) error {
 	var s string
 	err := json.Unmarshal(data, &s)
@@ -147,7 +147,7 @@ func (aa *Address) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// UnmarshalYAML unmarshals from JSON assuming Bech32 encoding.
+// UnmarshalYAML unmarshals from JSON
 func (aa *Address) UnmarshalYAML(data []byte) error {
 	var s string
 	err := yaml.Unmarshal(data, &s)
@@ -193,7 +193,7 @@ func (aa Address) Format(s fmt.State, verb rune) {
 	}
 }
 
-// get ConsAddress from pubkey
+// get Address from pubkey
 func GetAddress(pubkey crypto.PubKey) Address {
 	return Address(pubkey.Address())
 }

@@ -21,10 +21,10 @@ type Validator struct {
 }
 
 // NewValidator - initialize a new validator
-func NewValidator(addr sdk.Address, consPubKey crypto.PubKey, tokensToStake sdk.Int) Validator {
+func NewValidator(addr sdk.Address, pubKey crypto.PubKey, tokensToStake sdk.Int) Validator {
 	return Validator{
 		Address:                 addr,
-		PublicKey:               consPubKey,
+		PublicKey:               pubKey,
 		Jailed:                  false,
 		Status:                  sdk.Bonded,
 		StakedTokens:            tokensToStake,
