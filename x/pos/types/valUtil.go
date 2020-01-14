@@ -40,7 +40,7 @@ func UnmarshalValidator(cdc *codec.Codec, valBytes []byte) (validator Validator,
 
 // String returns a human readable string representation of a validator.
 func (v Validator) String() string {
-	bechConsPubKey := sdk.HexAddressPubKey(v.PublicKey)
+	hexAddressPubKey := sdk.HexAddressPubKey(v.PublicKey)
 
 	return fmt.Sprintf(`Validator
   Address:           		  %s
@@ -49,14 +49,14 @@ func (v Validator) String() string {
   Status:                     %s
   Tokens:               	  %s
   Unstakeing Completion Time:  %v`,
-		v.Address, bechConsPubKey, v.Jailed, v.Status, v.StakedTokens, v.UnstakingCompletionTime,
+		v.Address, hexAddressPubKey, v.Jailed, v.Status, v.StakedTokens, v.UnstakingCompletionTime,
 	)
 }
 
 // this is a helper struct used for JSON de- and encoding only
 type hexValidator struct {
 	Address                 sdk.Address    `json:"operator_address" yaml:"operator_address"` // the hex address of the validator
-	ConsPubKey              string         `json:"cons_pubkey" yaml:"cons_pubkey"`           // the hex consensus public key of the validator
+	PublicKey               string         `json:"public_key" yaml:"public_key"`             // the hex consensus public key of the validator
 	Jailed                  bool           `json:"jailed" yaml:"jailed"`                     // has the validator been jailed from staked status?
 	Status                  sdk.BondStatus `json:"status" yaml:"status"`                     // validator status (bonded/unbonding/unbonded)
 	StakedTokens            sdk.Int        `json:"stakedTokens" yaml:"stakedTokens"`         // how many staked tokens
@@ -65,10 +65,10 @@ type hexValidator struct {
 
 // MarshalJSON marshals the validator to JSON using Hex
 func (v Validator) MarshalJSON() ([]byte, error) {
-	bechConsPubKey := sdk.HexAddressPubKey(v.PublicKey)
+	hexAddressPubKey := sdk.HexAddressPubKey(v.PublicKey)
 	return codec.Cdc.MarshalJSON(hexValidator{
 		Address:                 v.Address,
-		ConsPubKey:              bechConsPubKey,
+		PublicKey:               hexAddressPubKey,
 		Jailed:                  v.Jailed,
 		Status:                  v.Status,
 		StakedTokens:            v.StakedTokens,
@@ -82,13 +82,13 @@ func (v *Validator) UnmarshalJSON(data []byte) error {
 	if err := codec.Cdc.UnmarshalJSON(data, bv); err != nil {
 		return err
 	}
-	consPubKey, err := sdk.GetAddressPubKeyFromHex(bv.ConsPubKey)
+	addressPubKeyFromHex, err := sdk.GetAddressPubKeyFromHex(bv.PublicKey)
 	if err != nil {
 		return err
 	}
 	*v = Validator{
 		Address:                 bv.Address,
-		PublicKey:               consPubKey,
+		PublicKey:               addressPubKeyFromHex,
 		Jailed:                  bv.Jailed,
 		StakedTokens:            bv.StakedTokens,
 		Status:                  bv.Status,
