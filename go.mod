@@ -3,15 +3,10 @@ module github.com/pokt-network/posmint
 go 1.13
 
 require (
-	github.com/btcsuite/btcd v0.0.0-20190115013929-ed77733ec07d
-	github.com/cosmos/go-bip39 v0.0.0-20180618194314-52158e4697b8
 	github.com/gogo/protobuf v1.3.0
-	github.com/golang/mock v1.3.1-0.20190508161146-9fa652df1129
 	github.com/pkg/errors v0.8.1
-	github.com/spf13/cobra v0.0.5 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/stumble/gorocksdb v0.0.3 // indirect
-	github.com/syndtr/goleveldb v1.0.1-0.20190318030020-c3a204f8e965
 	github.com/tendermint/crypto v0.0.0-20191022145703-50d29ede1e15
 	github.com/tendermint/go-amino v0.15.0
 	github.com/tendermint/iavl v0.12.4
