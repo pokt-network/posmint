@@ -7,21 +7,17 @@ import (
 // TmConfig is the structure that holds the SDK configuration parameters.
 // This could be used to initialize certain configuration parameters for the SDK.
 type Config struct {
-	mtx                sync.RWMutex
-	sealed             bool
-	coinType           uint32
-	fullFundraiserPath string
-	txEncoder          TxEncoder
-	addressVerifier    func([]byte) error
+	mtx             sync.RWMutex
+	sealed          bool
+	txEncoder       TxEncoder
+	addressVerifier func([]byte) error
 }
 
 var (
 	// Initializing an instance of TmConfig
 	sdkConfig = &Config{
-		sealed:             false,
-		coinType:           CoinType,
-		fullFundraiserPath: FullFundraiserPath,
-		txEncoder:          nil,
+		sealed:    false,
+		txEncoder: nil,
 	}
 )
 
@@ -55,13 +51,6 @@ func (config *Config) SetAddressVerifier(addressVerifier func([]byte) error) {
 // Set the BIP-0044 CoinType code on the config
 func (config *Config) SetCoinType(coinType uint32) {
 	config.assertNotSealed()
-	config.coinType = coinType
-}
-
-// Set the FullFundraiserPath (BIP44Prefix) on the config
-func (config *Config) SetFullFundraiserPath(fullFundraiserPath string) {
-	config.assertNotSealed()
-	config.fullFundraiserPath = fullFundraiserPath
 }
 
 // Seal seals the config such that the config state could not be modified further
@@ -81,14 +70,4 @@ func (config *Config) GetTxEncoder() TxEncoder {
 // GetAddressVerifier returns the function to verify that addresses have the correct format
 func (config *Config) GetAddressVerifier() func([]byte) error {
 	return config.addressVerifier
-}
-
-// Get the BIP-0044 CoinType code on the config
-func (config *Config) GetCoinType() uint32 {
-	return config.coinType
-}
-
-// Get the FullFundraiserPath (BIP44Prefix) on the config
-func (config *Config) GetFullFundraiserPath() string {
-	return config.fullFundraiserPath
 }
