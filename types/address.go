@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/tendermint/tendermint/crypto/ed25519"
+	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"gopkg.in/yaml.v2"
 
 	"github.com/tendermint/tendermint/crypto"
@@ -202,10 +204,30 @@ func GetAddress(pubkey crypto.PubKey) Address {
 // auxiliary
 // ----------------------------------------------------------------------------
 
+//HexAddressPubKey gets a Hex encoded string from the pubKey raw byte array
+//if the the type cannot be asserted returns from amino encoded bytes
 func HexAddressPubKey(pub crypto.PubKey) string {
+	//type Assertion
+	switch v := pub.(type) {
+	case ed25519.PubKeyEd25519:
+		//Raw Bytes
+		v.Bytes()
+		return hex.EncodeToString(v[:])
+	case secp256k1.PubKeySecp256k1:
+		//Raw Bytes
+		return hex.EncodeToString(v[:])
+	default:
+		//Amino Bytes
+		return hex.EncodeToString(pub.Bytes())
+	}
+}
+
+//HexAddressPubKeyAmino gets a Hex encoded string from the pubKey amino encoded byte array
+func HexAddressPubKeyAmino(pub crypto.PubKey) string {
 	return hex.EncodeToString(pub.Bytes())
 }
 
+// GetAddressPubKeyFromHex decodes PublicKey from a Hex encoded string.
 func GetAddressPubKeyFromHex(pubkey string) (pk crypto.PubKey, err error) {
 
 	bz, err := GetFromHex(pubkey)
@@ -251,11 +273,9 @@ func AccAddressFromHex(address string) (addr Address, err error) {
 func GetAccPubKeyHex(pubkey string) (pk crypto.PubKey, err error) {
 	return GetAddressPubKeyFromHex(pubkey)
 }
-
 func GetValPubKeyHex(pubkey string) (pk crypto.PubKey, err error) {
 	return GetAddressPubKeyFromHex(pubkey)
 }
-
 func GetConsPubKeyHex(pubkey string) (pk crypto.PubKey, err error) {
 	return GetAddressPubKeyFromHex(pubkey)
 }

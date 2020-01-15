@@ -3,6 +3,7 @@ package types_test
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/tendermint/tendermint/crypto"
 	"math/rand"
 	"testing"
 
@@ -192,6 +193,42 @@ func TestAddressInterface(t *testing.T) {
 		case types.Address:
 			_, err := types.AddressFromHex(addr.String())
 			require.Nil(t, err)
+		default:
+			t.Fail()
+		}
+	}
+
+}
+
+func TestPubKeyInterfaceAssertion(t *testing.T) {
+	var pub ed25519.PubKeyEd25519
+	rand.Read(pub[:])
+	var pub2 secp256k1.PubKeySecp256k1
+	rand.Read(pub2[:])
+
+	values := []crypto.PubKey{
+		pub, pub2,
+	}
+
+	for _, v := range values {
+		switch v := v.(type) {
+		case ed25519.PubKeyEd25519:
+			fmt.Println(v)
+			s := types.HexAddressPubKey(v)
+			as := types.HexAddressPubKeyAmino(v)
+			fmt.Println(s)
+			fmt.Println(as)
+			require.NotNil(t, s)
+			require.NotEqual(t, s, as)
+
+		case secp256k1.PubKeySecp256k1:
+			fmt.Println(v)
+			s := types.HexAddressPubKey(v)
+			as := types.HexAddressPubKeyAmino(v)
+			fmt.Println(s)
+			fmt.Println(as)
+			require.NotNil(t, s)
+			require.NotEqual(t, s, as)
 		default:
 			t.Fail()
 		}
