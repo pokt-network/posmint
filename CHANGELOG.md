@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] 2020-01-15
+
+### Added
+- Created alternate func HexAddressPubKeyAmino that returns the amino encoded bytes [#69]
+
+### Changed
+- Standardize the Address type to be used instead of AccAddress , ValAddress and ConsAddress.[#65]
+- Refactor Validators and Related. [#65]
+- Changed HexAddressPubKey to use actual bytes and not amino encoded bytes.[#69]
+- Refactor Test (Redundant Values in func after Address type) [#67]
+- Refactor Hooks (Redundant Values in func after Address type) [#67]
+
+### Removed
+- Clean Remaining Bech32 [#65]
+
 ## [Unreleased] 2019-12-30
 
 ### Added
