@@ -211,7 +211,6 @@ func HexAddressPubKey(pub crypto.PubKey) string {
 	switch v := pub.(type) {
 	case ed25519.PubKeyEd25519:
 		//Raw Bytes
-		v.Bytes()
 		return hex.EncodeToString(v[:])
 	case secp256k1.PubKeySecp256k1:
 		//Raw Bytes
