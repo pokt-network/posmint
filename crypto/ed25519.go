@@ -59,7 +59,7 @@ func (priv PrivateKey) AminoBytes() []byte {
 }
 
 func (priv PrivateKey) String() string {
-	return hex.EncodeToString(ed25519.PrivKeyEd25519(priv).Bytes())
+	return hex.EncodeToString(priv.Bytes())
 }
 
 func (priv PrivateKey) Public() PublicKey {
