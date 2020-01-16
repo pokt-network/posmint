@@ -129,19 +129,26 @@ func TestPubKeyInterfaceAssertion(t *testing.T) {
 			fmt.Println(v)
 			s := types.HexAddressPubKey(v)
 			as := types.HexAddressPubKeyAmino(v)
+			pk, _ := types.GetAddressPubKeyFromHex(s)
 			fmt.Println(s)
 			fmt.Println(as)
+			fmt.Println(pk)
 			require.NotNil(t, s)
 			require.NotEqual(t, s, as)
+			require.Equal(t, pk, pub)
 
 		case secp256k1.PubKeySecp256k1:
 			fmt.Println(v)
 			s := types.HexAddressPubKey(v)
 			as := types.HexAddressPubKeyAmino(v)
+			pk, _ := types.GetAddressPubKeyFromHex(s)
 			fmt.Println(s)
 			fmt.Println(as)
+			fmt.Println(pk)
 			require.NotNil(t, s)
 			require.NotEqual(t, s, as)
+			require.Equal(t, pk, pub2)
+
 		default:
 			t.Fail()
 		}
