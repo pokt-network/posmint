@@ -1,373 +1,673 @@
 package keys
 
-// import (
-// 	"testing"
+import (
+	"fmt"
+	"github.com/pokt-network/posmint/types"
+	"github.com/stretchr/testify/assert"
+	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/crypto/ed25519"
+	"io/ioutil"
+	"os"
+	"reflect"
+	"testing"
 
-// 	"github.com/stretchr/testify/assert"
-// 	"github.com/stretchr/testify/require"
-// 	"github.com/tendermint/tendermint/crypto"
-// 	"github.com/tendermint/tendermint/crypto/ed25519"
+	"github.com/stretchr/testify/require"
+)
 
-// 	"github.com/pokt-network/posmint/crypto/keys/hd"
-// 	"github.com/pokt-network/posmint/tests"
-// 	sdk "github.com/pokt-network/posmint/types"
-// )
+func NewTestCaseDir(t *testing.T) (string, func()) {
+	dir, err := ioutil.TempDir("", t.Name()+"_")
+	require.NoError(t, err)
+	return dir, func() { os.RemoveAll(dir) }
+}
 
-// func TestNew(t *testing.T) {
-// 	dir, cleanup := tests.NewTestCaseDir(t)
-// 	defer cleanup()
-// 	kb := New("keybasename", dir)
-// 	lazykb, ok := kb.(lazyKeybase)
-// 	require.True(t, ok)
-// 	require.Equal(t, lazykb.name, "keybasename")
-// 	require.Equal(t, lazykb.dir, dir)
-// }
+func TestNew(t *testing.T) {
+	dir, cleanup := NewTestCaseDir(t)
+	defer cleanup()
+	kb := New("keybasename", dir)
+	lazykb, ok := kb.(*lazyKeybase)
+	require.True(t, ok)
+	require.Equal(t, lazykb.name, "keybasename")
+	require.Equal(t, lazykb.dir, dir)
+}
 
-// func TestLazyKeyManagement(t *testing.T) {
-// 	dir, cleanup := tests.NewTestCaseDir(t)
-// 	defer cleanup()
-// 	kb := New("keybasename", dir)
+func Test_lazyKeybase_CloseDB(t *testing.T) {
+	type fields struct {
+		name     string
+		dir      string
+		coinbase KeyPair
+	}
 
-// 	algo := Secp256k1
-// 	n1, n2, n3 := "personal", "business", "other"
-// 	p1, p2 := "1234", "really-secure!@#$"
+	dir, cleanup := NewTestCaseDir(t)
+	defer cleanup()
 
-// 	// Check empty state
-// 	l, err := kb.List()
-// 	require.Nil(t, err)
-// 	assert.Empty(t, l)
+	tests := []struct {
+		name   string
+		fields fields
+	}{
+		{"Test Keybase CloseDB", fields{
+			name:     "keybasename",
+			dir:      dir,
+			coinbase: KeyPair{},
+		}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			lkb := lazyKeybase{
+				name:     tt.fields.name,
+				dir:      tt.fields.dir,
+				coinbase: tt.fields.coinbase,
+			}
+			lkb.CloseDB()
+		})
+	}
+}
 
-// 	_, _, err = kb.CreateMnemonic(n1, English, p1, Ed25519)
-// 	require.Error(t, err, "ed25519 keys are currently not supported by keybase")
+func Test_lazyKeybase_Create(t *testing.T) {
+	type fields struct {
+		name     string
+		dir      string
+		coinbase KeyPair
+	}
+	type args struct {
+		encryptPassphrase string
+	}
 
-// 	// create some keys
-// 	_, err = kb.Get(n1)
-// 	require.Error(t, err)
-// 	i, _, err := kb.CreateMnemonic(n1, English, p1, algo)
+	dir, cleanup := NewTestCaseDir(t)
+	defer cleanup()
 
-// 	require.NoError(t, err)
-// 	require.Equal(t, n1, i.GetName())
-// 	_, _, err = kb.CreateMnemonic(n2, English, p2, algo)
-// 	require.NoError(t, err)
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    KeyPair
+		wantErr bool
+	}{
+		{"Test Lazykeybase Create", fields{
+			name:     "keybase",
+			dir:      dir,
+			coinbase: KeyPair{},
+		}, args{encryptPassphrase: "ENCRYPTIONPASSPHRASE"},
+			KeyPair{}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			lkb := lazyKeybase{
+				name:     tt.fields.name,
+				dir:      tt.fields.dir,
+				coinbase: tt.fields.coinbase,
+			}
+			got, err := lkb.Create(tt.args.encryptPassphrase)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Create() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
 
-// 	// we can get these keys
-// 	i2, err := kb.Get(n2)
-// 	require.NoError(t, err)
-// 	_, err = kb.Get(n3)
-// 	require.NotNil(t, err)
-// 	_, err = kb.GetByAddress(accAddr(i2))
-// 	require.NoError(t, err)
-// 	addr, err := sdk.AddressFromBech32("cosmos1yq8lgssgxlx9smjhes6ryjasmqmd3ts2559g0t")
-// 	require.NoError(t, err)
-// 	_, err = kb.GetByAddress(addr)
-// 	require.NotNil(t, err)
+			if !assert.NotNil(t, got) {
+				t.Errorf("Returned Nil")
+			}
+			if !assert.NotNil(t, got.GetAddress()) {
+				t.Errorf("keypair with errors ")
+			}
 
-// 	// list shows them in order
-// 	keyS, err := kb.List()
-// 	require.NoError(t, err)
-// 	require.Equal(t, 2, len(keyS))
-// 	// note these are in alphabetical order
-// 	require.Equal(t, n2, keyS[0].GetName())
-// 	require.Equal(t, n1, keyS[1].GetName())
-// 	require.Equal(t, i2.GetPubKey(), keyS[0].GetPubKey())
+		})
+	}
+}
 
-// 	// deleting a key removes it
-// 	err = kb.Delete("bad name", "foo", false)
-// 	require.NotNil(t, err)
-// 	err = kb.Delete(n1, p1, false)
-// 	require.NoError(t, err)
-// 	keyS, err = kb.List()
-// 	require.NoError(t, err)
-// 	require.Equal(t, 1, len(keyS))
-// 	_, err = kb.Get(n1)
-// 	require.Error(t, err)
+func Test_lazyKeybase_Delete(t *testing.T) {
+	type fields struct {
+		name     string
+		dir      string
+		coinbase KeyPair
+	}
+	type args struct {
+		address    types.Address
+		passphrase string
+	}
 
-// 	// create an offline key
-// 	o1 := "offline"
-// 	priv1 := ed25519.GenPrivKey()
-// 	pub1 := priv1.PubKey()
-// 	i, err = kb.CreateOffline(o1, pub1)
-// 	require.Nil(t, err)
-// 	require.Equal(t, pub1, i.GetPubKey())
-// 	require.Equal(t, o1, i.GetName())
-// 	keyS, err = kb.List()
-// 	require.NoError(t, err)
-// 	require.Equal(t, 2, len(keyS))
+	dir, cleanup := NewTestCaseDir(t)
+	defer cleanup()
 
-// 	// delete the offline key
-// 	err = kb.Delete(o1, "", false)
-// 	require.NoError(t, err)
-// 	keyS, err = kb.List()
-// 	require.NoError(t, err)
-// 	require.Equal(t, 1, len(keyS))
+	tests := []struct {
+		name    string
+		fields  fields
+		wantErr bool
+	}{
+		{"Test keybase delete", fields{
+			name:     "keybasename",
+			dir:      dir,
+			coinbase: KeyPair{},
+		}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			lkb := lazyKeybase{
+				name:     tt.fields.name,
+				dir:      tt.fields.dir,
+				coinbase: tt.fields.coinbase,
+			}
+			wkp, err := lkb.Create("ENCRYPTIONPASSPHRASE")
+			if err != nil {
+				t.Errorf("Creation Failed")
+			}
 
-// 	// addr cache gets nuked - and test skip flag
-// 	err = kb.Delete(n2, "", true)
-// 	require.NoError(t, err)
-// }
+			if err := lkb.Delete(wkp.GetAddress(), "ENCRYPTIONPASSPHRASE"); (err != nil) != tt.wantErr {
+				t.Errorf("Delete() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
 
-// func TestLazySignVerify(t *testing.T) {
-// 	dir, cleanup := tests.NewTestCaseDir(t)
-// 	defer cleanup()
-// 	kb := New("keybasename", dir)
-// 	algo := Secp256k1
+func Test_lazyKeybase_ExportPrivKeyEncryptedArmor(t *testing.T) {
+	type fields struct {
+		name     string
+		dir      string
+		coinbase KeyPair
+	}
+	type args struct {
+		address           types.Address
+		decryptPassphrase string
+		encryptPassphrase string
+	}
 
-// 	n1, n2, n3 := "some dude", "a dudette", "dude-ish"
-// 	p1, p2, p3 := "1234", "foobar", "foobar"
+	dir, cleanup := NewTestCaseDir(t)
+	defer cleanup()
 
-// 	// create two users and get their info
-// 	i1, _, err := kb.CreateMnemonic(n1, English, p1, algo)
-// 	require.Nil(t, err)
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{"Test ExportPrivKeyEncryptedArmor", fields{
+			name:     "keybasename",
+			dir:      dir,
+			coinbase: KeyPair{},
+		}, args{
+			address:           nil,
+			decryptPassphrase: "ENCRYPTIONPASSPHRASE",
+			encryptPassphrase: "ENCRYPTIONPASSPHRASE",
+		}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			lkb := lazyKeybase{
+				name:     tt.fields.name,
+				dir:      tt.fields.dir,
+				coinbase: tt.fields.coinbase,
+			}
+			wkp, err := lkb.Create("ENCRYPTIONPASSPHRASE")
 
-// 	i2, _, err := kb.CreateMnemonic(n2, English, p2, algo)
-// 	require.Nil(t, err)
+			gotArmor, err := lkb.ExportPrivKeyEncryptedArmor(wkp.GetAddress(), tt.args.decryptPassphrase, tt.args.encryptPassphrase)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ExportPrivKeyEncryptedArmor() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotArmor == "" {
+				t.Errorf("ExportPrivKeyEncryptedArmor() gotArmor = %v", gotArmor)
+			} else {
+				fmt.Println(gotArmor)
+			}
+		})
+	}
+}
 
-// 	// Import a public key
-// 	armor, err := kb.ExportPubKey(n2)
-// 	require.Nil(t, err)
-// 	kb.ImportPubKey(n3, armor)
-// 	i3, err := kb.Get(n3)
-// 	require.NoError(t, err)
-// 	require.Equal(t, i3.GetName(), n3)
+func Test_lazyKeybase_ExportPrivateKeyObject(t *testing.T) {
+	type fields struct {
+		name     string
+		dir      string
+		coinbase KeyPair
+	}
+	type args struct {
+		address    types.Address
+		passphrase string
+	}
 
-// 	// let's try to sign some messages
-// 	d1 := []byte("my first message")
-// 	d2 := []byte("some other important info!")
-// 	d3 := []byte("feels like I forgot something...")
+	dir, cleanup := NewTestCaseDir(t)
+	defer cleanup()
 
-// 	// try signing both data with both ..
-// 	s11, pub1, err := kb.Sign(n1, p1, d1)
-// 	require.Nil(t, err)
-// 	require.Equal(t, i1.GetPubKey(), pub1)
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{"Test ExportPrivateKeyObject", fields{
+			name:     "keybasename",
+			dir:      dir,
+			coinbase: KeyPair{},
+		}, args{
+			address:    nil,
+			passphrase: "ENCRYPTIONPASSPHRASE",
+		}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			lkb := lazyKeybase{
+				name:     tt.fields.name,
+				dir:      tt.fields.dir,
+				coinbase: tt.fields.coinbase,
+			}
+			wkp, err := lkb.Create("ENCRYPTIONPASSPHRASE")
 
-// 	s12, pub1, err := kb.Sign(n1, p1, d2)
-// 	require.Nil(t, err)
-// 	require.Equal(t, i1.GetPubKey(), pub1)
+			got, err := lkb.ExportPrivateKeyObject(wkp.GetAddress(), tt.args.passphrase)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ExportPrivateKeyObject() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !assert.NotNil(t, got) {
+				t.Errorf("ExportPrivateKeyObject() got = %v", got)
+			} else {
+				fmt.Println(got)
+			}
+		})
+	}
+}
 
-// 	s21, pub2, err := kb.Sign(n2, p2, d1)
-// 	require.Nil(t, err)
-// 	require.Equal(t, i2.GetPubKey(), pub2)
+func Test_lazyKeybase_Get(t *testing.T) {
+	type fields struct {
+		name     string
+		dir      string
+		coinbase KeyPair
+	}
+	type args struct {
+		address types.Address
+	}
 
-// 	s22, pub2, err := kb.Sign(n2, p2, d2)
-// 	require.Nil(t, err)
-// 	require.Equal(t, i2.GetPubKey(), pub2)
+	dir, cleanup := NewTestCaseDir(t)
+	defer cleanup()
 
-// 	// let's try to validate and make sure it only works when everything is proper
-// 	cases := []struct {
-// 		key   crypto.PubKey
-// 		data  []byte
-// 		sig   []byte
-// 		valid bool
-// 	}{
-// 		// proper matches
-// 		{i1.GetPubKey(), d1, s11, true},
-// 		// change data, pubkey, or signature leads to fail
-// 		{i1.GetPubKey(), d2, s11, false},
-// 		{i2.GetPubKey(), d1, s11, false},
-// 		{i1.GetPubKey(), d1, s21, false},
-// 		// make sure other successes
-// 		{i1.GetPubKey(), d2, s12, true},
-// 		{i2.GetPubKey(), d1, s21, true},
-// 		{i2.GetPubKey(), d2, s22, true},
-// 	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    KeyPair
+		wantErr bool
+	}{
+		{"Test Lazykeybase Get", fields{
+			name:     "keybasename",
+			dir:      dir,
+			coinbase: KeyPair{},
+		}, args{address: nil}, KeyPair{}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			lkb := lazyKeybase{
+				name:     tt.fields.name,
+				dir:      tt.fields.dir,
+				coinbase: tt.fields.coinbase,
+			}
 
-// 	for i, tc := range cases {
-// 		valid := tc.key.VerifyBytes(tc.data, tc.sig)
-// 		require.Equal(t, tc.valid, valid, "%d", i)
-// 	}
+			wkp, err := lkb.Create("ENCRYPTIONPASSPHRASE")
 
-// 	// Now try to sign data with a secret-less key
-// 	_, _, err = kb.Sign(n3, p3, d3)
-// 	require.NotNil(t, err)
-// }
+			got, err := lkb.Get(wkp.GetAddress())
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Get() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !assert.NotNil(t, got) && assert.NotEmpty(t, got) {
+				t.Errorf("Get() got = %v", got)
+			}
+		})
+	}
+}
 
-// func TestLazyExportImport(t *testing.T) {
-// 	dir, cleanup := tests.NewTestCaseDir(t)
-// 	defer cleanup()
-// 	kb := New("keybasename", dir)
+func Test_lazyKeybase_GetCoinbase(t *testing.T) {
+	type fields struct {
+		name     string
+		dir      string
+		coinbase KeyPair
+	}
 
-// 	info, _, err := kb.CreateMnemonic("john", English, "secretcpw", Secp256k1)
-// 	require.NoError(t, err)
-// 	require.Equal(t, info.GetName(), "john")
+	dir, cleanup := NewTestCaseDir(t)
+	defer cleanup()
 
-// 	john, err := kb.Get("john")
-// 	require.NoError(t, err)
-// 	require.Equal(t, info.GetName(), "john")
-// 	johnAddr := info.GetPubKey().Address()
+	tests := []struct {
+		name    string
+		fields  fields
+		want    KeyPair
+		wantErr bool
+	}{
+		{"Test Lazykeybase GetCoinbase", fields{
+			name:     "keybasename",
+			dir:      dir,
+			coinbase: KeyPair{},
+		}, KeyPair{}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			kb := &lazyKeybase{
+				name:     tt.fields.name,
+				dir:      tt.fields.dir,
+				coinbase: tt.fields.coinbase,
+			}
 
-// 	armor, err := kb.Export("john")
-// 	require.NoError(t, err)
+			_, err := kb.Create("ENCRYPTIONPASSPHRASE")
 
-// 	err = kb.Import("john2", armor)
-// 	require.NoError(t, err)
+			got, err := kb.GetCoinbase()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("GetCoinbase() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !assert.NotNil(t, got) {
+				t.Errorf("GetCoinbase() got = %v", got)
+			} else {
+				fmt.Println(got)
+			}
+		})
+	}
+}
 
-// 	john2, err := kb.Get("john2")
-// 	require.NoError(t, err)
+func Test_lazyKeybase_ImportPrivKey(t *testing.T) {
+	type fields struct {
+		name     string
+		dir      string
+		coinbase KeyPair
+	}
 
-// 	require.Equal(t, john.GetPubKey().Address(), johnAddr)
-// 	require.Equal(t, john.GetName(), "john")
-// 	require.Equal(t, john, john2)
-// }
+	type args struct {
+		armor             string
+		decryptPassphrase string
+		encryptPassphrase string
+	}
 
-// func TestLazyExportImportPrivKey(t *testing.T) {
-// 	dir, cleanup := tests.NewTestCaseDir(t)
-// 	defer cleanup()
-// 	kb := New("keybasename", dir)
+	dir, cleanup := NewTestCaseDir(t)
+	defer cleanup()
 
-// 	info, _, err := kb.CreateMnemonic("john", English, "secretcpw", Secp256k1)
-// 	require.NoError(t, err)
-// 	require.Equal(t, info.GetName(), "john")
-// 	priv1, err := kb.Get("john")
-// 	require.NoError(t, err)
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    KeyPair
+		wantErr bool
+	}{
+		{"Test Lazykeybase Importprivkey", fields{
+			name:     "keybasename",
+			dir:      dir,
+			coinbase: KeyPair{},
+		}, args{
+			armor:             "",
+			decryptPassphrase: "ENCRYPTIONPASSPHRASE",
+			encryptPassphrase: "ENCRYPTIONPASSPHRASE",
+		}, KeyPair{},
+			false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			lkb := lazyKeybase{
+				name:     tt.fields.name,
+				dir:      tt.fields.dir,
+				coinbase: tt.fields.coinbase,
+			}
 
-// 	// decrypt local private key, and produce encrypted ASCII armored output
-// 	armored, err := kb.ExportPrivKey("john", "secretcpw", "new_secretcpw")
-// 	require.NoError(t, err)
+			wkp, err := lkb.Create("ENCRYPTIONPASSPHRASE")
 
-// 	// delete exported key
-// 	require.NoError(t, kb.Delete("john", "", true))
-// 	_, err = kb.Get("john")
-// 	require.Error(t, err)
+			armor, err := lkb.ExportPrivKeyEncryptedArmor(wkp.GetAddress(), tt.args.decryptPassphrase, tt.args.encryptPassphrase)
 
-// 	// import armored key
-// 	require.NoError(t, kb.ImportPrivKey("john", armored, "new_secretcpw"))
+			lkb.Delete(wkp.GetAddress(), "ENCRYPTIONPASSPHRASE")
 
-// 	// ensure old and new keys match
-// 	priv2, err := kb.Get("john")
-// 	require.NoError(t, err)
-// 	require.True(t, priv1.GetPubKey().Equals(priv2.GetPubKey()))
-// }
+			got, err := lkb.ImportPrivKey(armor, tt.args.decryptPassphrase, tt.args.encryptPassphrase)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ImportPrivKey() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !assert.NotNil(t, got) {
+				t.Errorf("ImportPrivKey() got = %v", got)
+			} else {
+				fmt.Println(got)
+			}
+		})
+	}
+}
 
-// func TestLazyExportImportPubKey(t *testing.T) {
-// 	dir, cleanup := tests.NewTestCaseDir(t)
-// 	defer cleanup()
-// 	kb := New("keybasename", dir)
+func Test_lazyKeybase_ImportPrivateKeyObject(t *testing.T) {
+	type fields struct {
+		name     string
+		dir      string
+		coinbase KeyPair
+	}
+	type args struct {
+		privateKey        [64]byte
+		encryptPassphrase string
+	}
 
-// 	// CreateMnemonic a private-public key pair and ensure consistency
-// 	notPasswd := "n9y25ah7"
-// 	info, _, err := kb.CreateMnemonic("john", English, notPasswd, Secp256k1)
-// 	require.Nil(t, err)
-// 	require.NotEqual(t, info, "")
-// 	require.Equal(t, info.GetName(), "john")
-// 	addr := info.GetPubKey().Address()
-// 	john, err := kb.Get("john")
-// 	require.NoError(t, err)
-// 	require.Equal(t, john.GetName(), "john")
-// 	require.Equal(t, john.GetPubKey().Address(), addr)
+	dir, cleanup := NewTestCaseDir(t)
+	defer cleanup()
 
-// 	// Export the public key only
-// 	armor, err := kb.ExportPubKey("john")
-// 	require.NoError(t, err)
-// 	// Import it under a different name
-// 	err = kb.ImportPubKey("john-pubkey-only", armor)
-// 	require.NoError(t, err)
-// 	// Ensure consistency
-// 	john2, err := kb.Get("john-pubkey-only")
-// 	require.NoError(t, err)
-// 	// Compare the public keys
-// 	require.True(t, john.GetPubKey().Equals(john2.GetPubKey()))
-// 	// Ensure the original key hasn't changed
-// 	john, err = kb.Get("john")
-// 	require.NoError(t, err)
-// 	require.Equal(t, john.GetPubKey().Address(), addr)
-// 	require.Equal(t, john.GetName(), "john")
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    KeyPair
+		wantErr bool
+	}{
+		{"Test LazyKeybase ImportPrivateKeyObject", fields{
+			name:     "keybasename",
+			dir:      dir,
+			coinbase: KeyPair{},
+		}, args{
+			privateKey:        [64]byte{},
+			encryptPassphrase: "ENCRYPTIONPASSPHRASE",
+		}, KeyPair{}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			lkb := lazyKeybase{
+				name:     tt.fields.name,
+				dir:      tt.fields.dir,
+				coinbase: tt.fields.coinbase,
+			}
 
-// 	// Ensure keys cannot be overwritten
-// 	err = kb.ImportPubKey("john-pubkey-only", armor)
-// 	require.NotNil(t, err)
-// }
+			wkp, err := lkb.Create("ENCRYPTIONPASSPHRASE")
 
-// func TestLazyExportPrivateKeyObject(t *testing.T) {
-// 	dir, cleanup := tests.NewTestCaseDir(t)
-// 	defer cleanup()
-// 	kb := New("keybasename", dir)
+			exported, err := lkb.ExportPrivateKeyObject(wkp.GetAddress(), "ENCRYPTIONPASSPHRASE")
 
-// 	info, _, err := kb.CreateMnemonic("john", English, "secretcpw", Secp256k1)
-// 	require.NoError(t, err)
-// 	require.Equal(t, info.GetName(), "john")
+			lkb.Delete(wkp.GetAddress(), "ENCRYPTIONPASSPHRASE")
 
-// 	// export private key object
-// 	_, err = kb.ExportPrivateKeyObject("john", "invalid")
-// 	require.NotNil(t, err, "%+v", err)
-// 	exported, err := kb.ExportPrivateKeyObject("john", "secretcpw")
-// 	require.Nil(t, err, "%+v", err)
-// 	require.True(t, exported.PubKey().Equals(info.GetPubKey()))
-// }
+			got, err := lkb.ImportPrivateKeyObject(exported.(ed25519.PrivKeyEd25519), tt.args.encryptPassphrase)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ImportPrivateKeyObject() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !assert.NotNil(t, got) {
+				t.Errorf("ImportPrivateKeyObject() got = %v", got)
+			}
+		})
+	}
+}
 
-// func TestLazyAdvancedKeyManagement(t *testing.T) {
-// 	dir, cleanup := tests.NewTestCaseDir(t)
-// 	defer cleanup()
-// 	kb := New("keybasename", dir)
+func Test_lazyKeybase_List(t *testing.T) {
+	type fields struct {
+		name     string
+		dir      string
+		coinbase KeyPair
+	}
 
-// 	algo := Secp256k1
-// 	n1, n2 := "old-name", "new name"
-// 	p1, p2 := "1234", "foobar"
+	dir, cleanup := NewTestCaseDir(t)
+	defer cleanup()
 
-// 	// make sure key works with initial password
-// 	_, _, err := kb.CreateMnemonic(n1, English, p1, algo)
-// 	require.Nil(t, err, "%+v", err)
-// 	assertPassword(t, kb, n1, p1, p2)
+	tests := []struct {
+		name    string
+		fields  fields
+		want    []KeyPair
+		wantErr bool
+	}{
+		{"Test lazyKeyBase List", fields{
+			name:     "keybasename",
+			dir:      dir,
+			coinbase: KeyPair{},
+		}, []KeyPair{}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			lkb := lazyKeybase{
+				name:     tt.fields.name,
+				dir:      tt.fields.dir,
+				coinbase: tt.fields.coinbase,
+			}
 
-// 	// update password requires the existing password
-// 	getNewpass := func() (string, error) { return p2, nil }
-// 	err = kb.Update(n1, "jkkgkg", getNewpass)
-// 	require.NotNil(t, err)
-// 	assertPassword(t, kb, n1, p1, p2)
+			_, err := lkb.Create("ENCRYPTIONPASSPHRASE")
 
-// 	// then it changes the password when correct
-// 	err = kb.Update(n1, p1, getNewpass)
-// 	require.NoError(t, err)
-// 	// p2 is now the proper one!
-// 	assertPassword(t, kb, n1, p2, p1)
+			got, err := lkb.List()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("List() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !assert.NotEmpty(t, got) {
+				t.Errorf("List() got = %v", got)
+			}
+		})
+	}
+}
 
-// 	// exporting requires the proper name and passphrase
-// 	_, err = kb.Export(n1 + ".notreal")
-// 	require.NotNil(t, err)
-// 	_, err = kb.Export(" " + n1)
-// 	require.NotNil(t, err)
-// 	_, err = kb.Export(n1 + " ")
-// 	require.NotNil(t, err)
-// 	_, err = kb.Export("")
-// 	require.NotNil(t, err)
-// 	exported, err := kb.Export(n1)
-// 	require.Nil(t, err, "%+v", err)
+func Test_lazyKeybase_SetCoinbase(t *testing.T) {
+	type fields struct {
+		name     string
+		dir      string
+		coinbase KeyPair
+	}
+	type args struct {
+		address types.Address
+	}
 
-// 	// import succeeds
-// 	err = kb.Import(n2, exported)
-// 	require.NoError(t, err)
+	dir, cleanup := NewTestCaseDir(t)
+	defer cleanup()
 
-// 	// second import fails
-// 	err = kb.Import(n2, exported)
-// 	require.NotNil(t, err)
-// }
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{"Test SetCoinbase", fields{
+			name:     "keybasename",
+			dir:      dir,
+			coinbase: KeyPair{},
+		}, args{address: nil}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			kb := &lazyKeybase{
+				name:     tt.fields.name,
+				dir:      tt.fields.dir,
+				coinbase: tt.fields.coinbase,
+			}
 
-// // TestSeedPhrase verifies restoring from a seed phrase
-// func TestLazySeedPhrase(t *testing.T) {
-// 	dir, cleanup := tests.NewTestCaseDir(t)
-// 	defer cleanup()
-// 	kb := New("keybasename", dir)
+			wkb, _ := kb.Create("ENCRYPTIONPASSPHRASE")
 
-// 	algo := Secp256k1
-// 	n1, n2 := "lost-key", "found-again"
-// 	p1, p2 := "1234", "foobar"
+			if err := kb.SetCoinbase(wkb.GetAddress()); (err != nil) != tt.wantErr {
+				t.Errorf("SetCoinbase() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
 
-// 	// make sure key works with initial password
-// 	info, mnemonic, err := kb.CreateMnemonic(n1, English, p1, algo)
-// 	require.Nil(t, err, "%+v", err)
-// 	require.Equal(t, n1, info.GetName())
-// 	assert.NotEmpty(t, mnemonic)
+func Test_lazyKeybase_Sign(t *testing.T) {
+	type fields struct {
+		name     string
+		dir      string
+		coinbase KeyPair
+	}
+	type args struct {
+		address    types.Address
+		passphrase string
+		msg        []byte
+	}
 
-// 	// now, let us delete this key
-// 	err = kb.Delete(n1, p1, false)
-// 	require.Nil(t, err, "%+v", err)
-// 	_, err = kb.Get(n1)
-// 	require.NotNil(t, err)
+	dir, cleanup := NewTestCaseDir(t)
+	defer cleanup()
 
-// 	// let us re-create it from the mnemonic-phrase
-// 	params := *hd.NewFundraiserParams(0, sdk.CoinType, 0)
-// 	newInfo, err := kb.Derive(n2, mnemonic, DefaultBIP39Passphrase, p2, params)
-// 	require.NoError(t, err)
-// 	require.Equal(t, n2, newInfo.GetName())
-// 	require.Equal(t, info.GetPubKey().Address(), newInfo.GetPubKey().Address())
-// 	require.Equal(t, info.GetPubKey(), newInfo.GetPubKey())
-// }
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    []byte
+		want1   crypto.PubKey
+		wantErr bool
+	}{
+		{"Test Sign", fields{
+			name:     "keybasename",
+			dir:      dir,
+			coinbase: KeyPair{},
+		}, args{
+			address:    nil,
+			passphrase: "ENCRYPTIONPASSPHRASE",
+			msg:        []byte("test"),
+		}, []byte{}, nil, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			lkb := lazyKeybase{
+				name:     tt.fields.name,
+				dir:      tt.fields.dir,
+				coinbase: tt.fields.coinbase,
+			}
+
+			wkb, _ := lkb.Create("ENCRYPTIONPASSPHRASE")
+
+			got, got1, err := lkb.Sign(wkb.GetAddress(), tt.args.passphrase, tt.args.msg)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Sign() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !assert.NotNil(t, got) {
+				t.Errorf("Sign() got = %v, want %v", got, tt.want)
+			}
+			if !reflect.DeepEqual(got1, wkb.PubKey) {
+				t.Errorf("Sign() got1 = %v, want %v", got1, tt.want1)
+			}
+		})
+	}
+}
+
+func Test_lazyKeybase_Update(t *testing.T) {
+	type fields struct {
+		name     string
+		dir      string
+		coinbase KeyPair
+	}
+	type args struct {
+		address types.Address
+		oldpass string
+		newpass string
+	}
+
+	dir, cleanup := NewTestCaseDir(t)
+	defer cleanup()
+
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		{"Test lazyKeybase Update", fields{
+			name:     "keybasename",
+			dir:      dir,
+			coinbase: KeyPair{},
+		}, args{
+			address: nil,
+			oldpass: "ENCRYPTIONPASSPHRASE",
+			newpass: "ENCRYPTIONPASSPHRASE2",
+		}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			lkb := lazyKeybase{
+				name:     tt.fields.name,
+				dir:      tt.fields.dir,
+				coinbase: tt.fields.coinbase,
+			}
+
+			wkb, _ := lkb.Create("ENCRYPTIONPASSPHRASE")
+
+			if err := lkb.Update(wkb.GetAddress(), tt.args.oldpass, tt.args.newpass); (err != nil) != tt.wantErr {
+				t.Errorf("Update() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if err := lkb.Delete(wkb.GetAddress(), tt.args.newpass); (err != nil) != tt.wantErr {
+				t.Errorf("Delete() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+		})
+	}
+}
