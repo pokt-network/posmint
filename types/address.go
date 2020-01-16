@@ -226,10 +226,24 @@ func GetAddressPubKeyFromHex(pubkey string) (pk crypto.PubKey, err error) {
 	if err != nil {
 		return nil, err
 	}
-	pk, err = cryptoAmino.PubKeyFromBytes(bz)
 
-	if err != nil {
-		return nil, err
+	switch len(bz) {
+	case ed25519.PubKeyEd25519Size:
+		var pubkeyBytes [ed25519.PubKeyEd25519Size]byte
+		copy(pubkeyBytes[:], bz)
+
+		pk = ed25519.PubKeyEd25519(pubkeyBytes)
+	case secp256k1.PubKeySecp256k1Size:
+		var pubkeyBytes [secp256k1.PubKeySecp256k1Size]byte
+		copy(pubkeyBytes[:], bz)
+
+		pk = secp256k1.PubKeySecp256k1(pubkeyBytes)
+	default:
+		pk, err = cryptoAmino.PubKeyFromBytes(bz)
+
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return pk, nil
