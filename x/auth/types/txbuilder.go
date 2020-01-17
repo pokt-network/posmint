@@ -247,7 +247,7 @@ func MakeSignature(keybase crkeys.Keybase, address sdk.Address, passphrase strin
 		return
 	}
 	return StdSignature{
-		PubKey:    pubkey,
+		PublicKey:    pubkey,
 		Signature: sigBytes,
 	}, nil
 }

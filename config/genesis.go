@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pokt-network/posmint/codec"
-	"github.com/tendermint/tendermint/crypto"
+	"github.com/pokt-network/posmint/crypto"
 	"github.com/tendermint/tendermint/libs/common"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
@@ -48,11 +48,11 @@ type InitConfig struct {
 	GenTxsDir string
 	Name      string
 	NodeID    string
-	ValPubKey crypto.PubKey
+	ValPubKey crypto.PublicKey
 }
 
 // NewInitConfig creates a new InitConfig object
-func NewInitConfig(chainID, genTxsDir, name, nodeID string, valPubKey crypto.PubKey) InitConfig {
+func NewInitConfig(chainID, genTxsDir, name, nodeID string, valPubKey crypto.PublicKey) InitConfig {
 	return InitConfig{
 		ChainID:   chainID,
 		GenTxsDir: genTxsDir,

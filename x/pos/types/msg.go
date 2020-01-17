@@ -1,8 +1,7 @@
 package types
 
 import (
-	"github.com/tendermint/tendermint/crypto"
-
+	"github.com/pokt-network/posmint/crypto"
 	sdk "github.com/pokt-network/posmint/types"
 )
 
@@ -18,7 +17,7 @@ var (
 // MsgStake - struct for staking transactions
 type MsgStake struct {
 	Address sdk.Address   `json:"validator_address" yaml:"validator_address"`
-	PubKey  crypto.PubKey `json:"pubkey" yaml:"pubkey"`
+	PubKey  crypto.PublicKey `json:"pubkey" yaml:"pubkey"`
 	Value   sdk.Int       `json:"value" yaml:"value"`
 }
 

@@ -2,10 +2,9 @@ package keys
 
 import (
 	"fmt"
+	posmintCrypto "github.com/pokt-network/posmint/crypto"
 	"github.com/pokt-network/posmint/types"
 	"github.com/stretchr/testify/assert"
-	"github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/ed25519"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -463,7 +462,7 @@ func Test_lazyKeybase_ImportPrivateKeyObject(t *testing.T) {
 
 			lkb.Delete(wkp.GetAddress(), "ENCRYPTIONPASSPHRASE")
 
-			got, err := lkb.ImportPrivateKeyObject(exported.(ed25519.PrivKeyEd25519), tt.args.encryptPassphrase)
+			got, err := lkb.ImportPrivateKeyObject(exported.(posmintCrypto.Ed25519PrivateKey), tt.args.encryptPassphrase)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ImportPrivateKeyObject() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -581,7 +580,7 @@ func Test_lazyKeybase_Sign(t *testing.T) {
 		fields  fields
 		args    args
 		want    []byte
-		want1   crypto.PubKey
+		want1   posmintCrypto.PublicKey
 		wantErr bool
 	}{
 		{"Test Sign", fields{
@@ -612,7 +611,7 @@ func Test_lazyKeybase_Sign(t *testing.T) {
 			if !assert.NotNil(t, got) {
 				t.Errorf("Sign() got = %v, want %v", got, tt.want)
 			}
-			if !reflect.DeepEqual(got1, wkb.PubKey) {
+			if !reflect.DeepEqual(got1, wkb.PublicKey) {
 				t.Errorf("Sign() got1 = %v, want %v", got1, tt.want1)
 			}
 		})

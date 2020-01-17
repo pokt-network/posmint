@@ -221,7 +221,7 @@ func TestHandleValidatorSignature(t *testing.T) {
 			expected: expected{validator: boundedValidator, tombstoned: false, missedBlocksCounter: int64(0)},
 		},
 		{
-			name:   "panics if no PubKey Relation",
+			name:   "panics if no PublicKey Relation",
 			panics: true,
 			args:   args{validator: boundedValidator, power: int64(10), signed: false},
 			expected: expected{

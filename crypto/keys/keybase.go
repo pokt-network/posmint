@@ -2,15 +2,12 @@ package keys
 
 import (
 	"fmt"
+	"github.com/pokt-network/posmint/crypto"
 
 	"github.com/pkg/errors"
 
 	"github.com/pokt-network/posmint/crypto/keys/mintkey"
 	"github.com/pokt-network/posmint/types"
-
-	//tmed "github.com/tendermint/crypto/ed25519"
-	tmcrypto "github.com/tendermint/tendermint/crypto"
-	tmed25519 "github.com/tendermint/tendermint/crypto/ed25519"
 
 	dbm "github.com/tendermint/tm-db"
 )
@@ -125,7 +122,7 @@ func (kb dbKeybase) Update(address types.Address, oldpass string, newpass string
 
 // Sign signs the msg with the named key.
 // It returns an error if the key doesn't exist or the decryption fails.
-func (kb dbKeybase) Sign(address types.Address, passphrase string, msg []byte) ([]byte, tmcrypto.PubKey, error) {
+func (kb dbKeybase) Sign(address types.Address, passphrase string, msg []byte) ([]byte, crypto.PublicKey, error) {
 	kp, err := kb.Get(address)
 	if err != nil {
 		return nil, nil, err
@@ -146,13 +143,13 @@ func (kb dbKeybase) Sign(address types.Address, passphrase string, msg []byte) (
 		return nil, nil, err
 	}
 
-	pub := priv.PubKey()
+	pub := priv.PublicKey()
 	return sig, pub, nil
 }
 
 // Create a new KeyPair and encrypt it to disk using encryptPassphrase
 func (kb dbKeybase) Create(encryptPassphrase string) (KeyPair, error) {
-	privKey := tmed25519.GenPrivKey()
+	privKey := crypto.PrivateKey(crypto.Ed25519PrivateKey{}).GenPrivateKey()
 	kp := kb.writeLocalKeyPair(privKey, encryptPassphrase)
 	return kp, nil
 }
@@ -165,16 +162,13 @@ func (kb dbKeybase) ImportPrivKey(armor, decryptPassphrase, encryptPassphrase st
 	if err != nil {
 		return KeyPair{}, err
 	}
-
 	Address, err := types.AddressFromHex(privKey.PubKey().Address().String())
 	if err != nil {
 		return KeyPair{}, err
 	}
-
 	if _, err := kb.Get(Address); err == nil {
 		return KeyPair{}, errors.New("Cannot overwrite key with address: " + Address.String())
 	}
-
 	return kb.writeLocalKeyPair(privKey, encryptPassphrase), nil
 }
 
@@ -190,7 +184,7 @@ func (kb dbKeybase) ExportPrivKeyEncryptedArmor(address types.Address, decryptPa
 
 // ImportPrivateKeyObject using the raw unencrypted privateKey string and encrypts it to disk using encryptPassphrase
 func (kb dbKeybase) ImportPrivateKeyObject(privateKey [64]byte, encryptPassphrase string) (KeyPair, error) {
-	ed25519PK := tmed25519.PrivKeyEd25519(privateKey)
+	ed25519PK := crypto.Ed25519PrivateKey(privateKey)
 	Address, err := types.AddressFromHex(ed25519PK.PubKey().Address().String())
 	if err != nil {
 		return KeyPair{}, err
@@ -202,7 +196,7 @@ func (kb dbKeybase) ImportPrivateKeyObject(privateKey [64]byte, encryptPassphras
 }
 
 // ExportPrivateKeyObject exports raw PrivKey object.
-func (kb dbKeybase) ExportPrivateKeyObject(address types.Address, passphrase string) (tmcrypto.PrivKey, error) {
+func (kb dbKeybase) ExportPrivateKeyObject(address types.Address, passphrase string) (crypto.PrivateKey, error) {
 	kp, err := kb.Get(address)
 	if err != nil {
 		return nil, err
@@ -226,11 +220,11 @@ func (kb dbKeybase) CloseDB() {
 }
 
 // Private interface
-func (kb dbKeybase) writeLocalKeyPair(priv tmcrypto.PrivKey, passphrase string) KeyPair {
+func (kb dbKeybase) writeLocalKeyPair(priv crypto.PrivateKey, passphrase string) KeyPair {
 	// encrypt private key using passphrase
 	privArmor := mintkey.EncryptArmorPrivKey(priv, passphrase)
 	// make Info
-	pub := priv.PubKey()
+	pub := priv.PublicKey()
 	localKeyPair := NewKeyPair(pub, privArmor)
 	kb.writeKeyPair(localKeyPair)
 	return localKeyPair

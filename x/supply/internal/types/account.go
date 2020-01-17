@@ -3,13 +3,13 @@ package types
 import (
 	"fmt"
 
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 
-	"github.com/tendermint/tendermint/crypto"
-
+	posCrypto "github.com/pokt-network/posmint/crypto"
 	sdk "github.com/pokt-network/posmint/types"
 	authtypes "github.com/pokt-network/posmint/x/auth/types"
 	"github.com/pokt-network/posmint/x/supply/exported"
+	"github.com/tendermint/tendermint/crypto"
 )
 
 var _ exported.ModuleAccountI = (*ModuleAccount)(nil)
@@ -77,7 +77,7 @@ func (ma ModuleAccount) GetPermissions() []string {
 }
 
 // SetPubKey - Implements Account
-func (ma ModuleAccount) SetPubKey(pubKey crypto.PubKey) error {
+func (ma ModuleAccount) SetPubKey(pubKey posCrypto.PublicKey) error {
 	return fmt.Errorf("not supported for module accounts")
 }
 

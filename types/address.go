@@ -6,28 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/tendermint/tendermint/crypto/ed25519"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
+	"github.com/pokt-network/posmint/crypto"
 	"gopkg.in/yaml.v2"
-
-	"github.com/tendermint/tendermint/crypto"
-	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
 )
 
 const (
-	// Constants defined here are the defaults value for address.
-	// You can use the specific values for your project.
-	// Add the follow lines to the `main()` of your server.
-	//
-	//	config := sdk.GetConfig()
-	//	config.SetBech32PrefixForAccount(yourBech32PrefixAccAddr, yourBech32PrefixAccPub)
-	//	config.SetBech32PrefixForValidator(yourBech32PrefixValAddr, yourBech32PrefixValPub)
-	//	config.SetBech32PrefixForConsensusNode(yourBech32PrefixConsAddr, yourBech32PrefixConsPub)
-	//	config.SetCoinType(yourCoinType)
-	//	config.SetFullFundraiserPath(yourFullFundraiserPath)
-	//	config.Seal()
-
-	// AddrLen defines a valid address length
 	AddrLen = 20
 )
 
@@ -43,13 +26,11 @@ type AddressI interface {
 }
 
 // Ensure that different address types implement the interface
-var _ AddressI = Address{}
+var (
+	_ AddressI       = Address{}
+	_ yaml.Marshaler = Address{}
+)
 
-var _ yaml.Marshaler = Address{}
-
-// VerifyAddressFormat verifies that the provided bytes form a valid address
-// according to the default address rules or a custom address verifier set by
-// GetConfig().SetAddressVerifier()
 func VerifyAddressFormat(bz []byte) error {
 	verifier := GetConfig().GetAddressVerifier()
 	if verifier != nil {
@@ -159,7 +140,7 @@ func (aa *Address) UnmarshalYAML(data []byte) error {
 	return nil
 }
 
-// Bytes returns the raw address bytes.
+// RawBytes returns the raw address bytes.
 func (aa Address) Bytes() []byte {
 	return aa
 }
@@ -189,99 +170,6 @@ func (aa Address) Format(s fmt.State, verb rune) {
 }
 
 // get Address from pubkey
-func GetAddress(pubkey crypto.PubKey) Address {
+func GetAddress(pubkey crypto.PublicKey) Address {
 	return Address(pubkey.Address())
-}
-
-// ----------------------------------------------------------------------------
-// auxiliary
-// ----------------------------------------------------------------------------
-
-//HexAddressPubKey gets a Hex encoded string from the pubKey raw byte array
-//if the the type cannot be asserted returns from amino encoded bytes
-func HexAddressPubKey(pub crypto.PubKey) string {
-	//type Assertion
-	switch v := pub.(type) {
-	case ed25519.PubKeyEd25519:
-		//Raw Bytes
-		return hex.EncodeToString(v[:])
-	case secp256k1.PubKeySecp256k1:
-		//Raw Bytes
-		return hex.EncodeToString(v[:])
-	default:
-		//Amino Bytes
-		return hex.EncodeToString(pub.Bytes())
-	}
-}
-
-//HexAddressPubKeyAmino gets a Hex encoded string from the pubKey amino encoded byte array
-func HexAddressPubKeyAmino(pub crypto.PubKey) string {
-	return hex.EncodeToString(pub.Bytes())
-}
-
-// GetAddressPubKeyFromHex decodes PublicKey from a Hex encoded string.
-func GetAddressPubKeyFromHex(pubkey string) (pk crypto.PubKey, err error) {
-
-	bz, err := GetFromHex(pubkey)
-	if err != nil {
-		return nil, err
-	}
-
-	switch len(bz) {
-	case ed25519.PubKeyEd25519Size:
-		var pubkeyBytes [ed25519.PubKeyEd25519Size]byte
-		copy(pubkeyBytes[:], bz)
-
-		pk = ed25519.PubKeyEd25519(pubkeyBytes)
-	case secp256k1.PubKeySecp256k1Size:
-		var pubkeyBytes [secp256k1.PubKeySecp256k1Size]byte
-		copy(pubkeyBytes[:], bz)
-
-		pk = secp256k1.PubKeySecp256k1(pubkeyBytes)
-	default:
-		pk, err = cryptoAmino.PubKeyFromBytes(bz)
-
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return pk, nil
-}
-
-// GetFromHex decodes a bytestring from a Hex encoded string.
-func GetFromHex(hexString string) ([]byte, error) {
-	if len(hexString) == 0 {
-		return nil, errors.New("decoding hex address failed: must provide an address")
-	}
-
-	bz, err := hex.DecodeString(hexString)
-	if err != nil {
-		return nil, err
-	}
-
-	return bz, nil
-}
-
-// ----------------------------------------------------------------------------
-// Backward Compatibility
-// ----------------------------------------------------------------------------
-
-func ConsAddressFromHex(address string) (addr Address, err error) {
-	return AddressFromHex(address)
-}
-func ValAddressFromHex(address string) (addr Address, err error) {
-	return AddressFromHex(address)
-}
-func AccAddressFromHex(address string) (addr Address, err error) {
-	return AddressFromHex(address)
-}
-func GetAccPubKeyHex(pubkey string) (pk crypto.PubKey, err error) {
-	return GetAddressPubKeyFromHex(pubkey)
-}
-func GetValPubKeyHex(pubkey string) (pk crypto.PubKey, err error) {
-	return GetAddressPubKeyFromHex(pubkey)
-}
-func GetConsPubKeyHex(pubkey string) (pk crypto.PubKey, err error) {
-	return GetAddressPubKeyFromHex(pubkey)
 }

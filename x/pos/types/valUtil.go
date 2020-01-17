@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"github.com/pokt-network/posmint/codec"
+	"github.com/pokt-network/posmint/crypto"
 	sdk "github.com/pokt-network/posmint/types"
 	"strings"
 	"time"
@@ -40,7 +41,7 @@ func UnmarshalValidator(cdc *codec.Codec, valBytes []byte) (validator Validator,
 
 // String returns a human readable string representation of a validator.
 func (v Validator) String() string {
-	hexAddressPubKey := sdk.HexAddressPubKey(v.PublicKey)
+	hexAddressPubKey := v.PublicKey.RawString()
 
 	return fmt.Sprintf(`Validator
   Address:           		  %s
@@ -65,10 +66,10 @@ type hexValidator struct {
 
 // MarshalJSON marshals the validator to JSON using Hex
 func (v Validator) MarshalJSON() ([]byte, error) {
-	hexAddressPubKey := sdk.HexAddressPubKey(v.PublicKey)
+	hexPubKey := v.PublicKey.RawString()
 	return codec.Cdc.MarshalJSON(hexValidator{
 		Address:                 v.Address,
-		PublicKey:               hexAddressPubKey,
+		PublicKey:               hexPubKey,
 		Jailed:                  v.Jailed,
 		Status:                  v.Status,
 		StakedTokens:            v.StakedTokens,
@@ -82,7 +83,7 @@ func (v *Validator) UnmarshalJSON(data []byte) error {
 	if err := codec.Cdc.UnmarshalJSON(data, bv); err != nil {
 		return err
 	}
-	addressPubKeyFromHex, err := sdk.GetAddressPubKeyFromHex(bv.PublicKey)
+	addressPubKeyFromHex, err := crypto.NewPublicKey(bv.PublicKey)
 	if err != nil {
 		return err
 	}

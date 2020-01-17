@@ -3,7 +3,7 @@ package types_test
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/tendermint/tendermint/crypto"
+	"github.com/pokt-network/posmint/crypto"
 	"math/rand"
 	"testing"
 
@@ -40,7 +40,7 @@ func TestEmptyAddresses(t *testing.T) {
 }
 
 func TestYAMLMarshalers(t *testing.T) {
-	addr := secp256k1.GenPrivKey().PubKey().Address()
+	addr := crypto.GenerateSecp256k1PrivKey().PubKey().Address()
 
 	address := types.Address(addr)
 
@@ -106,49 +106,6 @@ func TestAddressInterface(t *testing.T) {
 		case types.Address:
 			_, err := types.AddressFromHex(addr.String())
 			require.Nil(t, err)
-		default:
-			t.Fail()
-		}
-	}
-
-}
-
-func TestPubKeyInterfaceAssertion(t *testing.T) {
-	var pub ed25519.PubKeyEd25519
-	rand.Read(pub[:])
-	var pub2 secp256k1.PubKeySecp256k1
-	rand.Read(pub2[:])
-
-	values := []crypto.PubKey{
-		pub, pub2,
-	}
-
-	for _, v := range values {
-		switch v := v.(type) {
-		case ed25519.PubKeyEd25519:
-			fmt.Println(v)
-			s := types.HexAddressPubKey(v)
-			as := types.HexAddressPubKeyAmino(v)
-			pk, _ := types.GetAddressPubKeyFromHex(s)
-			fmt.Println(s)
-			fmt.Println(as)
-			fmt.Println(pk)
-			require.NotNil(t, s)
-			require.NotEqual(t, s, as)
-			require.Equal(t, pk, pub)
-
-		case secp256k1.PubKeySecp256k1:
-			fmt.Println(v)
-			s := types.HexAddressPubKey(v)
-			as := types.HexAddressPubKeyAmino(v)
-			pk, _ := types.GetAddressPubKeyFromHex(s)
-			fmt.Println(s)
-			fmt.Println(as)
-			fmt.Println(pk)
-			require.NotNil(t, s)
-			require.NotEqual(t, s, as)
-			require.Equal(t, pk, pub2)
-
 		default:
 			t.Fail()
 		}

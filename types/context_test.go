@@ -1,6 +1,7 @@
 package types_test
 
 import (
+	"github.com/pokt-network/posmint/crypto"
 	"testing"
 	"time"
 
@@ -10,8 +11,6 @@ import (
 	dbm "github.com/tendermint/tm-db"
 
 	abci "github.com/tendermint/tendermint/abci/types"
-
-	"github.com/tendermint/tendermint/crypto/secp256k1"
 
 	"github.com/pokt-network/posmint/store"
 	"github.com/pokt-network/posmint/types"
@@ -138,7 +137,7 @@ func TestContextHeader(t *testing.T) {
 
 	height := int64(5)
 	time := time.Now()
-	addr := secp256k1.GenPrivKey().PubKey().Address()
+	addr := crypto.GenerateSecp256k1PrivKey().PubKey().Address()
 	proposer := types.Address(addr)
 
 	ctx = types.NewContext(nil, abci.Header{}, false, nil)

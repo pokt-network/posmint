@@ -3,13 +3,13 @@ package util
 import (
 	"encoding/json"
 	"errors"
+	"github.com/pokt-network/posmint/crypto"
 	"io/ioutil"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tendermint/tendermint/crypto/ed25519"
 
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	priv = ed25519.GenPrivKey()
+	priv = crypto.PrivateKey(crypto.Ed25519PrivateKey{}).GenPrivateKey()
 	addr = sdk.Address(priv.PubKey().Address())
 )
 

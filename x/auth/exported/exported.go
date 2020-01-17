@@ -1,9 +1,8 @@
 package exported
 
 import (
+	"github.com/pokt-network/posmint/crypto"
 	"time"
-
-	"github.com/tendermint/tendermint/crypto"
 
 	sdk "github.com/pokt-network/posmint/types"
 )
@@ -18,8 +17,8 @@ type Account interface {
 	GetAddress() sdk.Address
 	SetAddress(sdk.Address) error // errors if already set.
 
-	GetPubKey() crypto.PubKey // can return nil.
-	SetPubKey(crypto.PubKey) error
+	GetPubKey() crypto.PublicKey // can return nil.
+	SetPubKey(crypto.PublicKey) error
 
 	GetAccountNumber() uint64
 	SetAccountNumber(uint64) error

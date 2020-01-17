@@ -1,8 +1,7 @@
 package keys
 
 import (
-	"github.com/tendermint/tendermint/crypto"
-
+	"github.com/pokt-network/posmint/crypto"
 	"github.com/pokt-network/posmint/types"
 )
 
@@ -21,7 +20,7 @@ type Keybase interface {
 	GetCoinbase() (KeyPair, error)
 	SetCoinbase(address types.Address) error
 	// Sign some bytes, looking up the private key to use
-	Sign(address types.Address, passphrase string, msg []byte) ([]byte, crypto.PubKey, error)
+	Sign(address types.Address, passphrase string, msg []byte) ([]byte, crypto.PublicKey, error)
 
 	// Create a new KeyPair and encrypt it to disk using encryptPassphrase
 	Create(encryptPassphrase string) (KeyPair, error)
@@ -36,7 +35,7 @@ type Keybase interface {
 	ImportPrivateKeyObject(privateKey [64]byte, encryptPassphrase string) (KeyPair, error)
 
 	// ExportPrivateKeyObject exports raw PrivKey object.
-	ExportPrivateKeyObject(address types.Address, passphrase string) (crypto.PrivKey, error)
+	ExportPrivateKeyObject(address types.Address, passphrase string) (crypto.PrivateKey, error)
 
 	// CloseDB closes the database.
 	CloseDB()
@@ -44,21 +43,21 @@ type Keybase interface {
 
 // KeyPair is the public information about a locally stored key
 type KeyPair struct {
-	PubKey       crypto.PubKey `json:"pubkey"`
-	PrivKeyArmor string        `json:"privkey.armor"`
+	PublicKey    crypto.PublicKey `json:"pubkey"`
+	PrivKeyArmor string           `json:"privkey.armor"`
 }
 
 // NewKeyPair with the given public key and priv armor key
-func NewKeyPair(pub crypto.PubKey, privArmor string) KeyPair {
+func NewKeyPair(pub crypto.PublicKey, privArmor string) KeyPair {
 	return KeyPair{
-		PubKey:       pub,
+		PublicKey:    pub,
 		PrivKeyArmor: privArmor,
 	}
 }
 
 // GetAddress for the given KeyPair
 func (kp KeyPair) GetAddress() types.Address {
-	return kp.PubKey.Address().Bytes()
+	return kp.PublicKey.Address().Bytes()
 }
 
 // encoding info

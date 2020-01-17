@@ -2,13 +2,11 @@ package keys
 
 import (
 	"crypto/rand"
+	"github.com/pokt-network/posmint/crypto"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/ed25519"
 
 	"github.com/pokt-network/posmint/crypto/keys/mintkey"
 	"github.com/pokt-network/posmint/types"
@@ -32,7 +30,7 @@ func TestKeyManagement(t *testing.T) {
 	assert.Empty(t, l)
 
 	// Fetching a non existent address should throw an error
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 	blankAddress := types.Address(pub.Address())
 	_, err = cstore.Get(blankAddress)
@@ -93,31 +91,31 @@ func TestSignVerify(t *testing.T) {
 	// try signing both data with both ..
 	s1, pub1, err := cstore.Sign(kp.GetAddress(), passphrase, d1)
 	require.Nil(t, err)
-	require.Equal(t, kp.PubKey, pub1)
+	require.Equal(t, kp.PublicKey, pub1)
 
 	s2, pub2, err := cstore.Sign(kp.GetAddress(), passphrase, d2)
 	require.Nil(t, err)
-	require.Equal(t, kp.PubKey, pub2)
+	require.Equal(t, kp.PublicKey, pub2)
 
 	s3, pub3, err := cstore.Sign(kp.GetAddress(), passphrase, d3)
 	require.Nil(t, err)
-	require.Equal(t, kp.PubKey, pub3)
+	require.Equal(t, kp.PublicKey, pub3)
 
 	// let's try to validate and make sure it only works when everything is proper
 	cases := []struct {
-		key   crypto.PubKey
+		key   crypto.PublicKey
 		data  []byte
 		sig   []byte
 		valid bool
 	}{
 		// proper matches
-		{kp.PubKey, d1, s1, true},
-		{kp.PubKey, d2, s2, true},
-		{kp.PubKey, d3, s3, true},
+		{kp.PublicKey, d1, s1, true},
+		{kp.PublicKey, d2, s2, true},
+		{kp.PublicKey, d3, s3, true},
 		// change data, pubkey, or signature leads to fail
-		{kp.PubKey, d1, s2, false},
-		{kp.PubKey, d2, s3, false},
-		{kp.PubKey, d3, s1, false},
+		{kp.PublicKey, d1, s2, false},
+		{kp.PublicKey, d2, s3, false},
+		{kp.PublicKey, d3, s1, false},
 	}
 
 	for i, tc := range cases {
@@ -170,11 +168,11 @@ func TestRawExportImport(t *testing.T) {
 	rawPk, err := cstore.ExportPrivateKeyObject(kp.GetAddress(), passphrase)
 	require.NoError(t, err)
 	require.NotEmpty(t, rawPk)
-	require.Equal(t, kp.PubKey.Address().String(), rawPk.PubKey().Address().String())
+	require.Equal(t, kp.PublicKey.Address().String(), rawPk.PubKey().Address().String())
 	kpList, err := cstore.List()
 	require.NoError(t, err)
 	require.NotEmpty(t, kpList)
-	_, err = cstore.ImportPrivateKeyObject(rawPk.(ed25519.PrivKeyEd25519), passphrase)
+	_, err = cstore.ImportPrivateKeyObject(rawPk.(crypto.Ed25519PrivateKey), passphrase)
 	require.Error(t, err)
 
 	// Delete the account, because otherwise it would error out
@@ -182,7 +180,7 @@ func TestRawExportImport(t *testing.T) {
 	require.NoError(t, err)
 
 	// Import the raw account succesfully
-	importedKp, err := cstore.ImportPrivateKeyObject(rawPk.(ed25519.PrivKeyEd25519), passphrase)
+	importedKp, err := cstore.ImportPrivateKeyObject(rawPk.(crypto.Ed25519PrivateKey), passphrase)
 	require.NoError(t, err)
 	fetchedKp, err := cstore.Get(importedKp.GetAddress())
 	require.NoError(t, err)

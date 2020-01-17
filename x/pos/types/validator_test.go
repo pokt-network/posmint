@@ -1,10 +1,9 @@
 package types
 
 import (
+	"github.com/pokt-network/posmint/crypto"
 	sdk "github.com/pokt-network/posmint/types"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/ed25519"
 	tmtypes "github.com/tendermint/tendermint/types"
 	"math/rand"
 	"reflect"
@@ -15,10 +14,10 @@ import (
 func TestNewValidator(t *testing.T) {
 	type args struct {
 		addr          sdk.Address
-		PublicKey     crypto.PubKey
+		PublicKey     crypto.PublicKey
 		tokensToStake sdk.Int
 	}
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	tests := []struct {
@@ -48,13 +47,13 @@ func TestNewValidator(t *testing.T) {
 func TestValidator_ABCIValidatorUpdate(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	tests := []struct {
@@ -70,7 +69,7 @@ func TestValidator_ABCIValidatorUpdate(t *testing.T) {
 			StakedTokens:            sdk.ZeroInt(),
 			UnstakingCompletionTime: time.Time{},
 		}, abci.ValidatorUpdate{
-			PubKey: tmtypes.TM2PB.PubKey(pub),
+			PubKey: tmtypes.TM2PB.PubKey(pub.PubKey()),
 			Power:  int64(0),
 		}},
 		{"testingABCIValidatorUpdate Bonded", fields{
@@ -81,7 +80,7 @@ func TestValidator_ABCIValidatorUpdate(t *testing.T) {
 			StakedTokens:            sdk.ZeroInt(),
 			UnstakingCompletionTime: time.Time{},
 		}, abci.ValidatorUpdate{
-			PubKey: tmtypes.TM2PB.PubKey(pub),
+			PubKey: tmtypes.TM2PB.PubKey(pub.PubKey()),
 			Power:  int64(0),
 		}},
 	}
@@ -105,13 +104,13 @@ func TestValidator_ABCIValidatorUpdate(t *testing.T) {
 func TestValidator_ABCIValidatorUpdateZero(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	tests := []struct {
@@ -127,7 +126,7 @@ func TestValidator_ABCIValidatorUpdateZero(t *testing.T) {
 			StakedTokens:            sdk.OneInt(),
 			UnstakingCompletionTime: time.Time{},
 		}, abci.ValidatorUpdate{
-			PubKey: tmtypes.TM2PB.PubKey(pub),
+			PubKey: tmtypes.TM2PB.PubKey(pub.PubKey()),
 			Power:  int64(0),
 		}},
 		{"testingABCIValidatorUpdate Bonded", fields{
@@ -138,7 +137,7 @@ func TestValidator_ABCIValidatorUpdateZero(t *testing.T) {
 			StakedTokens:            sdk.OneInt(),
 			UnstakingCompletionTime: time.Time{},
 		}, abci.ValidatorUpdate{
-			PubKey: tmtypes.TM2PB.PubKey(pub),
+			PubKey: tmtypes.TM2PB.PubKey(pub.PubKey()),
 			Power:  int64(0),
 		}},
 	}
@@ -162,13 +161,13 @@ func TestValidator_ABCIValidatorUpdateZero(t *testing.T) {
 func TestValidator_AddStakedTokens(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	type args struct {
@@ -217,13 +216,13 @@ func TestValidator_AddStakedTokens(t *testing.T) {
 func TestValidator_Address(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	tests := []struct {
@@ -260,13 +259,13 @@ func TestValidator_Address(t *testing.T) {
 func TestValidator_ConsensusPower(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	tests := []struct {
@@ -311,13 +310,13 @@ func TestValidator_ConsensusPower(t *testing.T) {
 func TestValidator_Equals(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	type args struct {
@@ -380,14 +379,14 @@ func TestValidator_Equals(t *testing.T) {
 func TestValidator_GetAddress(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
 
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	tests := []struct {
@@ -424,13 +423,13 @@ func TestValidator_GetAddress(t *testing.T) {
 func TestValidator_GetConsAddr(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	tests := []struct {
@@ -467,19 +466,19 @@ func TestValidator_GetConsAddr(t *testing.T) {
 func TestValidator_GetPublicKey(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	tests := []struct {
 		name   string
 		fields fields
-		want   crypto.PubKey
+		want   crypto.PublicKey
 	}{
 		{"Default Test", fields{
 			Address:                 sdk.Address(pub.Address()),
@@ -510,14 +509,14 @@ func TestValidator_GetPublicKey(t *testing.T) {
 func TestValidator_GetConsensusPower(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
 
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	tests := []struct {
@@ -554,14 +553,14 @@ func TestValidator_GetConsensusPower(t *testing.T) {
 func TestValidator_GetStatus(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
 
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	tests := []struct {
@@ -598,14 +597,14 @@ func TestValidator_GetStatus(t *testing.T) {
 func TestValidator_GetTokens(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
 
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	tests := []struct {
@@ -642,14 +641,14 @@ func TestValidator_GetTokens(t *testing.T) {
 func TestValidator_IsJailed(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
 
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	tests := []struct {
@@ -686,14 +685,14 @@ func TestValidator_IsJailed(t *testing.T) {
 func TestValidator_IsStaked(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
 
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	tests := []struct {
@@ -746,14 +745,14 @@ func TestValidator_IsStaked(t *testing.T) {
 func TestValidator_IsUnstaked(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
 
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	tests := []struct {
@@ -806,14 +805,14 @@ func TestValidator_IsUnstaked(t *testing.T) {
 func TestValidator_IsUnstaking(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
 
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	tests := []struct {
@@ -866,14 +865,14 @@ func TestValidator_IsUnstaking(t *testing.T) {
 func TestValidator_PotentialConsensusPower(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
 
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	tests := []struct {
@@ -910,14 +909,14 @@ func TestValidator_PotentialConsensusPower(t *testing.T) {
 func TestValidator_RemoveStakedTokens(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
 
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	type args struct {
@@ -980,14 +979,14 @@ func TestValidator_RemoveStakedTokens(t *testing.T) {
 func TestValidator_UpdateStatus(t *testing.T) {
 	type fields struct {
 		Address                 sdk.Address
-		PublicKey               crypto.PubKey
+		PublicKey               crypto.PublicKey
 		Jailed                  bool
 		Status                  sdk.BondStatus
 		StakedTokens            sdk.Int
 		UnstakingCompletionTime time.Time
 	}
 
-	var pub ed25519.PubKeyEd25519
+	var pub crypto.Ed25519PublicKey
 	rand.Read(pub[:])
 
 	type args struct {
