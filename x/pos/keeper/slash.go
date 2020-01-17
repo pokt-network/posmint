@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	posCrypto "github.com/pokt-network/posmint/crypto"
 	"github.com/pokt-network/posmint/x/pos/exported"
 	"github.com/pokt-network/posmint/x/pos/types"
 	"github.com/tendermint/go-amino"
@@ -268,14 +269,14 @@ func (k Keeper) handleValidatorSignature(ctx sdk.Context, addr crypto.Address, p
 	k.SetValidatorSigningInfo(ctx, consAddr, signInfo)
 }
 
-func (k Keeper) AddPubKeyRelation(ctx sdk.Context, pubkey crypto.PubKey) {
+func (k Keeper) AddPubKeyRelation(ctx sdk.Context, pubkey posCrypto.PublicKey) {
 	addr := pubkey.Address()
 	k.setAddrPubkeyRelation(ctx, addr, pubkey)
 }
 
-func (k Keeper) getPubKeyRelation(ctx sdk.Context, address crypto.Address) (crypto.PubKey, error) {
+func (k Keeper) getPubKeyRelation(ctx sdk.Context, address crypto.Address) (posCrypto.PublicKey, error) {
 	store := ctx.KVStore(k.storeKey)
-	var pubkey crypto.PubKey
+	var pubkey posCrypto.PublicKey
 	err := k.cdc.UnmarshalBinaryLengthPrefixed(store.Get(types.GetAddrPubkeyRelationKey(address)), &pubkey)
 	if err != nil {
 		return nil, fmt.Errorf("address %s not found", sdk.Address(address))
@@ -283,7 +284,7 @@ func (k Keeper) getPubKeyRelation(ctx sdk.Context, address crypto.Address) (cryp
 	return pubkey, nil
 }
 
-func (k Keeper) setAddrPubkeyRelation(ctx sdk.Context, addr crypto.Address, pubkey crypto.PubKey) {
+func (k Keeper) setAddrPubkeyRelation(ctx sdk.Context, addr crypto.Address, pubkey posCrypto.PublicKey) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshalBinaryLengthPrefixed(pubkey)
 	store.Set(types.GetAddrPubkeyRelationKey(addr), bz)

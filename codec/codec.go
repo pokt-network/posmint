@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/pokt-network/posmint/crypto"
 
 	"github.com/tendermint/go-amino"
 	cryptoamino "github.com/tendermint/tendermint/crypto/encoding/amino"
@@ -20,6 +21,7 @@ func New() *Codec {
 // Register the go-crypto to the codec
 func RegisterCrypto(cdc *Codec) {
 	cryptoamino.RegisterAmino(cdc)
+	crypto.RegisterAmino(cdc)
 }
 
 // RegisterEvidences registers Tendermint evidence types with the provided codec.

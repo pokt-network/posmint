@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 	"github.com/pokt-network/posmint/codec"
-	"github.com/tendermint/tendermint/crypto/ed25519"
+	"github.com/pokt-network/posmint/crypto"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	"github.com/tendermint/tendermint/p2p"
 	"io/ioutil"
@@ -25,7 +25,7 @@ func LoadOrGenerateNodeKeyFile(cdc *codec.Codec, filePath string) error {
 }
 
 func GenerateNodeKeyFile(cdc *codec.Codec, filePath string) (*p2p.NodeKey, error) {
-	privKey := ed25519.GenPrivKey()
+	privKey := crypto.PrivateKey(crypto.Ed25519PrivateKey{}).GenPrivateKey()
 	nodeKey := &p2p.NodeKey{
 		PrivKey: privKey,
 	}

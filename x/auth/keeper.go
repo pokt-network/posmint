@@ -2,8 +2,7 @@ package auth
 
 import (
 	"fmt"
-
-	"github.com/tendermint/tendermint/crypto"
+	"github.com/pokt-network/posmint/crypto"
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/pokt-network/posmint/codec"
@@ -131,8 +130,8 @@ func (ak AccountKeeper) IterateAccounts(ctx sdk.Context, process func(exported.A
 	}
 }
 
-// GetPubKey Returns the PubKey of the account at address
-func (ak AccountKeeper) GetPubKey(ctx sdk.Context, addr sdk.Address) (crypto.PubKey, sdk.Error) {
+// GetPubKey Returns the PublicKey of the account at address
+func (ak AccountKeeper) GetPubKey(ctx sdk.Context, addr sdk.Address) (crypto.PublicKey, sdk.Error) {
 	acc := ak.GetAccount(ctx, addr)
 	if acc == nil {
 		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))

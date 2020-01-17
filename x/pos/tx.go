@@ -14,7 +14,7 @@ func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, amoun
 	txBuilder, cliCtx := newTx(cdc, tmNode, keybase, passphrase)
 	msg := types.MsgStake{
 		Address: sdk.Address(kp.GetAddress()),
-		PubKey:  kp.PubKey,
+		PubKey:  kp.PublicKey,
 		Value:   amount,
 	}
 	err := msg.ValidateBasic()

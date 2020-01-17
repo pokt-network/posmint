@@ -3,7 +3,7 @@ package keys
 import (
 	"fmt"
 
-	"github.com/tendermint/tendermint/crypto"
+	"github.com/pokt-network/posmint/crypto"
 	cmn "github.com/tendermint/tendermint/libs/common"
 
 	"github.com/pokt-network/posmint/types"
@@ -90,7 +90,7 @@ func (lkb lazyKeybase) Update(address types.Address, oldpass string, newpass str
 	return newDbKeybase(db).Update(address, oldpass, newpass)
 }
 
-func (lkb lazyKeybase) Sign(address types.Address, passphrase string, msg []byte) ([]byte, crypto.PubKey, error) {
+func (lkb lazyKeybase) Sign(address types.Address, passphrase string, msg []byte) ([]byte, crypto.PublicKey, error) {
 	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
 	if err != nil {
 		return nil, nil, err
@@ -140,7 +140,7 @@ func (lkb lazyKeybase) ImportPrivateKeyObject(privateKey [64]byte, encryptPassph
 	return newDbKeybase(db).ImportPrivateKeyObject(privateKey, encryptPassphrase)
 }
 
-func (lkb lazyKeybase) ExportPrivateKeyObject(address types.Address, passphrase string) (crypto.PrivKey, error) {
+func (lkb lazyKeybase) ExportPrivateKeyObject(address types.Address, passphrase string) (crypto.PrivateKey, error) {
 	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
 	if err != nil {
 		return nil, err

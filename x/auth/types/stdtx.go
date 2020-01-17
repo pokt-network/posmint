@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/pokt-network/posmint/codec"
+	posCrypto "github.com/pokt-network/posmint/crypto"
+	sdk "github.com/pokt-network/posmint/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/multisig"
-	yaml "gopkg.in/yaml.v2"
-
-	"github.com/pokt-network/posmint/codec"
-	sdk "github.com/pokt-network/posmint/types"
+	"gopkg.in/yaml.v2"
 )
 
 var (
@@ -121,8 +121,8 @@ func (tx StdTx) GetSignatures() []StdSignature { return tx.Signatures }
 // 	}
 // }
 
-// Bytes for signing later
-// func (fee StdFee) Bytes() []byte {
+// RawBytes for signing later
+// func (fee StdFee) RawBytes() []byte {
 // 	// normalize. XXX
 // 	// this is a sign of something ugly
 // 	// (in the lcd_test, client side its null,
@@ -189,8 +189,8 @@ func StdSignBytes(chainID string, accnum uint64, sequence uint64, fee sdk.Coins,
 
 // StdSignature represents a sig
 type StdSignature struct {
-	crypto.PubKey `json:"pub_key" yaml:"pub_key"` // optional
-	Signature     []byte                          `json:"signature" yaml:"signature"`
+	posCrypto.PublicKey `json:"pub_key" yaml:"pub_key"` // optional
+	Signature           []byte `json:"signature" yaml:"signature"`
 }
 
 // DefaultTxDecoder logic for standard transaction decoding
@@ -228,8 +228,8 @@ func (ss StdSignature) MarshalYAML() (interface{}, error) {
 		err    error
 	)
 
-	if ss.PubKey != nil {
-		pubkey = sdk.HexAddressPubKey(ss.PubKey)
+	if ss.PublicKey != nil {
+		pubkey = ss.PublicKey.RawString()
 	}
 
 	bz, err = yaml.Marshal(struct {

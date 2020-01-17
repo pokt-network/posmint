@@ -3,15 +3,13 @@ package mintkey
 import (
 	"encoding/hex"
 	"fmt"
-
+	posCrypto "github.com/pokt-network/posmint/crypto"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/armor"
-	cryptoAmino "github.com/tendermint/tendermint/crypto/encoding/amino"
 	"github.com/tendermint/tendermint/crypto/xsalsa20symmetric"
 
 	cmn "github.com/tendermint/tendermint/libs/common"
 
-	"github.com/pokt-network/posmint/crypto/keys/keyerror"
 	"github.com/tendermint/crypto/bcrypt"
 )
 
@@ -90,7 +88,7 @@ func unarmorBytes(armorStr, blockType string) (bz []byte, err error) {
 // encrypt/decrypt with armor
 
 // Encrypt and armor the private key.
-func EncryptArmorPrivKey(privKey crypto.PrivKey, passphrase string) string {
+func EncryptArmorPrivKey(privKey posCrypto.PrivateKey, passphrase string) string {
 	saltBytes, encBytes := encryptPrivKey(privKey, passphrase)
 	header := map[string]string{
 		"kdf":  "bcrypt",
@@ -103,7 +101,7 @@ func EncryptArmorPrivKey(privKey crypto.PrivKey, passphrase string) string {
 // encrypt the given privKey with the passphrase using a randomly
 // generated salt and the xsalsa20 cipher. returns the salt and the
 // encrypted priv key.
-func encryptPrivKey(privKey crypto.PrivKey, passphrase string) (saltBytes []byte, encBytes []byte) {
+func encryptPrivKey(privKey posCrypto.PrivateKey, passphrase string) (saltBytes []byte, encBytes []byte) {
 	saltBytes = crypto.CRandBytes(16)
 	key, err := bcrypt.GenerateFromPassword(saltBytes, []byte(passphrase), BcryptSecurityParameter)
 	if err != nil {
@@ -115,8 +113,8 @@ func encryptPrivKey(privKey crypto.PrivKey, passphrase string) (saltBytes []byte
 }
 
 // Unarmor and decrypt the private key.
-func UnarmorDecryptPrivKey(armorStr string, passphrase string) (crypto.PrivKey, error) {
-	var privKey crypto.PrivKey
+func UnarmorDecryptPrivKey(armorStr string, passphrase string) (posCrypto.PrivateKey, error) {
+	var privKey posCrypto.PrivateKey
 	blockType, header, encBytes, err := armor.DecodeArmor(armorStr)
 	if err != nil {
 		return privKey, err
@@ -138,7 +136,7 @@ func UnarmorDecryptPrivKey(armorStr string, passphrase string) (crypto.PrivKey, 
 	return privKey, err
 }
 
-func decryptPrivKey(saltBytes []byte, encBytes []byte, passphrase string) (privKey crypto.PrivKey, err error) {
+func decryptPrivKey(saltBytes []byte, encBytes []byte, passphrase string) (privKey posCrypto.PrivateKey, err error) {
 	key, err := bcrypt.GenerateFromPassword(saltBytes, []byte(passphrase), BcryptSecurityParameter)
 	if err != nil {
 		cmn.Exit("Error generating bcrypt key from passphrase: " + err.Error())
@@ -146,10 +144,13 @@ func decryptPrivKey(saltBytes []byte, encBytes []byte, passphrase string) (privK
 	key = crypto.Sha256(key) // Get 32 bytes
 	privKeyBytes, err := xsalsa20symmetric.DecryptSymmetric(encBytes, key)
 	if err != nil && err.Error() == "Ciphertext decryption failed" {
-		return privKey, keyerror.NewErrWrongPassword()
+		return
 	} else if err != nil {
-		return privKey, err
+		return
 	}
-	privKey, err = cryptoAmino.PrivKeyFromBytes(privKeyBytes)
-	return privKey, err
+	pk, err := posCrypto.PrivKeyFromBytes(privKeyBytes)
+	if err != nil {
+		return
+	}
+	return pk, err
 }

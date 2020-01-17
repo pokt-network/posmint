@@ -4,10 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	tcrypto "github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/ed25519"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
 type byter interface {
@@ -26,7 +22,7 @@ func checkAminoBinary(t *testing.T, src, dst interface{}, size int) {
 	if size != -1 {
 		require.Equal(t, size, len(bz), "Amino binary size mismatch")
 	}
-	// Unmarshal.
+	// Unmarshal
 	err = cdc.UnmarshalBinaryBare(bz, dst)
 	require.Nil(t, err, "%+v", err)
 }
@@ -48,16 +44,16 @@ func checkAminoJSON(t *testing.T, src interface{}, dst interface{}, isNil bool) 
 
 func TestKeyEncodings(t *testing.T) {
 	cases := []struct {
-		privKey           tcrypto.PrivKey
+		privKey           PrivateKey
 		privSize, pubSize int // binary sizes with the amino overhead
 	}{
 		{
-			privKey:  ed25519.GenPrivKey(),
+			privKey:  PrivateKey(Ed25519PrivateKey{}).GenPrivateKey(),
 			privSize: 69,
 			pubSize:  37,
 		},
 		{
-			privKey:  secp256k1.GenPrivKey(),
+			privKey:  PrivateKey(Secp256k1PrivateKey{}).GenPrivateKey(),
 			privSize: 37,
 			pubSize:  38,
 		},
@@ -66,7 +62,7 @@ func TestKeyEncodings(t *testing.T) {
 	for _, tc := range cases {
 
 		// Check (de/en)codings of PrivKeys.
-		var priv2, priv3 tcrypto.PrivKey
+		var priv2, priv3 PrivateKey
 		checkAminoBinary(t, tc.privKey, &priv2, tc.privSize)
 		require.EqualValues(t, tc.privKey, priv2)
 		checkAminoJSON(t, tc.privKey, &priv3, false) // TODO also check Prefix bytes.
@@ -80,8 +76,8 @@ func TestKeyEncodings(t *testing.T) {
 		require.EqualValues(t, sig1, sig2)
 
 		// Check (de/en)codings of PubKeys.
-		pubKey := tc.privKey.PubKey()
-		var pub2, pub3 tcrypto.PubKey
+		pubKey := PubKeyToPublicKey(tc.privKey.PubKey())
+		var pub2, pub3 PublicKey
 		checkAminoBinary(t, pubKey, &pub2, tc.pubSize)
 		require.EqualValues(t, pubKey, pub2)
 		checkAminoJSON(t, pubKey, &pub3, false) // TODO also check Prefix bytes.
@@ -96,13 +92,13 @@ func TestNilEncodings(t *testing.T) {
 	checkAminoJSON(t, &a, &b, true)
 	require.EqualValues(t, a, b)
 
-	// Check nil PubKey.
-	var c, d tcrypto.PubKey
+	// Check nil PublicKey.
+	var c, d PublicKey
 	checkAminoJSON(t, &c, &d, true)
 	require.EqualValues(t, c, d)
 
 	// Check nil PrivKey.
-	var e, f tcrypto.PrivKey
+	var e, f PrivateKey
 	checkAminoJSON(t, &e, &f, true)
 	require.EqualValues(t, e, f)
 

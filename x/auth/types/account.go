@@ -3,9 +3,9 @@ package types
 import (
 	"errors"
 	"fmt"
+	"github.com/pokt-network/posmint/crypto"
 	"time"
 
-	"github.com/tendermint/tendermint/crypto"
 	"gopkg.in/yaml.v2"
 
 	sdk "github.com/pokt-network/posmint/types"
@@ -22,18 +22,18 @@ var _ exported.Account = (*BaseAccount)(nil)
 // However one doesn't have to use BaseAccount as long as your struct
 // implements Account.
 type BaseAccount struct {
-	Address       sdk.Address   `json:"address" yaml:"address"`
-	Coins         sdk.Coins     `json:"coins" yaml:"coins"`
-	PubKey        crypto.PubKey `json:"public_key" yaml:"public_key"`
-	AccountNumber uint64        `json:"account_number" yaml:"account_number"`
-	Sequence      uint64        `json:"sequence" yaml:"sequence"`
+	Address       sdk.Address      `json:"address" yaml:"address"`
+	Coins         sdk.Coins        `json:"coins" yaml:"coins"`
+	PubKey        crypto.PublicKey `json:"public_key" yaml:"public_key"`
+	AccountNumber uint64           `json:"account_number" yaml:"account_number"`
+	Sequence      uint64           `json:"sequence" yaml:"sequence"`
 }
 
 type Accounts []exported.Account
 
 // NewBaseAccount creates a new BaseAccount object
 func NewBaseAccount(address sdk.Address, coins sdk.Coins,
-	pubKey crypto.PubKey, accountNumber uint64, sequence uint64) *BaseAccount {
+	pubKey crypto.PublicKey, accountNumber uint64, sequence uint64) *BaseAccount {
 
 	return &BaseAccount{
 		Address:       address,
@@ -49,7 +49,7 @@ func (acc BaseAccount) String() string {
 	var pubkey string
 
 	if acc.PubKey != nil {
-		pubkey = sdk.HexAddressPubKey(acc.PubKey)
+		pubkey = acc.PubKey.RawString()
 	}
 
 	return fmt.Sprintf(`Account:
@@ -89,12 +89,12 @@ func (acc *BaseAccount) SetAddress(addr sdk.Address) error {
 }
 
 // GetPubKey - Implements sdk.Account.
-func (acc BaseAccount) GetPubKey() crypto.PubKey {
+func (acc BaseAccount) GetPubKey() crypto.PublicKey {
 	return acc.PubKey
 }
 
 // SetPubKey - Implements sdk.Account.
-func (acc *BaseAccount) SetPubKey(pubKey crypto.PubKey) error {
+func (acc *BaseAccount) SetPubKey(pubKey crypto.PublicKey) error {
 	acc.PubKey = pubKey
 	return nil
 }
@@ -145,7 +145,7 @@ func (acc BaseAccount) MarshalYAML() (interface{}, error) {
 	var pubkey string
 
 	if acc.PubKey != nil {
-		pubkey = sdk.HexAddressPubKey(acc.PubKey)
+		pubkey = acc.PubKey.RawString()
 	}
 
 	bs, err = yaml.Marshal(struct {

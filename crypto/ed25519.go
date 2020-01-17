@@ -3,69 +3,126 @@ package crypto
 import (
 	ed255192 "crypto/ed25519"
 	"encoding/hex"
-	sdk "github.com/pokt-network/posmint/types"
+	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
 )
 
-type PublicKey ed25519.PubKeyEd25519
-type PrivateKey ed25519.PrivKeyEd25519
-
-const (
-	PrivKeySize   = ed255192.PrivateKeySize
-	PubKeySize    = ed25519.PubKeyEd25519Size
-	SignatureSize = ed25519.SignatureSize
+type (
+	Ed25519PublicKey  ed25519.PubKeyEd25519
+	Ed25519PrivateKey ed25519.PrivKeyEd25519
 )
 
-func NewPublicKey(hexString string) (PublicKey, error) {
-	b, err := hex.DecodeString(hexString)
-	if err != nil {
-		return PublicKey{}, err
-	}
-	var bz [PubKeySize]byte
+var (
+	_ PublicKey      = Ed25519PublicKey{}
+	_ PrivateKey     = Ed25519PrivateKey{}
+	_ crypto.PubKey  = Ed25519PublicKey{}
+	_ crypto.PrivKey = Ed25519PrivateKey{}
+)
+
+const (
+	Ed25519PrivKeySize   = ed255192.PrivateKeySize
+	Ed25519PubKeySize    = ed25519.PubKeyEd25519Size
+	Ed25519SignatureSize = ed25519.SignatureSize
+)
+
+func (Ed25519PublicKey) NewPublicKey(b []byte) (PublicKey, error) {
+	var bz [Ed25519PubKeySize]byte
 	copy(bz[:], b)
 	pubkey := ed25519.PubKeyEd25519(bz)
-	pk := PublicKey(pubkey)
+	pk := Ed25519PublicKey(pubkey)
 	return pk, nil
 }
 
-func (pub PublicKey) AminoBytes() []byte {
-	return ed25519.PubKeyEd25519(pub).Bytes()
+func (Ed25519PublicKey) PubKeyToPublicKey(key crypto.PubKey) PublicKey {
+	return Ed25519PublicKey(key.(ed25519.PubKeyEd25519))
 }
 
-func (pub PublicKey) Bytes() []byte {
-	pkBytes := [PubKeySize]byte(pub)
+func (pub Ed25519PublicKey) PubKey() crypto.PubKey {
+	return ed25519.PubKeyEd25519(pub)
+}
+
+func (pub Ed25519PublicKey) Bytes() []byte {
+	bz, err := cdc.MarshalBinaryBare(pub)
+	if err != nil {
+		panic(err)
+	}
+	return bz
+}
+
+func (pub Ed25519PublicKey) RawBytes() []byte {
+	pkBytes := [Ed25519PubKeySize]byte(pub)
 	return pkBytes[:]
 }
 
-func (pub PublicKey) String() string {
+func (pub Ed25519PublicKey) String() string {
 	return hex.EncodeToString(pub.Bytes())
 }
 
-func (pub PublicKey) Address() sdk.Address {
-	return sdk.Address(ed25519.PubKeyEd25519(pub).Address())
+func (pub Ed25519PublicKey) RawString() string {
+	return hex.EncodeToString(pub.RawBytes())
 }
 
-func (pub PublicKey) VerifySignature(msg []byte, sig []byte) bool {
+func (pub Ed25519PublicKey) Address() crypto.Address {
+	return ed25519.PubKeyEd25519(pub).Address()
+}
+
+func (pub Ed25519PublicKey) VerifyBytes(msg []byte, sig []byte) bool {
 	return ed25519.PubKeyEd25519(pub).VerifyBytes(msg, sig)
 }
 
-func (priv PrivateKey) Bytes() []byte {
-	pkBytes := [PrivKeySize]byte(priv)
+func (pub Ed25519PublicKey) Equals(other crypto.PubKey) bool {
+	return ed25519.PubKeyEd25519(pub).Equals(ed25519.PubKeyEd25519(other.(Ed25519PublicKey)))
+}
+
+func (pub Ed25519PublicKey) Size() int {
+	return Ed25519PubKeySize
+}
+
+func (priv Ed25519PrivateKey) RawBytes() []byte {
+	pkBytes := [Ed25519PrivKeySize]byte(priv)
 	return pkBytes[:]
 }
 
-func (priv PrivateKey) AminoBytes() []byte {
-	return ed25519.PrivKeyEd25519(priv).Bytes()
+func (priv Ed25519PrivateKey) RawString() string {
+	return hex.EncodeToString(priv.RawBytes())
 }
 
-func (priv PrivateKey) String() string {
+func (priv Ed25519PrivateKey) Bytes() []byte {
+	bz, err := cdc.MarshalBinaryBare(priv)
+	if err != nil {
+		panic(err)
+	}
+	return bz
+}
+
+func (priv Ed25519PrivateKey) String() string {
 	return hex.EncodeToString(priv.Bytes())
 }
 
-func (priv PrivateKey) Public() PublicKey {
-	return PublicKey(ed25519.PrivKeyEd25519(priv).PubKey().(ed25519.PubKeyEd25519))
+func (priv Ed25519PrivateKey) PublicKey() PublicKey {
+	return Ed25519PublicKey(ed25519.PrivKeyEd25519(priv).PubKey().(ed25519.PubKeyEd25519))
 }
 
-func (priv PrivateKey) Sign(msg []byte) ([]byte, error) {
+func (priv Ed25519PrivateKey) PubKey() crypto.PubKey {
+	return ed25519.PrivKeyEd25519(priv).PubKey().(ed25519.PubKeyEd25519)
+}
+
+func (priv Ed25519PrivateKey) Equals(other crypto.PrivKey) bool {
+	return ed25519.PrivKeyEd25519(priv).Equals(ed25519.PrivKeyEd25519(other.(Ed25519PrivateKey)))
+}
+
+func (priv Ed25519PrivateKey) Sign(msg []byte) ([]byte, error) {
 	return ed25519.PrivKeyEd25519(priv).Sign(msg)
+}
+
+func (priv Ed25519PrivateKey) Size() int {
+	return Ed25519PrivKeySize
+}
+
+func (Ed25519PrivateKey) PrivKeyToPrivateKey(key crypto.PrivKey) PrivateKey {
+	return Ed25519PrivateKey(key.(ed25519.PrivKeyEd25519))
+}
+
+func (Ed25519PrivateKey) GenPrivateKey() PrivateKey {
+	return Ed25519PrivateKey(ed25519.GenPrivKey())
 }

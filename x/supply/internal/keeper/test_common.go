@@ -1,10 +1,10 @@
 package keeper
 
 import (
+	"github.com/pokt-network/posmint/crypto"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
@@ -97,12 +97,12 @@ func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64)
 // nolint: unparam deadcode unused
 func createTestAccs(ctx sdk.Context, numAccs int, initialCoins sdk.Coins, ak *auth.AccountKeeper) (accs []auth.Account) {
 	for i := 0; i < numAccs; i++ {
-		privKey := secp256k1.GenPrivKey()
+		privKey := crypto.Secp256k1PrivateKey{}.GenPrivateKey()
 		pubKey := privKey.PubKey()
 		addr := sdk.Address(pubKey.Address())
 		acc := auth.NewBaseAccountWithAddress(addr)
 		acc.Coins = initialCoins
-		acc.PubKey = pubKey
+		acc.PubKey = crypto.PubKeyToPublicKey(pubKey)
 		acc.AccountNumber = uint64(i)
 		ak.SetAccount(ctx, &acc)
 	}

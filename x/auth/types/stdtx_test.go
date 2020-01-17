@@ -2,21 +2,20 @@ package types
 
 import (
 	"fmt"
+	"github.com/pokt-network/posmint/crypto"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/ed25519"
 	"github.com/tendermint/tendermint/libs/log"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 )
 
 var (
-	priv = ed25519.GenPrivKey()
+	priv = crypto.GenerateSecp256k1PrivKey()
 	addr = sdk.Address(priv.PubKey().Address())
 )
 
@@ -81,7 +80,7 @@ func TestTxValidateBasic(t *testing.T) {
 	require.Equal(t, sdk.CodeInsufficientFee, err.Result().Code)
 
 	// require to fail validation when no signatures exist
-	privs, accNums, seqs := []crypto.PrivKey{}, []uint64{}, []uint64{}
+	privs, accNums, seqs := []crypto.PrivateKey{}, []uint64{}, []uint64{}
 	tx = NewTestTx(ctx, msgs, privs, accNums, seqs, fee)
 
 	err = tx.ValidateBasic()
@@ -89,7 +88,7 @@ func TestTxValidateBasic(t *testing.T) {
 	require.Equal(t, sdk.CodeNoSignatures, err.Result().Code)
 
 	// require to fail validation when signatures do not match expected signers
-	privs, accNums, seqs = []crypto.PrivKey{priv1}, []uint64{0, 1}, []uint64{0, 0}
+	privs, accNums, seqs = []crypto.PrivateKey{priv1}, []uint64{0, 1}, []uint64{0, 0}
 	tx = NewTestTx(ctx, msgs, privs, accNums, seqs, fee)
 
 	err = tx.ValidateBasic()
@@ -97,7 +96,7 @@ func TestTxValidateBasic(t *testing.T) {
 	require.Equal(t, sdk.CodeUnauthorized, err.Result().Code)
 
 	// require to pass when above criteria are matched
-	privs, accNums, seqs = []crypto.PrivKey{priv1, priv2}, []uint64{0, 1}, []uint64{0, 0}
+	privs, accNums, seqs = []crypto.PrivateKey{priv1, priv2}, []uint64{0, 1}, []uint64{0, 0}
 	tx = NewTestTx(ctx, msgs, privs, accNums, seqs, fee)
 
 	err = tx.ValidateBasic()
@@ -138,12 +137,12 @@ func TestStdSignatureMarshalYAML(t *testing.T) {
 			"|\n  pubkey: \"\"\n  signature: \"\"\n",
 		},
 		{
-			StdSignature{PubKey: pubKey, Signature: []byte("dummySig")},
-			fmt.Sprintf("|\n  pubkey: %s\n  signature: dummySig\n", sdk.HexAddressPubKey(pubKey)),
+			StdSignature{PublicKey: pubKey, Signature: []byte("dummySig")},
+			fmt.Sprintf("|\n  pubkey: %s\n  signature: dummySig\n", pubKey.RawString()),
 		},
 		{
-			StdSignature{PubKey: pubKey, Signature: nil},
-			fmt.Sprintf("|\n  pubkey: %s\n  signature: \"\"\n", sdk.HexAddressPubKey(pubKey)),
+			StdSignature{PublicKey: pubKey, Signature: nil},
+			fmt.Sprintf("|\n  pubkey: %s\n  signature: \"\"\n", pubKey.RawString()),
 		},
 	}
 

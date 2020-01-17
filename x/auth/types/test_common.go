@@ -2,9 +2,7 @@
 package types
 
 import (
-	"github.com/tendermint/tendermint/crypto"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
-
+	"github.com/pokt-network/posmint/crypto"
 	sdk "github.com/pokt-network/posmint/types"
 )
 
@@ -25,14 +23,14 @@ func NewTestCoins() sdk.Coins {
 	}
 }
 
-func KeyTestPubAddr() (crypto.PrivKey, crypto.PubKey, sdk.Address) {
-	key := secp256k1.GenPrivKey()
-	pub := key.PubKey()
+func KeyTestPubAddr() (crypto.PrivateKey, crypto.PublicKey, sdk.Address) {
+	key := crypto.Secp256k1PrivateKey{}.GenPrivateKey()
+	pub := crypto.PubKeyToPublicKey(key.PubKey())
 	addr := sdk.Address(pub.Address())
 	return key, pub, addr
 }
 
-func NewTestTx(ctx sdk.Context, msgs []sdk.Msg, privs []crypto.PrivKey, accNums []uint64, seqs []uint64, fee sdk.Coins) sdk.Tx {
+func NewTestTx(ctx sdk.Context, msgs []sdk.Msg, privs []crypto.PrivateKey, accNums []uint64, seqs []uint64, fee sdk.Coins) sdk.Tx {
 	sigs := make([]StdSignature, len(privs))
 	for i, priv := range privs {
 		signBytes := StdSignBytes(ctx.ChainID(), accNums[i], seqs[i], fee, msgs, "")
@@ -42,14 +40,14 @@ func NewTestTx(ctx sdk.Context, msgs []sdk.Msg, privs []crypto.PrivKey, accNums 
 			panic(err)
 		}
 
-		sigs[i] = StdSignature{PubKey: priv.PubKey(), Signature: sig}
+		sigs[i] = StdSignature{PublicKey: priv.PublicKey(), Signature: sig}
 	}
 
 	tx := NewStdTx(msgs, fee, sigs, "")
 	return tx
 }
 
-func NewTestTxWithMemo(ctx sdk.Context, msgs []sdk.Msg, privs []crypto.PrivKey, accNums []uint64, seqs []uint64, fee sdk.Coins, memo string) sdk.Tx {
+func NewTestTxWithMemo(ctx sdk.Context, msgs []sdk.Msg, privs []crypto.PrivateKey, accNums []uint64, seqs []uint64, fee sdk.Coins, memo string) sdk.Tx {
 	sigs := make([]StdSignature, len(privs))
 	for i, priv := range privs {
 		signBytes := StdSignBytes(ctx.ChainID(), accNums[i], seqs[i], fee, msgs, memo)
@@ -59,14 +57,14 @@ func NewTestTxWithMemo(ctx sdk.Context, msgs []sdk.Msg, privs []crypto.PrivKey, 
 			panic(err)
 		}
 
-		sigs[i] = StdSignature{PubKey: priv.PubKey(), Signature: sig}
+		sigs[i] = StdSignature{PublicKey: priv.PublicKey(), Signature: sig}
 	}
 
 	tx := NewStdTx(msgs, fee, sigs, memo)
 	return tx
 }
 
-func NewTestTxWithSignBytes(msgs []sdk.Msg, privs []crypto.PrivKey, accNums []uint64, seqs []uint64, fee sdk.Coins, signBytes []byte, memo string) sdk.Tx {
+func NewTestTxWithSignBytes(msgs []sdk.Msg, privs []crypto.PrivateKey, accNums []uint64, seqs []uint64, fee sdk.Coins, signBytes []byte, memo string) sdk.Tx {
 	sigs := make([]StdSignature, len(privs))
 	for i, priv := range privs {
 		sig, err := priv.Sign(signBytes)
@@ -74,7 +72,7 @@ func NewTestTxWithSignBytes(msgs []sdk.Msg, privs []crypto.PrivKey, accNums []ui
 			panic(err)
 		}
 
-		sigs[i] = StdSignature{PubKey: priv.PubKey(), Signature: sig}
+		sigs[i] = StdSignature{PublicKey: priv.PublicKey(), Signature: sig}
 	}
 
 	tx := NewStdTx(msgs, fee, sigs, memo)
