@@ -19,7 +19,7 @@ var (
 	randomPermAcc = types.NewEmptyModuleAccount(randomPerm, "random")
 
 	initTokens = sdk.TokensFromConsensusPower(initialPower)
-	initCoins  = sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, initTokens))
+	initCoins  = sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, initTokens))
 )
 
 func getCoinsByName(ctx sdk.Context, k Keeper, moduleName string) sdk.Coins {

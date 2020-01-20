@@ -9,7 +9,7 @@ import (
 )
 
 func TestMustGetValidator(t *testing.T) {
-	boundedValidator := getBondedValidator()
+	boundedValidator := getStakedValidator()
 
 	type args struct {
 		validator types.Validator
@@ -60,7 +60,7 @@ func TestMustGetValidator(t *testing.T) {
 }
 
 func TestMustGetValidatorByConsAddr(t *testing.T) {
-	boundedValidator := getBondedValidator()
+	boundedValidator := getStakedValidator()
 	type args struct {
 		validator types.Validator
 	}
@@ -111,7 +111,7 @@ func TestMustGetValidatorByConsAddr(t *testing.T) {
 }
 
 func TestValidatorByConsAddr(t *testing.T) {
-	boundedValidator := getBondedValidator()
+	boundedValidator := getStakedValidator()
 
 	type args struct {
 		validator types.Validator
@@ -158,7 +158,7 @@ func TestValidatorByConsAddr(t *testing.T) {
 }
 
 func TestValidatorCaching(t *testing.T) {
-	boundedValidator := getBondedValidator()
+	boundedValidator := getStakedValidator()
 
 	type args struct {
 		bz        []byte
@@ -197,7 +197,7 @@ func TestValidatorCaching(t *testing.T) {
 }
 
 func TestNewValidatorCaching(t *testing.T) {
-	boundedValidator := getBondedValidator()
+	boundedValidator := getStakedValidator()
 
 	type args struct {
 		bz        []byte

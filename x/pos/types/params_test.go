@@ -16,7 +16,7 @@ func TestDefaultParams(t *testing.T) {
 			UnstakingTime:            DefaultUnstakingTime,
 			MaxValidators:            DefaultMaxValidators,
 			StakeMinimum:             DefaultMinStake,
-			StakeDenom:               types.DefaultBondDenom,
+			StakeDenom:               types.DefaultStakeDenom,
 			ProposerRewardPercentage: DefaultBaseProposerAwardPercentage,
 			MaxEvidenceAge:           DefaultMaxEvidenceAge,
 			SignedBlocksWindow:       DefaultSignedBlocksWindow,

@@ -7,7 +7,7 @@ import (
 )
 
 func TestGetMissedArray(t *testing.T) {
-	validator := getBondedValidator()
+	validator := getStakedValidator()
 	consAddr := validator.GetAddress()
 
 	tests := []struct {
@@ -38,7 +38,7 @@ func TestGetMissedArray(t *testing.T) {
 }
 
 func TestClearMissedArray(t *testing.T) {
-	validator := getBondedValidator()
+	validator := getStakedValidator()
 	consAddr := validator.GetAddress()
 
 	tests := []struct {

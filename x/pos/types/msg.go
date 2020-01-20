@@ -16,9 +16,9 @@ var (
 //----------------------------------------------------------------------------------------------------------------------
 // MsgStake - struct for staking transactions
 type MsgStake struct {
-	Address sdk.Address   `json:"validator_address" yaml:"validator_address"`
+	Address sdk.Address      `json:"validator_address" yaml:"validator_address"`
 	PubKey  crypto.PublicKey `json:"pubkey" yaml:"pubkey"`
-	Value   sdk.Int       `json:"value" yaml:"value"`
+	Value   sdk.Int          `json:"value" yaml:"value"`
 }
 
 // Return address(es) that must sign over msg.GetSignBytes()

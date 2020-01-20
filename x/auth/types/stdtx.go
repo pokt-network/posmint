@@ -190,7 +190,7 @@ func StdSignBytes(chainID string, accnum uint64, sequence uint64, fee sdk.Coins,
 // StdSignature represents a sig
 type StdSignature struct {
 	posCrypto.PublicKey `json:"pub_key" yaml:"pub_key"` // optional
-	Signature           []byte `json:"signature" yaml:"signature"`
+	Signature           []byte                          `json:"signature" yaml:"signature"`
 }
 
 // DefaultTxDecoder logic for standard transaction decoding

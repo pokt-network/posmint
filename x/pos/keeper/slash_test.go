@@ -10,7 +10,7 @@ import (
 )
 
 func TestGetAndSetValidatorBurn(t *testing.T) {
-	boundedValidator := getBondedValidator()
+	boundedValidator := getStakedValidator()
 
 	type args struct {
 		amount    sdk.Dec
@@ -54,7 +54,7 @@ func TestGetAndSetValidatorBurn(t *testing.T) {
 }
 
 func TestDeleteValidatorBurn(t *testing.T) {
-	boundedValidator := getBondedValidator()
+	boundedValidator := getStakedValidator()
 	var emptyCoins sdk.Dec
 
 	type args struct {
@@ -92,7 +92,7 @@ func TestDeleteValidatorBurn(t *testing.T) {
 }
 
 func TestGetAndSetAddrPubKeyRelation(t *testing.T) {
-	boundedValidator := getBondedValidator()
+	boundedValidator := getStakedValidator()
 
 	type args struct {
 		validator types.Validator
@@ -139,7 +139,7 @@ func TestGetAndSetAddrPubKeyRelation(t *testing.T) {
 }
 
 func TestDeleteAddrPubKeyRelation(t *testing.T) {
-	boundedValidator := getBondedValidator()
+	boundedValidator := getStakedValidator()
 
 	type args struct {
 		validator types.Validator
@@ -178,7 +178,7 @@ func TestDeleteAddrPubKeyRelation(t *testing.T) {
 }
 
 func TestHandleValidatorSignature(t *testing.T) {
-	boundedValidator := getBondedValidator()
+	boundedValidator := getStakedValidator()
 
 	type args struct {
 		validator        types.Validator
@@ -289,7 +289,7 @@ func TestHandleValidatorSignature(t *testing.T) {
 }
 
 func TestValidateDoubleSign(t *testing.T) {
-	boundedValidator := getBondedValidator()
+	boundedValidator := getStakedValidator()
 
 	type args struct {
 		validator        types.Validator
@@ -378,7 +378,7 @@ func TestValidateDoubleSign(t *testing.T) {
 }
 
 func TestHandleDoubleSign(t *testing.T) {
-	boundedValidator := getBondedValidator()
+	boundedValidator := getStakedValidator()
 	supplySize := sdk.NewInt(100)
 
 	type args struct {
@@ -485,8 +485,8 @@ func TestHandleDoubleSign(t *testing.T) {
 }
 
 func TestValidateSlash(t *testing.T) {
-	boundedValidator := getBondedValidator()
-	unboundedValidator := getUnbondedValidator()
+	boundedValidator := getStakedValidator()
+	unboundedValidator := getUnstakedValidator()
 	supplySize := sdk.NewInt(100)
 
 	type args struct {
@@ -633,7 +633,7 @@ func TestValidateSlash(t *testing.T) {
 }
 
 func TestSlash(t *testing.T) {
-	boundedValidator := getBondedValidator()
+	boundedValidator := getStakedValidator()
 	supplySize := sdk.NewInt(50001)
 
 	type args struct {
@@ -724,7 +724,7 @@ func TestSlash(t *testing.T) {
 }
 
 func TestBurnValidators(t *testing.T) {
-	primaryBoundedValidator := getBondedValidator()
+	primaryBoundedValidator := getStakedValidator()
 
 	type args struct {
 		amount    sdk.Dec
