@@ -119,6 +119,10 @@ func (priv Ed25519PrivateKey) Size() int {
 	return Ed25519PrivKeySize
 }
 
+func (priv Ed25519PrivateKey) PrivKey() crypto.PrivKey {
+	return ed25519.PrivKeyEd25519(priv)
+}
+
 func (Ed25519PrivateKey) PrivKeyToPrivateKey(key crypto.PrivKey) PrivateKey {
 	return Ed25519PrivateKey(key.(ed25519.PrivKeyEd25519))
 }

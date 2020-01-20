@@ -118,6 +118,10 @@ func (priv Secp256k1PrivateKey) Size() int {
 	return Secp256k1PrivateKeySize
 }
 
+func (priv Secp256k1PrivateKey) PrivKey() crypto.PrivKey {
+	return secp256k1.PrivKeySecp256k1(priv)
+}
+
 func (Secp256k1PrivateKey) PrivKeyToPrivateKey(key crypto.PrivKey) PrivateKey {
 	return Secp256k1PrivateKey(key.(secp256k1.PrivKeySecp256k1))
 }
