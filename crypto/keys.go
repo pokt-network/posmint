@@ -87,6 +87,6 @@ func GenerateSecp256k1PrivKey() PrivateKey {
 	return Secp256k1PrivateKey{}.GenPrivateKey()
 }
 
-func GenereateEd25519PrivKey() PrivateKey {
+func GenerateEd25519PrivKey() PrivateKey {
 	return Ed25519PrivateKey{}.GenPrivateKey()
 }
