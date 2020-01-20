@@ -26,6 +26,7 @@ type PrivateKey interface {
 	RawBytes() []byte
 	String() string
 	RawString() string
+	PrivKey() crypto.PrivKey
 	PubKey() crypto.PubKey
 	Equals(other crypto.PrivKey) bool
 	PublicKey() PublicKey
