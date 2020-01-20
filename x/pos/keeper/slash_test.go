@@ -10,7 +10,7 @@ import (
 )
 
 func TestGetAndSetValidatorBurn(t *testing.T) {
-	boundedValidator := getStakedValidator()
+	stakedValidator := getStakedValidator()
 
 	type args struct {
 		amount    sdk.Dec
@@ -27,12 +27,12 @@ func TestGetAndSetValidatorBurn(t *testing.T) {
 	}{
 		{
 			name:     "can get and set validator burn",
-			args:     args{amount: sdk.NewDec(10), validator: boundedValidator},
+			args:     args{amount: sdk.NewDec(10), validator: stakedValidator},
 			expected: expected{amount: sdk.NewDec(10), found: true},
 		},
 		{
 			name:     "returns no coins if not set",
-			args:     args{amount: sdk.NewDec(10), validator: boundedValidator},
+			args:     args{amount: sdk.NewDec(10), validator: stakedValidator},
 			expected: expected{amount: sdk.NewDec(0), found: false},
 		},
 	}
@@ -54,7 +54,7 @@ func TestGetAndSetValidatorBurn(t *testing.T) {
 }
 
 func TestDeleteValidatorBurn(t *testing.T) {
-	boundedValidator := getStakedValidator()
+	stakedValidator := getStakedValidator()
 	var emptyCoins sdk.Dec
 
 	type args struct {
@@ -75,7 +75,7 @@ func TestDeleteValidatorBurn(t *testing.T) {
 		{
 			name:     "deletes validator burn",
 			panics:   false,
-			args:     args{amount: sdk.NewDec(10), validator: boundedValidator},
+			args:     args{amount: sdk.NewDec(10), validator: stakedValidator},
 			expected: expected{amount: emptyCoins, found: false},
 		},
 	}
@@ -92,7 +92,7 @@ func TestDeleteValidatorBurn(t *testing.T) {
 }
 
 func TestGetAndSetAddrPubKeyRelation(t *testing.T) {
-	boundedValidator := getStakedValidator()
+	stakedValidator := getStakedValidator()
 
 	type args struct {
 		validator types.Validator
@@ -109,16 +109,16 @@ func TestGetAndSetAddrPubKeyRelation(t *testing.T) {
 	}{
 		{
 			name:     "can get and set PubKeyRelations",
-			args:     args{validator: boundedValidator},
-			expected: expected{validator: boundedValidator, set: true},
+			args:     args{validator: stakedValidator},
+			expected: expected{validator: stakedValidator, set: true},
 		},
 		{
 			name: "throws err if not set ",
-			args: args{validator: boundedValidator},
+			args: args{validator: stakedValidator},
 			expected: expected{
-				validator: boundedValidator,
+				validator: stakedValidator,
 				set:       false,
-				message:   fmt.Sprintf("address %s not found", sdk.Address(boundedValidator.GetPublicKey().Address())),
+				message:   fmt.Sprintf("address %s not found", sdk.Address(stakedValidator.GetPublicKey().Address())),
 			},
 		},
 	}
@@ -139,7 +139,7 @@ func TestGetAndSetAddrPubKeyRelation(t *testing.T) {
 }
 
 func TestDeleteAddrPubKeyRelation(t *testing.T) {
-	boundedValidator := getStakedValidator()
+	stakedValidator := getStakedValidator()
 
 	type args struct {
 		validator types.Validator
@@ -156,11 +156,11 @@ func TestDeleteAddrPubKeyRelation(t *testing.T) {
 	}{
 		{
 			name: "delete a PubKeyRelation",
-			args: args{validator: boundedValidator},
+			args: args{validator: stakedValidator},
 			expected: expected{
-				validator: boundedValidator,
+				validator: stakedValidator,
 				set:       true,
-				message:   fmt.Sprintf("address %s not found", sdk.Address(boundedValidator.GetPublicKey().Address())),
+				message:   fmt.Sprintf("address %s not found", sdk.Address(stakedValidator.GetPublicKey().Address())),
 			},
 		},
 	}
@@ -178,7 +178,7 @@ func TestDeleteAddrPubKeyRelation(t *testing.T) {
 }
 
 func TestHandleValidatorSignature(t *testing.T) {
-	boundedValidator := getStakedValidator()
+	stakedValidator := getStakedValidator()
 
 	type args struct {
 		validator        types.Validator
@@ -205,36 +205,36 @@ func TestHandleValidatorSignature(t *testing.T) {
 		{
 			name:     "handles a signature",
 			panics:   false,
-			args:     args{validator: boundedValidator, power: int64(10), signed: false},
-			expected: expected{validator: boundedValidator, tombstoned: false, missedBlocksCounter: int64(1)},
+			args:     args{validator: stakedValidator, power: int64(10), signed: false},
+			expected: expected{validator: stakedValidator, tombstoned: false, missedBlocksCounter: int64(1)},
 		},
 		{
 			name:     "previously signed signature",
 			panics:   false,
-			args:     args{validator: boundedValidator, power: int64(10), signed: true},
-			expected: expected{validator: boundedValidator, tombstoned: false, missedBlocksCounter: int64(0)},
+			args:     args{validator: stakedValidator, power: int64(10), signed: true},
+			expected: expected{validator: stakedValidator, tombstoned: false, missedBlocksCounter: int64(0)},
 		},
 		{
 			name:     "jails if signature with overflown minHeight and maxHeight",
 			panics:   false,
-			args:     args{validator: boundedValidator, power: int64(10), signed: true, increasedContext: 51, maxMissed: 51},
-			expected: expected{validator: boundedValidator, tombstoned: false, missedBlocksCounter: int64(0)},
+			args:     args{validator: stakedValidator, power: int64(10), signed: true, increasedContext: 51, maxMissed: 51},
+			expected: expected{validator: stakedValidator, tombstoned: false, missedBlocksCounter: int64(0)},
 		},
 		{
 			name:   "panics if no PublicKey Relation",
 			panics: true,
-			args:   args{validator: boundedValidator, power: int64(10), signed: false},
+			args:   args{validator: stakedValidator, power: int64(10), signed: false},
 			expected: expected{
-				message:        fmt.Sprintf("Validator consensus-address %s not found", sdk.Address(boundedValidator.GetPublicKey().Address())),
+				message:        fmt.Sprintf("Validator consensus-address %s not found", sdk.Address(stakedValidator.GetPublicKey().Address())),
 				pubKeyRelation: false,
 			},
 		},
 		{
 			name:   "panics if no signed info",
 			panics: true,
-			args:   args{validator: boundedValidator, power: int64(10), signed: false},
+			args:   args{validator: stakedValidator, power: int64(10), signed: false},
 			expected: expected{
-				message:        fmt.Sprintf("Expected signing info for validator %s but not found", sdk.Address(boundedValidator.GetPublicKey().Address())),
+				message:        fmt.Sprintf("Expected signing info for validator %s but not found", sdk.Address(stakedValidator.GetPublicKey().Address())),
 				pubKeyRelation: true,
 			},
 		},
@@ -289,7 +289,7 @@ func TestHandleValidatorSignature(t *testing.T) {
 }
 
 func TestValidateDoubleSign(t *testing.T) {
-	boundedValidator := getStakedValidator()
+	stakedValidator := getStakedValidator()
 
 	type args struct {
 		validator        types.Validator
@@ -311,9 +311,9 @@ func TestValidateDoubleSign(t *testing.T) {
 		{
 			name:   "handles double signature",
 			panics: false,
-			args:   args{validator: boundedValidator},
+			args:   args{validator: stakedValidator},
 			expected: expected{
-				validator:      boundedValidator,
+				validator:      stakedValidator,
 				pubKeyRelation: true,
 				tombstoned:     false,
 			},
@@ -321,9 +321,9 @@ func TestValidateDoubleSign(t *testing.T) {
 		{
 			name:   "ignores double signature on tombstoned validator",
 			panics: true,
-			args:   args{validator: boundedValidator},
+			args:   args{validator: stakedValidator},
 			expected: expected{
-				validator:      boundedValidator,
+				validator:      stakedValidator,
 				pubKeyRelation: true,
 				tombstoned:     true,
 				message:        fmt.Sprintf("ERROR:\nCodespace: pos\nCode: 113\nMessage: \"Warning: validator is already tombstoned\"\n"),
@@ -332,9 +332,9 @@ func TestValidateDoubleSign(t *testing.T) {
 		{
 			name:   "ignores double signature on tombstoned validator",
 			panics: true,
-			args:   args{validator: boundedValidator},
+			args:   args{validator: stakedValidator},
 			expected: expected{
-				validator:      boundedValidator,
+				validator:      stakedValidator,
 				pubKeyRelation: false,
 				tombstoned:     false,
 				message:        fmt.Sprintf("ERROR:\nCodespace: pos\nCode: 114\nMessage: \"Warning: the DS evidence is unable to be handled\"\n"),
@@ -378,7 +378,7 @@ func TestValidateDoubleSign(t *testing.T) {
 }
 
 func TestHandleDoubleSign(t *testing.T) {
-	boundedValidator := getStakedValidator()
+	stakedValidator := getStakedValidator()
 	supplySize := sdk.NewInt(100)
 
 	type args struct {
@@ -402,9 +402,9 @@ func TestHandleDoubleSign(t *testing.T) {
 		{
 			name:   "handles double signature",
 			panics: false,
-			args:   args{validator: boundedValidator, power: int64(10)},
+			args:   args{validator: stakedValidator, power: int64(10)},
 			expected: expected{
-				validator:      boundedValidator,
+				validator:      stakedValidator,
 				pubKeyRelation: true,
 				tombstoned:     false,
 			},
@@ -412,9 +412,9 @@ func TestHandleDoubleSign(t *testing.T) {
 		{
 			name:   "ignores double signature on tombstoned validator",
 			panics: true,
-			args:   args{validator: boundedValidator},
+			args:   args{validator: stakedValidator},
 			expected: expected{
-				validator:      boundedValidator,
+				validator:      stakedValidator,
 				pubKeyRelation: true,
 				tombstoned:     true,
 				message:        fmt.Sprintf("ERROR:\nCodespace: pos\nCode: 113\nMessage: \"Warning: validator is already tombstoned\"\n"),
@@ -423,9 +423,9 @@ func TestHandleDoubleSign(t *testing.T) {
 		{
 			name:   "ignores double signature on tombstoned validator",
 			panics: true,
-			args:   args{validator: boundedValidator},
+			args:   args{validator: stakedValidator},
 			expected: expected{
-				validator:      boundedValidator,
+				validator:      stakedValidator,
 				pubKeyRelation: false,
 				tombstoned:     false,
 				message:        fmt.Sprintf("ERROR:\nCodespace: pos\nCode: 114\nMessage: \"Warning: the DS evidence is unable to be handled\"\n"),
@@ -485,8 +485,8 @@ func TestHandleDoubleSign(t *testing.T) {
 }
 
 func TestValidateSlash(t *testing.T) {
-	boundedValidator := getStakedValidator()
-	unboundedValidator := getUnstakedValidator()
+	stakedValidator := getStakedValidator()
+	unstakedValidator := getUnstakedValidator()
 	supplySize := sdk.NewInt(100)
 
 	type args struct {
@@ -514,9 +514,9 @@ func TestValidateSlash(t *testing.T) {
 		{
 			name:   "validates slash",
 			panics: false,
-			args:   args{validator: boundedValidator},
+			args:   args{validator: stakedValidator},
 			expected: expected{
-				validator:      boundedValidator,
+				validator:      stakedValidator,
 				found:          true,
 				pubKeyRelation: true,
 				tombstoned:     false,
@@ -525,33 +525,33 @@ func TestValidateSlash(t *testing.T) {
 		{
 			name:   "empty validator if not found",
 			panics: false,
-			args:   args{validator: boundedValidator},
+			args:   args{validator: stakedValidator},
 			expected: expected{
-				validator:      boundedValidator,
+				validator:      stakedValidator,
 				found:          true,
 				pubKeyRelation: true,
 				tombstoned:     false,
 			},
 		},
 		{
-			name:   "panics if unboundedValidator",
+			name:   "panics if unstakedValidator",
 			panics: true,
-			args:   args{validator: unboundedValidator},
+			args:   args{validator: unstakedValidator},
 			expected: expected{
-				validator:      boundedValidator,
+				validator:      stakedValidator,
 				found:          true,
 				pubKeyRelation: true,
 				tombstoned:     false,
 				fraction:       false,
-				message:        fmt.Sprintf("should not be slashing unstaked validator: %s", unboundedValidator.Address),
+				message:        fmt.Sprintf("should not be slashing unstaked validator: %s", unstakedValidator.Address),
 			},
 		},
 		{
 			name:   "panics with invalid slashFactor",
 			panics: true,
-			args:   args{validator: unboundedValidator, slashFraction: sdk.NewDec(-10)},
+			args:   args{validator: unstakedValidator, slashFraction: sdk.NewDec(-10)},
 			expected: expected{
-				validator:      boundedValidator,
+				validator:      stakedValidator,
 				found:          true,
 				pubKeyRelation: true,
 				tombstoned:     false,
@@ -562,9 +562,9 @@ func TestValidateSlash(t *testing.T) {
 		{
 			name:   "panics with wrong infraction height",
 			panics: true,
-			args:   args{validator: unboundedValidator},
+			args:   args{validator: unstakedValidator},
 			expected: expected{
-				validator:      boundedValidator,
+				validator:      stakedValidator,
 				found:          true,
 				pubKeyRelation: true,
 				tombstoned:     false,
@@ -633,7 +633,7 @@ func TestValidateSlash(t *testing.T) {
 }
 
 func TestSlash(t *testing.T) {
-	boundedValidator := getStakedValidator()
+	stakedValidator := getStakedValidator()
 	supplySize := sdk.NewInt(50001)
 
 	type args struct {
@@ -662,13 +662,13 @@ func TestSlash(t *testing.T) {
 		{
 			name:   "slash all validaor coins",
 			panics: false,
-			args:   args{validator: boundedValidator, power: int64(1)},
+			args:   args{validator: stakedValidator, power: int64(1)},
 			expected: expected{
-				validator:      boundedValidator,
+				validator:      stakedValidator,
 				found:          true,
 				pubKeyRelation: true,
 				tombstoned:     false,
-				stakedTokens:   boundedValidator.StakedTokens.Sub(sdk.NewInt(50000)),
+				stakedTokens:   stakedValidator.StakedTokens.Sub(sdk.NewInt(50000)),
 			},
 		},
 	}
@@ -724,7 +724,7 @@ func TestSlash(t *testing.T) {
 }
 
 func TestBurnValidators(t *testing.T) {
-	primaryBoundedValidator := getStakedValidator()
+	primaryStakedValidator := getStakedValidator()
 
 	type args struct {
 		amount    sdk.Dec
@@ -744,12 +744,12 @@ func TestBurnValidators(t *testing.T) {
 			name: "can get and set validator burn",
 			args: args{
 				amount:    sdk.NewDec(100),
-				validator: primaryBoundedValidator,
+				validator: primaryStakedValidator,
 			},
 			expected: expected{
 				amount:    sdk.ZeroDec(),
 				found:     true,
-				validator: primaryBoundedValidator,
+				validator: primaryStakedValidator,
 			},
 		},
 	}

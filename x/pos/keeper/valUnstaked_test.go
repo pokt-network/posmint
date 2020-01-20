@@ -8,9 +8,8 @@ import (
 )
 
 func TestGetAndSetlUnstaking(t *testing.T) {
-	boundedValidator := getStakedValidator()
-	secondaryBoundedValidator := getStakedValidator()
 	stakedValidator := getStakedValidator()
+	secondaryStakedValidator := getStakedValidator()
 
 	type expected struct {
 		validators       []types.Validator
@@ -18,7 +17,7 @@ func TestGetAndSetlUnstaking(t *testing.T) {
 		length           int
 	}
 	type args struct {
-		boundedVal      types.Validator
+		stakedVal       types.Validator
 		validators      []types.Validator
 		stakedValidator types.Validator
 	}
@@ -31,8 +30,8 @@ func TestGetAndSetlUnstaking(t *testing.T) {
 	}{
 		{
 			name:     "gets validators",
-			args:     args{validators: []types.Validator{boundedValidator}},
-			expected: expected{validators: []types.Validator{boundedValidator}, length: 1, stakedValidators: false},
+			args:     args{validators: []types.Validator{stakedValidator}},
+			expected: expected{validators: []types.Validator{stakedValidator}, length: 1, stakedValidators: false},
 		},
 		{
 			name:     "gets emtpy slice of validators",
@@ -40,10 +39,10 @@ func TestGetAndSetlUnstaking(t *testing.T) {
 			args:     args{stakedValidator: stakedValidator},
 		},
 		{
-			name:       "only gets unstakedbounded validators",
-			validators: []types.Validator{boundedValidator, secondaryBoundedValidator},
+			name:       "only gets unstakedstaked validators",
+			validators: []types.Validator{stakedValidator, secondaryStakedValidator},
 			expected:   expected{length: 1, stakedValidators: true},
-			args:       args{stakedValidator: stakedValidator, validators: []types.Validator{boundedValidator}},
+			args:       args{stakedValidator: stakedValidator, validators: []types.Validator{stakedValidator}},
 		},
 	}
 
@@ -69,7 +68,7 @@ func TestGetAndSetlUnstaking(t *testing.T) {
 }
 
 func TestDeleteUnstakingValidator(t *testing.T) {
-	boundedValidator := getStakedValidator()
+	stakedValidator := getStakedValidator()
 
 	type expected struct {
 		validators       []types.Validator
@@ -77,7 +76,7 @@ func TestDeleteUnstakingValidator(t *testing.T) {
 		length           int
 	}
 	type args struct {
-		boundedVal      types.Validator
+		stakedVal       types.Validator
 		validators      []types.Validator
 		stakedValidator types.Validator
 	}
@@ -90,7 +89,7 @@ func TestDeleteUnstakingValidator(t *testing.T) {
 	}{
 		{
 			name:     "deletes validator",
-			args:     args{validators: []types.Validator{boundedValidator}},
+			args:     args{validators: []types.Validator{stakedValidator}},
 			expected: expected{length: 0, stakedValidators: false},
 		},
 	}
@@ -116,8 +115,8 @@ func TestDeleteUnstakingValidator(t *testing.T) {
 }
 
 func TestDeleteUnstakingValidators(t *testing.T) {
-	boundedValidator := getStakedValidator()
-	secondaryBoundedValidator := getStakedValidator()
+	stakedValidator := getStakedValidator()
+	secondaryStakedValidator := getStakedValidator()
 
 	type expected struct {
 		validators       []types.Validator
@@ -125,7 +124,7 @@ func TestDeleteUnstakingValidators(t *testing.T) {
 		length           int
 	}
 	type args struct {
-		boundedVal      types.Validator
+		stakedVal       types.Validator
 		validators      []types.Validator
 		stakedValidator types.Validator
 	}
@@ -138,7 +137,7 @@ func TestDeleteUnstakingValidators(t *testing.T) {
 	}{
 		{
 			name:     "deletes all unstaking validator",
-			args:     args{validators: []types.Validator{boundedValidator, secondaryBoundedValidator}},
+			args:     args{validators: []types.Validator{stakedValidator, secondaryStakedValidator}},
 			expected: expected{length: 0, stakedValidators: false},
 		},
 	}
@@ -160,7 +159,7 @@ func TestDeleteUnstakingValidators(t *testing.T) {
 }
 
 func TestGetAllMatureValidators(t *testing.T) {
-	unboundingValidator := getUnstakingValidator()
+	unstakingValidator := getUnstakingValidator()
 
 	type expected struct {
 		validators       []types.Validator
@@ -168,7 +167,7 @@ func TestGetAllMatureValidators(t *testing.T) {
 		length           int
 	}
 	type args struct {
-		boundedVal      types.Validator
+		stakedVal       types.Validator
 		validators      []types.Validator
 		stakedValidator types.Validator
 	}
@@ -181,13 +180,13 @@ func TestGetAllMatureValidators(t *testing.T) {
 	}{
 		{
 			name:     "gets all mature validators",
-			args:     args{validators: []types.Validator{unboundingValidator}},
-			expected: expected{validators: []types.Validator{unboundingValidator}, length: 1, stakedValidators: false},
+			args:     args{validators: []types.Validator{unstakingValidator}},
+			expected: expected{validators: []types.Validator{unstakingValidator}, length: 1, stakedValidators: false},
 		},
 		{
 			name:     "gets empty slice if no mature validators",
 			args:     args{validators: []types.Validator{}},
-			expected: expected{validators: []types.Validator{unboundingValidator}, length: 0, stakedValidators: false},
+			expected: expected{validators: []types.Validator{unstakingValidator}, length: 0, stakedValidators: false},
 		},
 	}
 
@@ -207,7 +206,7 @@ func TestGetAllMatureValidators(t *testing.T) {
 }
 
 func TestUnstakeAllMatureValidators(t *testing.T) {
-	unboundingValidator := getUnstakingValidator()
+	unstakingValidator := getUnstakingValidator()
 
 	type expected struct {
 		validators       []types.Validator
@@ -215,7 +214,7 @@ func TestUnstakeAllMatureValidators(t *testing.T) {
 		length           int
 	}
 	type args struct {
-		boundedVal      types.Validator
+		stakedVal       types.Validator
 		validators      []types.Validator
 		stakedValidator types.Validator
 	}
@@ -228,8 +227,8 @@ func TestUnstakeAllMatureValidators(t *testing.T) {
 	}{
 		{
 			name:     "unstake mature validators",
-			args:     args{validators: []types.Validator{unboundingValidator}},
-			expected: expected{validators: []types.Validator{unboundingValidator}, length: 0, stakedValidators: false},
+			args:     args{validators: []types.Validator{unstakingValidator}},
+			expected: expected{validators: []types.Validator{unstakingValidator}, length: 0, stakedValidators: false},
 		},
 	}
 
@@ -250,8 +249,8 @@ func TestUnstakeAllMatureValidators(t *testing.T) {
 }
 
 func TestUnstakingValidatorsIterator(t *testing.T) {
-	boundedValidator := getStakedValidator()
-	unboundedValidator := getUnstakedValidator()
+	stakedValidator := getStakedValidator()
+	unstakedValidator := getUnstakedValidator()
 
 	tests := []struct {
 		name       string
@@ -261,7 +260,7 @@ func TestUnstakingValidatorsIterator(t *testing.T) {
 	}{
 		{
 			name:       "recieves a valid iterator",
-			validators: []types.Validator{boundedValidator, unboundedValidator},
+			validators: []types.Validator{stakedValidator, unstakedValidator},
 			panics:     false,
 		},
 	}
