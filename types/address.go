@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/pokt-network/posmint/crypto"
+	tmCrypto "github.com/tendermint/tendermint/crypto"
 	"gopkg.in/yaml.v2"
 )
 
@@ -44,7 +45,7 @@ func VerifyAddressFormat(bz []byte) error {
 
 // Address a wrapper around bytes meant to represent an address.
 // When marshaled to a string or JSON.
-type Address []byte
+type Address tmCrypto.Address
 
 // AddressFromHex creates an Address from a hex string.
 func AddressFromHex(address string) (addr Address, err error) {
@@ -61,7 +62,7 @@ func AddressFromHex(address string) (addr Address, err error) {
 		return nil, err
 	}
 
-	return Address(bz), nil
+	return bz, nil
 }
 
 // Returns boolean for whether two Addresses are Equal
