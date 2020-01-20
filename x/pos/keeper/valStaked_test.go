@@ -8,8 +8,8 @@ import (
 )
 
 func TestGetAndSetStakedValidator(t *testing.T) {
-	boundedValidator := getBondedValidator()
-	unboundedValidator := getUnbondedValidator()
+	boundedValidator := getStakedValidator()
+	unboundedValidator := getUnstakedValidator()
 
 	type expected struct {
 		validators []types.Validator
@@ -56,7 +56,7 @@ func TestGetAndSetStakedValidator(t *testing.T) {
 }
 
 func TestRemoveStakedValidatorTokens(t *testing.T) {
-	boundedValidator := getBondedValidator()
+	boundedValidator := getStakedValidator()
 
 	type expected struct {
 		tokens       sdk.Int
@@ -110,8 +110,8 @@ func TestRemoveStakedValidatorTokens(t *testing.T) {
 }
 
 func TestRemoveDeleteFromStakingSet(t *testing.T) {
-	boundedValidator := getBondedValidator()
-	unboundedValidator := getUnbondedValidator()
+	boundedValidator := getStakedValidator()
+	unboundedValidator := getUnstakedValidator()
 
 	tests := []struct {
 		name       string
@@ -144,8 +144,8 @@ func TestRemoveDeleteFromStakingSet(t *testing.T) {
 }
 
 func TestGetValsIterator(t *testing.T) {
-	boundedValidator := getBondedValidator()
-	unboundedValidator := getUnbondedValidator()
+	boundedValidator := getStakedValidator()
+	unboundedValidator := getUnstakedValidator()
 
 	tests := []struct {
 		name       string

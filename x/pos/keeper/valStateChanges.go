@@ -106,7 +106,7 @@ func (k Keeper) StakeValidator(ctx sdk.Context, validator types.Validator, amoun
 	// add coins to the staked field
 	validator.AddStakedTokens(amount)
 	// set the status to staked
-	validator = validator.UpdateStatus(sdk.Bonded)
+	validator = validator.UpdateStatus(sdk.Staked)
 	// save in the validator store
 	k.SetValidator(ctx, validator)
 	// save in the staked store
@@ -137,7 +137,7 @@ func (k Keeper) ValidateValidatorBeginUnstaking(ctx sdk.Context, validator types
 	return nil
 }
 
-// store ops when validator begins to unstake -> starts the unbonding timer
+// store ops when validator begins to unstake -> starts the unstaking timer
 func (k Keeper) BeginUnstakingValidator(ctx sdk.Context, validator types.Validator) sdk.Error {
 	// call before unstaking hook
 	k.BeforeValidatorBeginUnstaking(ctx, validator.GetAddress())
@@ -146,7 +146,7 @@ func (k Keeper) BeginUnstakingValidator(ctx sdk.Context, validator types.Validat
 	// delete the validator from the staking set, as it is technically staked but not going to participate
 	k.deleteValidatorFromStakingSet(ctx, validator)
 	// set the status
-	validator = validator.UpdateStatus(sdk.Unbonding)
+	validator = validator.UpdateStatus(sdk.Unstaking)
 	// set the unstaking completion time and completion height appropriately
 	validator.UnstakingCompletionTime = ctx.BlockHeader().Time.Add(params.UnstakingTime)
 	// save the now unstaked validator record and power index
@@ -169,7 +169,7 @@ func (k Keeper) ValidateValidatorFinishUnstaking(ctx sdk.Context, validator type
 	return nil
 }
 
-// store ops to unstake a validator -> called after unbonding time is up
+// store ops to unstake a validator -> called after unstaking time is up
 func (k Keeper) FinishUnstakingValidator(ctx sdk.Context, validator types.Validator) sdk.Error {
 	// call the before hook
 	k.BeforeValidatorUnstaked(ctx, validator.GetAddress())
@@ -182,7 +182,7 @@ func (k Keeper) FinishUnstakingValidator(ctx sdk.Context, validator types.Valida
 	// send the tokens from staking module account to validator account
 	k.coinsFromStakedToUnstaked(ctx, validator)
 	// update the status to unstaked
-	validator = validator.UpdateStatus(sdk.Unbonded)
+	validator = validator.UpdateStatus(sdk.Unstaked)
 	// update the validator in the main store
 	k.SetValidator(ctx, validator)
 	// call the after hook
@@ -217,7 +217,7 @@ func (k Keeper) ForceValidatorUnstake(ctx sdk.Context, validator types.Validator
 	// remove their tokens from the field
 	validator = validator.RemoveStakedTokens(validator.StakedTokens)
 	// update their status to unstaked
-	validator = validator.UpdateStatus(sdk.Unbonded)
+	validator = validator.UpdateStatus(sdk.Unstaked)
 	// set the validator in store
 	k.SetValidator(ctx, validator)
 	// call after hook

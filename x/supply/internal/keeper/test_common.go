@@ -77,7 +77,7 @@ func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64)
 
 	valTokens := sdk.TokensFromConsensusPower(initPower)
 
-	initialCoins := sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, valTokens))
+	initialCoins := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, valTokens))
 	createTestAccs(ctx, int(nAccs), initialCoins, &ak)
 
 	maccPerms := map[string][]string{
@@ -88,7 +88,7 @@ func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64)
 		randomPerm:   []string{"random"},
 	}
 	keeper := NewKeeper(cdc, keySupply, ak, bk, maccPerms)
-	totalSupply := sdk.NewCoins(sdk.NewCoin(sdk.DefaultBondDenom, valTokens.MulRaw(nAccs)))
+	totalSupply := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, valTokens.MulRaw(nAccs)))
 	keeper.SetSupply(ctx, types.NewSupply(totalSupply))
 
 	return ctx, ak, keeper

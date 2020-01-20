@@ -30,7 +30,7 @@ func (k Keeper) MaxValidators(ctx sdk.Context) (res uint64) {
 	return
 }
 
-// StakeDenom - Bondable coin denomination
+// StakeDenom - Stakeable coin denomination
 func (k Keeper) StakeDenom(ctx sdk.Context) (res string) {
 	k.Paramstore.Get(ctx, types.KeyStakeDenom, &res)
 	return

@@ -13,7 +13,7 @@ type args struct {
 }
 
 func TestSetandGetValidatorAward(t *testing.T) {
-	validator := getBondedValidator()
+	validator := getStakedValidator()
 	validatorAddress := validator.Address
 
 	tests := []struct {
@@ -49,7 +49,7 @@ func TestSetandGetValidatorAward(t *testing.T) {
 }
 
 func TestSetAndGetProposer(t *testing.T) {
-	validator := getBondedValidator()
+	validator := getStakedValidator()
 	Address := validator.GetAddress()
 
 	tests := []struct {
@@ -76,7 +76,7 @@ func TestSetAndGetProposer(t *testing.T) {
 }
 
 func TestDeleteValidatorAward(t *testing.T) {
-	validator := getBondedValidator()
+	validator := getStakedValidator()
 	validatorAddress := validator.Address
 
 	tests := []struct {
@@ -126,7 +126,7 @@ func TestGetProposerRewardPercentage(t *testing.T) {
 }
 
 func TestMint(t *testing.T) {
-	validator := getBondedValidator()
+	validator := getStakedValidator()
 	validatorAddress := validator.Address
 
 	tests := []struct {

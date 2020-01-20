@@ -7,8 +7,8 @@ import (
 // staking constants
 const (
 
-	// default bond denomination
-	DefaultBondDenom = "stake"
+	// default stake denomination
+	DefaultStakeDenom = "stake"
 
 	// Delay, in blocks, between when validator updates are returned to the
 	// consensus-engine and when they are applied. For example, if
@@ -35,35 +35,35 @@ func TokensFromConsensusPower(power int64) Int {
 	return NewInt(power).Mul(PowerReduction)
 }
 
-// BondStatus is the status of a validator
-type BondStatus byte
+// StakeStatus is the status of a validator
+type StakeStatus byte
 
 // staking constants
 const (
-	Unbonded  BondStatus = 0x00
-	Unbonding BondStatus = 0x01
-	Bonded    BondStatus = 0x02
+	Unstaked  StakeStatus = 0x00
+	Unstaking StakeStatus = 0x01
+	Staked    StakeStatus = 0x02
 
-	BondStatusUnbonded  = "Unbonded"
-	BondStatusUnbonding = "Unbonding"
-	BondStatusBonded    = "Bonded"
+	StakeStatusUnstaked  = "Unstaked"
+	StakeStatusUnstaking = "Unstaking"
+	StakeStatusStaked    = "Staked"
 )
 
-// Equal compares two BondStatus instances
-func (b BondStatus) Equal(b2 BondStatus) bool {
+// Equal compares two StakeStatus instances
+func (b StakeStatus) Equal(b2 StakeStatus) bool {
 	return byte(b) == byte(b2)
 }
 
-// String implements the Stringer interface for BondStatus.
-func (b BondStatus) String() string {
+// String implements the Stringer interface for StakeStatus.
+func (b StakeStatus) String() string {
 	switch b {
 	case 0x00:
-		return BondStatusUnbonded
+		return StakeStatusUnstaked
 	case 0x01:
-		return BondStatusUnbonding
+		return StakeStatusUnstaking
 	case 0x02:
-		return BondStatusBonded
+		return StakeStatusStaked
 	default:
-		panic("invalid bond status")
+		panic("invalid stake status")
 	}
 }
