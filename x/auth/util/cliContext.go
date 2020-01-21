@@ -26,9 +26,10 @@ type CLIContext struct { // TODO consider module passing clicontext instead of n
 // FromAddress field accordingly.
 func NewCLIContext(node rpcclient.Client, fromAddress sdk.Address, passphrase string) CLIContext {
 	return CLIContext{
-		Client:      node,
-		Passphrase:  passphrase,
-		FromAddress: fromAddress,
+		Client:        node,
+		Passphrase:    passphrase,
+		FromAddress:   fromAddress,
+		BroadcastMode: BroadcastSync,
 	}
 }
 

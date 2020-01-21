@@ -59,9 +59,10 @@ func Send(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, fromAddr
 
 func RawTx(cdc *codec.Codec, tmNode client.Client, fromAddr sdk.Address, txBytes []byte) (sdk.TxResponse, error) {
 	return util.CLIContext{
-		Codec:       cdc,
-		Client:      tmNode,
-		FromAddress: sdk.Address(fromAddr),
+		Codec:         cdc,
+		Client:        tmNode,
+		FromAddress:   fromAddr,
+		BroadcastMode: util.BroadcastSync,
 	}.BroadcastTx(txBytes)
 }
 
