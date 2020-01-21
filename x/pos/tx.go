@@ -13,9 +13,8 @@ import (
 func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, amount sdk.Int, kp keys.KeyPair, passphrase string) (*sdk.TxResponse, error) {
 	txBuilder, cliCtx := newTx(cdc, tmNode, keybase, passphrase)
 	msg := types.MsgStake{
-		Address: sdk.Address(kp.GetAddress()),
-		PubKey:  kp.PublicKey,
-		Value:   amount,
+		PubKey: kp.PublicKey,
+		Value:  amount,
 	}
 	err := msg.ValidateBasic()
 	if err != nil {
