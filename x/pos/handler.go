@@ -40,7 +40,7 @@ func handleStake(ctx sdk.Context, msg types.MsgStake, k keeper.Keeper) sdk.Resul
 
 func stakeNewValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keeper) sdk.Result {
 	// check to see if teh public key has already been register for that validator
-	if _, found := k.GetValidatorByConsAddr(ctx, sdk.GetAddress(msg.PubKey)); found {
+	if _, found := k.GetValidator(ctx, sdk.GetAddress(msg.PubKey)); found {
 		return types.ErrValidatorPubKeyExists(k.Codespace()).Result()
 	}
 	// check the consensus params
@@ -144,11 +144,11 @@ func handleMsgBeginUnstake(ctx sdk.Context, msg types.MsgBeginUnstake, k keeper.
 // Validators must submit a transaction to unjail itself after todo
 // having been jailed (and thus unstaked) for downtime
 func handleMsgUnjail(ctx sdk.Context, msg types.MsgUnjail, k keeper.Keeper) sdk.Result {
-	consAddr, err := validateUnjailMessage(ctx, msg, k)
+	address, err := validateUnjailMessage(ctx, msg, k)
 	if err != nil {
 		return err.Result()
 	}
-	k.UnjailValidator(ctx, consAddr)
+	k.UnjailValidator(ctx, address)
 	ctx.EventManager().EmitEvent(
 		sdk.NewEvent(
 			sdk.EventTypeMessage,
@@ -159,7 +159,7 @@ func handleMsgUnjail(ctx sdk.Context, msg types.MsgUnjail, k keeper.Keeper) sdk.
 	return sdk.Result{Events: ctx.EventManager().Events()}
 }
 
-func validateUnjailMessage(ctx sdk.Context, msg types.MsgUnjail, k keeper.Keeper) (consAddr sdk.Address, err sdk.Error) {
+func validateUnjailMessage(ctx sdk.Context, msg types.MsgUnjail, k keeper.Keeper) (address sdk.Address, err sdk.Error) {
 	validator := k.Validator(ctx, msg.ValidatorAddr)
 	if validator == nil {
 		return nil, types.ErrNoValidatorForAddress(k.Codespace())
@@ -176,8 +176,8 @@ func validateUnjailMessage(ctx sdk.Context, msg types.MsgUnjail, k keeper.Keeper
 	if !validator.IsJailed() {
 		return nil, types.ErrValidatorNotJailed(k.Codespace())
 	}
-	consAddr = sdk.Address(validator.GetPublicKey().Address())
-	info, found := k.GetValidatorSigningInfo(ctx, consAddr)
+	address = sdk.Address(validator.GetPublicKey().Address())
+	info, found := k.GetValidatorSigningInfo(ctx, address)
 	if !found {
 		return nil, types.ErrNoValidatorForAddress(k.Codespace())
 	}

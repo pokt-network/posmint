@@ -35,7 +35,7 @@ func (k Keeper) rewardFromFees(ctx sdk.Context, previousProposer sdk.Address) {
 	proposerReward := baseProposerRewardPercentage.Mul(totalReward).Quo(sdk.NewInt(100))
 	daoReward := totalReward.Sub(proposerReward)
 	// get the validator structure
-	proposerValidator := k.validatorByConsAddr(ctx, previousProposer)
+	proposerValidator := k.Validator(ctx, previousProposer)
 	if proposerValidator != nil {
 		propRewardCoins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), proposerReward))
 		daoRewardCoins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), daoReward))
@@ -129,20 +129,20 @@ func (k Keeper) mint(ctx sdk.Context, amount sdk.Int, address sdk.Address) sdk.R
 }
 
 // get the proposer public key for this block
-func (k Keeper) GetPreviousProposer(ctx sdk.Context) (consAddr sdk.Address) {
+func (k Keeper) GetPreviousProposer(ctx sdk.Context) (address sdk.Address) {
 	store := ctx.KVStore(k.storeKey)
 	b := store.Get(types.ProposerKey)
 	if b == nil {
 		panic("Previous proposer not set")
 	}
-	k.cdc.MustUnmarshalBinaryLengthPrefixed(b, &consAddr)
+	k.cdc.MustUnmarshalBinaryLengthPrefixed(b, &address)
 	return
 }
 
 // set the proposer public key for this block
-func (k Keeper) SetPreviousProposer(ctx sdk.Context, consAddr sdk.Address) {
+func (k Keeper) SetPreviousProposer(ctx sdk.Context, address sdk.Address) {
 	store := ctx.KVStore(k.storeKey)
-	b := k.cdc.MustMarshalBinaryLengthPrefixed(consAddr)
+	b := k.cdc.MustMarshalBinaryLengthPrefixed(address)
 	store.Set(types.ProposerKey, b)
 }
 

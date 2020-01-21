@@ -72,8 +72,8 @@ type QuerySigningInfoParams struct {
 	Address sdk.Address
 }
 
-func NewQuerySigningInfoParams(consAddr sdk.Address) QuerySigningInfoParams {
-	return QuerySigningInfoParams{consAddr}
+func NewQuerySigningInfoParams(address sdk.Address) QuerySigningInfoParams {
+	return QuerySigningInfoParams{address}
 }
 
 // QuerySigningInfosParams defines the params for the following queries:

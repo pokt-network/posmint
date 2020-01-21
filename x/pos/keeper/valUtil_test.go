@@ -59,58 +59,7 @@ func TestMustGetValidator(t *testing.T) {
 
 }
 
-func TestMustGetValidatorByConsAddr(t *testing.T) {
-	stakedValidator := getStakedValidator()
-	type args struct {
-		validator types.Validator
-	}
-	type expected struct {
-		validator types.Validator
-		message   string
-	}
-	tests := []struct {
-		name   string
-		panics bool
-		args
-		expected
-	}{
-		{
-			name:     "gets validator",
-			panics:   false,
-			args:     args{validator: stakedValidator},
-			expected: expected{validator: stakedValidator},
-		},
-		{
-			name:     "panics if no validator",
-			panics:   true,
-			args:     args{validator: stakedValidator},
-			expected: expected{message: fmt.Sprintf("validator with consensus-Address %s not found", stakedValidator.GetAddress())},
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			context, _, keeper := createTestInput(t, true)
-			switch test.panics {
-			case true:
-				defer func() {
-					err := recover().(error)
-					assert.Equal(t, test.expected.message, err.Error(), "messages don't match")
-				}()
-				_ = keeper.mustGetValidatorByConsAddr(context, test.args.validator.GetAddress())
-			default:
-				keeper.SetValidator(context, test.args.validator)
-				keeper.SetValidatorByConsAddr(context, test.args.validator)
-				keeper.SetStakedValidator(context, test.args.validator)
-				validator := keeper.mustGetValidatorByConsAddr(context, test.args.validator.GetAddress())
-				assert.True(t, validator.Equals(test.expected.validator), "validator does not match")
-			}
-		})
-	}
-
-}
-
-func TestValidatorByConsAddr(t *testing.T) {
+func TestValidatorByAddress(t *testing.T) {
 	stakedValidator := getStakedValidator()
 
 	type args struct {
@@ -144,13 +93,12 @@ func TestValidatorByConsAddr(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			switch test.expected.null {
 			case true:
-				validator := keeper.validatorByConsAddr(context, test.args.validator.GetAddress())
+				validator := keeper.Validator(context, test.args.validator.GetAddress())
 				assert.Nil(t, validator)
 			default:
 				keeper.SetValidator(context, test.args.validator)
-				keeper.SetValidatorByConsAddr(context, test.args.validator)
 				keeper.SetStakedValidator(context, test.args.validator)
-				validator := keeper.validatorByConsAddr(context, test.args.validator.GetAddress())
+				validator := keeper.Validator(context, test.args.validator.GetAddress())
 				assert.Equal(t, validator, test.expected.validator, "validator does not match")
 			}
 		})

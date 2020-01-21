@@ -250,7 +250,7 @@ func TestValidator_Address(t *testing.T) {
 				UnstakingCompletionTime: tt.fields.UnstakingCompletionTime,
 			}
 			if got := v.GetAddress(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetConsAddr() = %v, want %v", got, tt.want)
+				t.Errorf("GetAddress() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -415,49 +415,6 @@ func TestValidator_GetAddress(t *testing.T) {
 			}
 			if got := v.GetAddress(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetAddress() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestValidator_GetConsAddr(t *testing.T) {
-	type fields struct {
-		Address                 sdk.Address
-		PublicKey               crypto.PublicKey
-		Jailed                  bool
-		Status                  sdk.StakeStatus
-		StakedTokens            sdk.Int
-		UnstakingCompletionTime time.Time
-	}
-	var pub crypto.Ed25519PublicKey
-	rand.Read(pub[:])
-
-	tests := []struct {
-		name   string
-		fields fields
-		want   sdk.Address
-	}{
-		{"Default Test", fields{
-			Address:                 sdk.Address(pub.Address()),
-			PublicKey:               pub,
-			Jailed:                  false,
-			Status:                  sdk.Staked,
-			StakedTokens:            sdk.ZeroInt(),
-			UnstakingCompletionTime: time.Time{},
-		}, sdk.Address(pub.Address())},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			v := Validator{
-				Address:                 tt.fields.Address,
-				PublicKey:               tt.fields.PublicKey,
-				Jailed:                  tt.fields.Jailed,
-				Status:                  tt.fields.Status,
-				StakedTokens:            tt.fields.StakedTokens,
-				UnstakingCompletionTime: tt.fields.UnstakingCompletionTime,
-			}
-			if got := v.GetAddress(); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetConsAddr() = %v, want %v", got, tt.want)
 			}
 		})
 	}
