@@ -91,15 +91,15 @@ func QueryUnstakingValidators(cdc *codec.Codec, tmNode rpcclient.Client, height 
 	return validators, nil
 }
 
-func QuerySigningInfo(cdc *codec.Codec, tmNode rpcclient.Client, height int64, consAddr sdk.Address) (types.ValidatorSigningInfo, error) {
+func QuerySigningInfo(cdc *codec.Codec, tmNode rpcclient.Client, height int64, address sdk.Address) (types.ValidatorSigningInfo, error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
-	key := types.GetValidatorSigningInfoKey(consAddr)
+	key := types.GetValidatorSigningInfoKey(address)
 	res, _, err := cliCtx.QueryStore(key, types.StoreKey)
 	if err != nil {
 		return types.ValidatorSigningInfo{}, err
 	}
 	if len(res) == 0 {
-		return types.ValidatorSigningInfo{}, fmt.Errorf("validator %s not found in slashing store", consAddr)
+		return types.ValidatorSigningInfo{}, fmt.Errorf("validator %s not found in slashing store", address)
 	}
 	var signingInfo types.ValidatorSigningInfo
 	cdc.MustUnmarshalBinaryLengthPrefixed(res, &signingInfo)

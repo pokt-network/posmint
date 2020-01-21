@@ -23,8 +23,8 @@ func BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock, k Keeper) {
 	// burn any custom validator slashes
 	k.burnValidators(ctx)
 	// record the new proposer for when we payout on the next block
-	consAddr := sdk.Address(req.Header.ProposerAddress)
-	k.SetPreviousProposer(ctx, consAddr)
+	address := sdk.Address(req.Header.ProposerAddress)
+	k.SetPreviousProposer(ctx, address)
 
 	// Iterate over all the validators which *should* have signed this block
 	// store whether or not they have actually signed it and slash/unstake any

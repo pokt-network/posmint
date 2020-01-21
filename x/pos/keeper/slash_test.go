@@ -276,7 +276,7 @@ func TestHandleValidatorSignature(t *testing.T) {
 				assert.Equal(t, test.expected.tombstoned, signedInfo.Tombstoned)
 				assert.Equal(t, test.expected.missedBlocksCounter, signedInfo.MissedBlocksCounter)
 				if test.expected.jail {
-					validator, found := keeper.GetValidatorByConsAddr(context, sdk.Address(cryptoAddr))
+					validator, found := keeper.GetValidator(context, sdk.Address(cryptoAddr))
 					if !found {
 						t.FailNow()
 					}
@@ -346,7 +346,6 @@ func TestValidateDoubleSign(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			cryptoAddr := test.args.validator.GetPublicKey().Address()
 			keeper.SetValidator(context, test.args.validator)
-			keeper.SetValidatorByConsAddr(context, test.args.validator)
 			signingInfo := types.ValidatorSigningInfo{
 				Address:     test.args.validator.GetAddress(),
 				StartHeight: context.BlockHeight(),
@@ -365,11 +364,11 @@ func TestValidateDoubleSign(t *testing.T) {
 				t.FailNow()
 			}
 
-			consAddr, signedInfo, validator, err := keeper.validateDoubleSign(context, cryptoAddr, infractionHeight, time.Unix(0, 0))
+			address, signedInfo, validator, err := keeper.validateDoubleSign(context, cryptoAddr, infractionHeight, time.Unix(0, 0))
 			if err != nil {
 				assert.Equal(t, test.expected.message, err.Error())
 			} else {
-				assert.Equal(t, sdk.Address(cryptoAddr), consAddr, "addresses do not match")
+				assert.Equal(t, sdk.Address(cryptoAddr), address, "addresses do not match")
 				assert.Equal(t, signedInfo, signingInfo, "signed Info do not match")
 				assert.Equal(t, test.expected.validator, validator, "validators do not match")
 			}
@@ -437,7 +436,6 @@ func TestHandleDoubleSign(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			cryptoAddr := test.args.validator.GetPublicKey().Address()
 			keeper.SetValidator(context, test.args.validator)
-			keeper.SetValidatorByConsAddr(context, test.args.validator)
 			addMintedCoinsToModule(t, context, &keeper, types.StakedPoolName)
 			sendFromModuleToAccount(t, context, &keeper, types.StakedPoolName, test.args.validator.Address, supplySize)
 			signingInfo := types.ValidatorSigningInfo{
@@ -580,7 +578,6 @@ func TestValidateSlash(t *testing.T) {
 			cryptoAddr := test.args.validator.GetPublicKey().Address()
 			if test.expected.found {
 				keeper.SetValidator(context, test.args.validator)
-				keeper.SetValidatorByConsAddr(context, test.args.validator)
 				addMintedCoinsToModule(t, context, &keeper, types.StakedPoolName)
 				sendFromModuleToAccount(t, context, &keeper, types.StakedPoolName, test.args.validator.Address, supplySize)
 			}
@@ -678,10 +675,9 @@ func TestSlash(t *testing.T) {
 			cryptoAddr := test.args.validator.GetPublicKey().Address()
 			if test.expected.found {
 				keeper.SetValidator(context, test.args.validator)
-				keeper.SetValidatorByConsAddr(context, test.args.validator)
 				addMintedCoinsToModule(t, context, &keeper, types.StakedPoolName)
 				sendFromModuleToAccount(t, context, &keeper, types.StakedPoolName, test.args.validator.Address, supplySize)
-				v, found := keeper.GetValidatorByConsAddr(context, sdk.Address(cryptoAddr))
+				v, found := keeper.GetValidator(context, sdk.Address(cryptoAddr))
 				if !found {
 					t.FailNow()
 				}
@@ -714,7 +710,7 @@ func TestSlash(t *testing.T) {
 			}
 
 			keeper.slash(context, sdk.Address(cryptoAddr), infractionHeight, test.args.power, fraction)
-			validator, found := keeper.GetValidatorByConsAddr(context, sdk.Address(cryptoAddr))
+			validator, found := keeper.GetValidator(context, sdk.Address(cryptoAddr))
 			if !found {
 				t.Fail()
 			}
@@ -757,7 +753,6 @@ func TestBurnValidators(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			context, _, keeper := createTestInput(t, true)
 			keeper.SetValidator(context, test.args.validator)
-			keeper.SetValidatorByConsAddr(context, test.args.validator)
 			addMintedCoinsToModule(t, context, &keeper, types.StakedPoolName)
 			sendFromModuleToAccount(t, context, &keeper, types.StakedPoolName, test.args.validator.Address, test.args.validator.StakedTokens)
 			keeper.setValidatorBurn(context, test.args.amount, test.args.validator.Address)
@@ -765,7 +760,7 @@ func TestBurnValidators(t *testing.T) {
 
 			primaryCryptoAddr := test.args.validator.GetAddress()
 
-			primaryValidator, found := keeper.GetValidatorByConsAddr(context, primaryCryptoAddr)
+			primaryValidator, found := keeper.GetValidator(context, primaryCryptoAddr)
 			if !found {
 				t.Fail()
 			}
