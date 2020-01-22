@@ -54,6 +54,8 @@ func stakeNewValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keeper) sdk
 	}
 	// create validator object using the message fields
 	validator := types.NewValidator(sdk.Address(msg.PubKey.Address()), msg.PubKey, msg.Value)
+	// Set Validator Status
+	validator.Status = sdk.Unstaked
 	// check if they can stake
 	if err := k.ValidateValidatorStaking(ctx, validator, msg.Value); err != nil {
 		return err.Result()
