@@ -59,9 +59,6 @@ func TestGetAndSetlUnstaking(t *testing.T) {
 			}
 			validators := keeper.getAllUnstakingValidators(context)
 
-			for _, validator := range validators {
-				assert.True(t, validator.Status.Equal(sdk.Unstaked))
-			}
 			assert.Equalf(t, test.expected.length, len(validators), "length of the validators does not match expected on %v", test.name)
 		})
 	}
