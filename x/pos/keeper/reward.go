@@ -98,7 +98,7 @@ func (k Keeper) getValidatorAward(ctx sdk.Context, address sdk.Address) (coins s
 	store := ctx.KVStore(k.storeKey)
 	value := store.Get(types.KeyForValidatorAward(address))
 	if value == nil {
-		return coins, false
+		return sdk.ZeroInt(), false
 	}
 	k.cdc.MustUnmarshalBinaryBare(value, &coins)
 	found = true
