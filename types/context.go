@@ -94,7 +94,11 @@ func (c Context) MustGetPrevCtx(height int64) Context {
 
 func (c Context) PrevCtx(height int64) (Context, error) {
 	if height == c.BlockHeight() {
-		return c, nil
+		header := c.BlockHeader()
+		if header.LastBlockId.Hash == nil {
+			header.LastBlockId.Hash = c.BlockHeader().ConsensusHash
+		}
+		return c.WithBlockHeader(header), nil
 	}
 	ms, err := c.ms.(CommitMultiStore).CacheMultiStoreWithVersion(height)
 	if err != nil {
