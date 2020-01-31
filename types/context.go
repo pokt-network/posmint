@@ -2,6 +2,8 @@ package types
 
 import (
 	"context"
+	"errors"
+	"github.com/tendermint/tendermint/store"
 	"time"
 
 	"github.com/gogo/protobuf/proto"
@@ -23,6 +25,7 @@ and standard additions here would be better just to add to the Context struct
 type Context struct {
 	ctx           context.Context
 	ms            MultiStore
+	blockstore    *store.BlockStore
 	header        abci.Header
 	chainID       string
 	txBytes       []byte
@@ -79,6 +82,69 @@ func NewContext(ms MultiStore, header abci.Header, isCheckTx bool, logger log.Lo
 		minGasPrice:  DecCoins{},
 		eventManager: NewEventManager(),
 	}
+}
+
+func (c Context) MustGetPrevCtx(height int64) Context {
+	con, err := c.PrevCtx(height)
+	if err != nil {
+		panic(err)
+	}
+	return con
+}
+
+func (c Context) PrevCtx(height int64) (Context, error) {
+	if height == c.BlockHeight() {
+		return c, nil
+	}
+	ms, err := c.ms.(CommitMultiStore).CacheMultiStoreWithVersion(height)
+	if err != nil {
+		return Context{}, err
+	}
+	blck := c.blockstore.LoadBlock(height)
+	if blck == nil {
+		return Context{}, errors.New("block at height not found")
+	}
+	hash := blck.LastBlockID.Hash
+	if hash == nil {
+		hash = blck.ConsensusHash
+	}
+	var header = abci.Header{
+		Version: abci.Version{
+			Block: blck.Version.Block.Uint64(),
+			App:   blck.Version.App.Uint64(),
+		},
+		ChainID:  blck.ChainID,
+		Height:   blck.Height,
+		Time:     blck.Time,
+		NumTxs:   blck.NumTxs,
+		TotalTxs: blck.TotalTxs,
+		LastBlockId: abci.BlockID{
+			Hash: hash,
+			PartsHeader: abci.PartSetHeader{
+				Total: int32(blck.LastBlockID.PartsHeader.Total),
+				Hash:  blck.Hash(),
+			},
+		},
+		LastCommitHash:     blck.LastCommitHash,
+		DataHash:           blck.DataHash,
+		ValidatorsHash:     blck.ValidatorsHash,
+		NextValidatorsHash: blck.NextValidatorsHash,
+		ConsensusHash:      blck.ConsensusHash,
+		AppHash:            blck.AppHash,
+		LastResultsHash:    blck.LastResultsHash,
+		EvidenceHash:       blck.EvidenceHash,
+		ProposerAddress:    blck.ProposerAddress,
+	}
+	return NewContext(ms, header, false, c.logger), nil
+}
+
+func (c Context) WithBlockStore(bs *store.BlockStore) Context {
+	c.blockstore = bs
+	return c
+}
+
+func (c Context) BlockStore() *store.BlockStore {
+	return c.blockstore
 }
 
 func (c Context) WithContext(ctx context.Context) Context {

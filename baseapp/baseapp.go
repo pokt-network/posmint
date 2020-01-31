@@ -1,14 +1,15 @@
-/*
-Package baseapp contains data structures that provide basic data storage
-functionality and act as a bridge between the ABCI interface and the SDK
-abstractions.
-
-BaseApp has no state except the CommitMultiStore you provide upon init.
-*/
+///*
+//Package baseapp contains data structures that provide basic data storage
+//functionality and act as a bridge between the ABCI interface and the SDK
+//abstractions.
+//
+//BaseApp has no state except the CommitMultiStore you provide upon init.
+//*/
 package baseapp
 
 import (
 	"fmt"
+	"github.com/tendermint/tendermint/node"
 	"io"
 	"os"
 	"reflect"
@@ -55,6 +56,7 @@ type BaseApp struct {
 	logger      log.Logger
 	name        string               // application name from abci.Info
 	db          dbm.DB               // common DB backend
+	tmNode      *node.Node           // <---- todo updated here
 	cms         sdk.CommitMultiStore // Main (uncached) state
 	router      sdk.Router           // handle any kind of message
 	queryRouter sdk.QueryRouter      // router for redirecting query calls
@@ -108,10 +110,7 @@ var _ abci.Application = (*BaseApp)(nil)
 // configuration choices.
 //
 // NOTE: The db is used to store the version number for now.
-func NewBaseApp(
-	name string, logger log.Logger, db dbm.DB, txDecoder sdk.TxDecoder, options ...func(*BaseApp),
-) *BaseApp {
-
+func NewBaseApp(name string, logger log.Logger, db dbm.DB, txDecoder sdk.TxDecoder, options ...func(*BaseApp)) *BaseApp {
 	app := &BaseApp{
 		logger:         logger,
 		name:           name,
@@ -127,6 +126,10 @@ func NewBaseApp(
 	}
 
 	return app
+}
+
+func (app *BaseApp) SetTendermintNode(node *node.Node) {
+	app.tmNode = node
 }
 
 // Name returns the name of the BaseApp.
@@ -305,11 +308,15 @@ func (app *BaseApp) IsSealed() bool { return app.sealed }
 // setCheckState sets checkState with the cached multistore and
 // the context wrapping it.
 // It is called by InitChain() and Commit()
-func (app *BaseApp) setCheckState(header abci.Header) {
-	ms := app.cms.CacheMultiStore()
+func (app *BaseApp) setCheckState(header abci.Header) { // todo <- modified here
+	ms := app.cms
+	context := sdk.NewContext(ms, header, true, app.logger).WithMinGasPrices(app.minGasPrices)
+	if app.tmNode != nil {
+		context = context.WithBlockStore(app.tmNode.BlockStore())
+	}
 	app.checkState = &state{
-		ms:  ms,
-		ctx: sdk.NewContext(ms, header, true, app.logger).WithMinGasPrices(app.minGasPrices),
+		ms:  ms.CacheMultiStore(),
+		ctx: context,
 	}
 }
 
@@ -317,11 +324,15 @@ func (app *BaseApp) setCheckState(header abci.Header) {
 // the context wrapping it.
 // It is called by InitChain() and BeginBlock(),
 // and deliverState is set nil on Commit().
-func (app *BaseApp) setDeliverState(header abci.Header) {
-	ms := app.cms.CacheMultiStore()
+func (app *BaseApp) setDeliverState(header abci.Header) { // todo <- modified here
+	ms := app.cms
+	context := sdk.NewContext(ms, header, true, app.logger).WithMinGasPrices(app.minGasPrices)
+	if app.tmNode != nil {
+		context = context.WithBlockStore(app.tmNode.BlockStore())
+	}
 	app.deliverState = &state{
-		ms:  ms,
-		ctx: sdk.NewContext(ms, header, false, app.logger),
+		ms:  ms.CacheMultiStore(),
+		ctx: context,
 	}
 }
 
@@ -594,7 +605,7 @@ func handleQueryCustom(app *BaseApp, path []string, req abci.RequestQuery) (res 
 		return sdk.ErrInternal("cannot query with proof when height <= 1; please provide a valid height").QueryResult()
 	}
 
-	cacheMS, err := app.cms.CacheMultiStoreWithVersion(req.Height)
+	err := app.cms.LoadVersion(req.Height)
 	if err != nil {
 		return sdk.ErrInternal(
 			fmt.Sprintf(
@@ -606,8 +617,8 @@ func handleQueryCustom(app *BaseApp, path []string, req abci.RequestQuery) (res 
 
 	// cache wrap the commit-multistore for safety
 	ctx := sdk.NewContext(
-		cacheMS, app.checkState.ctx.BlockHeader(), true, app.logger,
-	).WithMinGasPrices(app.minGasPrices)
+		app.cms, app.checkState.ctx.BlockHeader(), true, app.logger,
+	).WithMinGasPrices(app.minGasPrices).WithBlockStore(app.checkState.ctx.BlockStore())
 
 	// Passes the rest of the path as an argument to the querier.
 	//
@@ -839,11 +850,11 @@ func (app *BaseApp) getState(mode runTxMode) *state {
 // cacheTxContext returns a new context based off of the provided context with
 // a cache wrapped multi-store.
 func (app *BaseApp) cacheTxContext(ctx sdk.Context, txBytes []byte) (
-	sdk.Context, sdk.CacheMultiStore) {
+	sdk.Context, sdk.MultiStore) { // todo edit here!!!
 
-	ms := ctx.MultiStore()
+	ms := ctx.MultiStore() // todo edit here!!!
 	// TODO: https://github.com/pokt-network/posmint/issues/2824
-	msCache := ms.CacheMultiStore()
+	msCache := ms
 	if msCache.TracingEnabled() {
 		msCache = msCache.SetTracingContext(
 			sdk.TraceContext(
@@ -851,7 +862,7 @@ func (app *BaseApp) cacheTxContext(ctx sdk.Context, txBytes []byte) (
 					"txHash": fmt.Sprintf("%X", tmhash.Sum(txBytes)),
 				},
 			),
-		).(sdk.CacheMultiStore)
+		)
 	}
 
 	return ctx.WithMultiStore(msCache), msCache
@@ -924,7 +935,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 
 	if app.anteHandler != nil {
 		var anteCtx sdk.Context
-		var msCache sdk.CacheMultiStore
+		var msCache sdk.MultiStore // todo edit here
 
 		// Cache wrap context before anteHandler call in case it aborts.
 		// This is required for both CheckTx and DeliverTx.
@@ -953,7 +964,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 			return result
 		}
 
-		msCache.Write()
+		msCache.CacheMultiStore().Write() // todo edit here!!!
 	}
 
 	// Create a new context based off of the existing context with a cache wrapped
@@ -969,7 +980,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 
 	// only update state if all messages pass
 	if result.IsOK() {
-		msCache.Write()
+		msCache.CacheMultiStore().Write() // todo edit here!!!
 	}
 
 	return result
@@ -977,9 +988,9 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 
 // EndBlock implements the ABCI interface.
 func (app *BaseApp) EndBlock(req abci.RequestEndBlock) (res abci.ResponseEndBlock) {
-	if app.deliverState.ms.TracingEnabled() {
-		app.deliverState.ms = app.deliverState.ms.SetTracingContext(nil).(sdk.CacheMultiStore)
-	}
+	//if app.deliverState.ms.TracingEnabled() {
+	//	app.deliverState.ms = app.deliverState.ms.SetTracingContext(nil).(sdk.CacheMultiStore)
+	//} // todo edit here!!!!
 
 	if app.endBlocker != nil {
 		res = app.endBlocker(app.deliverState.ctx, req)
