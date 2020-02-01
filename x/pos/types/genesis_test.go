@@ -35,7 +35,7 @@ func TestNewGenesisState(t *testing.T) {
 		signingInfos     map[string]ValidatorSigningInfo
 		missedBlocks     map[string][]MissedBlock
 	}
-	ca, _ := types.AddressFromHex("ABCDEFGHIJK")
+	ca, _ := types.AddressFromHex("22a3ecfff14962f93614d225828cad8bdb188279")
 
 	tests := []struct {
 		name string
