@@ -53,7 +53,7 @@ func TestGetValMissedBlockKey(t *testing.T) {
 		v types.Address
 		i int64
 	}
-	ca, _ := types.AddressFromHex("29f0a60104f3218a2cb51e6a269182d5dc271447114e342086d9c922a106a3c0")
+	ca, _ := types.AddressFromHex("22a3ecfff14962f93614d225828cad8bdb188279")
 
 	b := make([]byte, 8)
 	binary.LittleEndian.PutUint64(b, uint64(1))
@@ -79,7 +79,7 @@ func TestGetValMissedBlockPrefixKey(t *testing.T) {
 	type args struct {
 		v types.Address
 	}
-	ca, _ := types.AddressFromHex("29f0a60104f3218a2cb51e6a269182d5dc271447114e342086d9c922a106a3c0")
+	ca, _ := types.AddressFromHex("22a3ecfff14962f93614d225828cad8bdb188279")
 
 	tests := []struct {
 		name string
@@ -125,7 +125,7 @@ func TestGetValidatorSigningInfoKey(t *testing.T) {
 	type args struct {
 		v types.Address
 	}
-	ca, _ := types.AddressFromHex("29f0a60104f3218a2cb51e6a269182d5dc271447114e342086d9c922a106a3c0")
+	ca, _ := types.AddressFromHex("22a3ecfff14962f93614d225828cad8bdb188279")
 
 	tests := []struct {
 		name string
@@ -169,7 +169,7 @@ func TestKeyForValByAllVals(t *testing.T) {
 	type args struct {
 		addr types.Address
 	}
-	ca, _ := types.AddressFromHex("29f0a60104f3218a2cb51e6a269182d5dc271447114e342086d9c922a106a3c0")
+	ca, _ := types.AddressFromHex("22a3ecfff14962f93614d225828cad8bdb188279")
 
 	tests := []struct {
 		name string
@@ -191,7 +191,7 @@ func TestKeyForValidatorAward(t *testing.T) {
 	type args struct {
 		address types.Address
 	}
-	ca, _ := types.AddressFromHex("29f0a60104f3218a2cb51e6a269182d5dc271447114e342086d9c922a106a3c0")
+	ca, _ := types.AddressFromHex("22a3ecfff14962f93614d225828cad8bdb188279")
 
 	tests := []struct {
 		name string
@@ -213,7 +213,7 @@ func TestKeyForValidatorBurn(t *testing.T) {
 	type args struct {
 		address types.Address
 	}
-	ca, _ := types.AddressFromHex("29f0a60104f3218a2cb51e6a269182d5dc271447114e342086d9c922a106a3c0")
+	ca, _ := types.AddressFromHex("22a3ecfff14962f93614d225828cad8bdb188279")
 
 	tests := []struct {
 		name string
@@ -263,7 +263,7 @@ func TestKeyForValidatorPrevStateStateByPower(t *testing.T) {
 	type args struct {
 		address types.Address
 	}
-	ca, _ := types.AddressFromHex("29f0a60104f3218a2cb51e6a269182d5dc271447114e342086d9c922a106a3c0")
+	ca, _ := types.AddressFromHex("22a3ecfff14962f93614d225828cad8bdb188279")
 
 	tests := []struct {
 		name string
