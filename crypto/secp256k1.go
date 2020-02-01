@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
-	"strings"
 )
 
 type (
@@ -55,11 +54,11 @@ func (pub Secp256k1PublicKey) RawBytes() []byte {
 }
 
 func (pub Secp256k1PublicKey) String() string {
-	return strings.ToUpper(hex.EncodeToString(pub.Bytes()))
+	return hex.EncodeToString(pub.Bytes())
 }
 
 func (pub Secp256k1PublicKey) RawString() string {
-	return strings.ToUpper(hex.EncodeToString(pub.RawBytes()))
+	return hex.EncodeToString(pub.RawBytes())
 }
 
 func (pub Secp256k1PublicKey) Address() crypto.Address {
@@ -92,7 +91,7 @@ func (priv Secp256k1PrivateKey) Bytes() []byte {
 }
 
 func (priv Secp256k1PrivateKey) String() string {
-	return strings.ToUpper(hex.EncodeToString(priv.Bytes()))
+	return hex.EncodeToString(priv.Bytes())
 }
 
 func (priv Secp256k1PrivateKey) Equals(other crypto.PrivKey) bool {
@@ -100,7 +99,7 @@ func (priv Secp256k1PrivateKey) Equals(other crypto.PrivKey) bool {
 }
 
 func (priv Secp256k1PrivateKey) RawString() string {
-	return strings.ToUpper(hex.EncodeToString(priv.RawBytes()))
+	return hex.EncodeToString(priv.RawBytes())
 }
 
 func (priv Secp256k1PrivateKey) PublicKey() PublicKey {

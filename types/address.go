@@ -9,7 +9,6 @@ import (
 	"github.com/pokt-network/posmint/crypto"
 	tmCrypto "github.com/tendermint/tendermint/crypto"
 	"gopkg.in/yaml.v2"
-	"strings"
 )
 
 const (
@@ -54,7 +53,7 @@ func AddressFromHex(address string) (addr Address, err error) {
 		return Address{}, nil
 	}
 
-	bz, err := hex.DecodeString(strings.ToUpper(address))
+	bz, err := hex.DecodeString(address)
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +152,7 @@ func (aa Address) String() string {
 		return ""
 	}
 
-	str := strings.ToUpper(hex.EncodeToString(aa.Bytes()))
+	str := hex.EncodeToString(aa.Bytes())
 
 	return str
 }
