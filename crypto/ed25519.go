@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
+	"strings"
 )
 
 type (
@@ -55,11 +56,11 @@ func (pub Ed25519PublicKey) RawBytes() []byte {
 }
 
 func (pub Ed25519PublicKey) String() string {
-	return hex.EncodeToString(pub.Bytes())
+	return strings.ToUpper(hex.EncodeToString(pub.Bytes()))
 }
 
 func (pub Ed25519PublicKey) RawString() string {
-	return hex.EncodeToString(pub.RawBytes())
+	return strings.ToUpper(hex.EncodeToString(pub.RawBytes()))
 }
 
 func (pub Ed25519PublicKey) Address() crypto.Address {
@@ -84,7 +85,7 @@ func (priv Ed25519PrivateKey) RawBytes() []byte {
 }
 
 func (priv Ed25519PrivateKey) RawString() string {
-	return hex.EncodeToString(priv.RawBytes())
+	return strings.ToUpper(hex.EncodeToString(priv.RawBytes()))
 }
 
 func (priv Ed25519PrivateKey) Bytes() []byte {
@@ -96,7 +97,7 @@ func (priv Ed25519PrivateKey) Bytes() []byte {
 }
 
 func (priv Ed25519PrivateKey) String() string {
-	return hex.EncodeToString(priv.Bytes())
+	return strings.ToUpper(hex.EncodeToString(priv.Bytes()))
 }
 
 func (priv Ed25519PrivateKey) PublicKey() PublicKey {
