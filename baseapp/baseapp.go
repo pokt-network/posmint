@@ -830,8 +830,9 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (re
 		Codespace: codespace,
 		Data:      data,
 		Log:       strings.TrimSpace(msgLogs.String()),
-		GasUsed:   ctx.GasMeter().GasConsumed(),
-		Events:    events,
+		//GasUsed:   ctx.GasMeter().GasConsumed(),
+		GasUsed: 0,
+		Events:  events,
 	}
 
 	return result
@@ -847,9 +848,9 @@ func (app *BaseApp) getState(mode runTxMode) *state {
 	return app.deliverState
 }
 
-// cacheTxContext returns a new context based off of the provided context with
+// txContext returns a new context based off of the provided context with
 // a cache wrapped multi-store.
-func (app *BaseApp) cacheTxContext(ctx sdk.Context, txBytes []byte) (
+func (app *BaseApp) txContext(ctx sdk.Context, txBytes []byte) (
 	sdk.Context, sdk.MultiStore) { // todo edit here!!!
 
 	ms := ctx.MultiStore() // todo edit here!!!
@@ -863,6 +864,27 @@ func (app *BaseApp) cacheTxContext(ctx sdk.Context, txBytes []byte) (
 				},
 			),
 		)
+	}
+
+	return ctx.WithMultiStore(msCache), msCache
+}
+
+// txContext returns a new context based off of the provided context with
+// a cache wrapped multi-store.
+func (app *BaseApp) cacheTxContext(ctx sdk.Context, txBytes []byte) (
+	sdk.Context, sdk.CacheMultiStore) {
+
+	ms := ctx.MultiStore()
+	// TODO: https://github.com/cosmos/cosmos-sdk/issues/2824
+	msCache := ms.CacheMultiStore()
+	if msCache.TracingEnabled() {
+		msCache = msCache.SetTracingContext(
+			sdk.TraceContext(
+				map[string]interface{}{
+					"txHash": fmt.Sprintf("%X", tmhash.Sum(txBytes)),
+				},
+			),
+		).(sdk.CacheMultiStore)
 	}
 
 	return ctx.WithMultiStore(msCache), msCache
@@ -907,7 +929,8 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 		}
 
 		result.GasWanted = gasWanted
-		result.GasUsed = ctx.GasMeter().GasConsumed()
+		//result.GasUsed = ctx.GasMeter().GasConsumed()
+		result.GasUsed = 0
 	}()
 
 	// If BlockGasMeter() panics it will be caught by the above recover and will
@@ -935,7 +958,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 
 	if app.anteHandler != nil {
 		var anteCtx sdk.Context
-		var msCache sdk.MultiStore // todo edit here
+		var msCache sdk.CacheMultiStore // todo edit here
 
 		// Cache wrap context before anteHandler call in case it aborts.
 		// This is required for both CheckTx and DeliverTx.
@@ -945,7 +968,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 		// writes do not happen if aborted/failed.  This may have some
 		// performance benefits, but it'll be more difficult to get right.
 		anteCtx, msCache = app.cacheTxContext(ctx, txBytes)
-
+		anteCtx.WithMultiStore(msCache.CacheMultiStore())
 		newCtx, result, abort := app.anteHandler(anteCtx, tx, mode == runTxModeSimulate)
 		if !newCtx.IsZero() {
 			// At this point, newCtx.MultiStore() is cache-wrapped, or something else
@@ -964,12 +987,14 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 			return result
 		}
 
-		msCache.CacheMultiStore().Write() // todo edit here!!!
+		if mode == runTxModeDeliver {
+			msCache.Write()
+		}
 	}
 
 	// Create a new context based off of the existing context with a cache wrapped
 	// multi-store in case message processing fails.
-	runMsgCtx, msCache := app.cacheTxContext(ctx, txBytes)
+	runMsgCtx, msCache := app.txContext(ctx, txBytes)
 	result = app.runMsgs(runMsgCtx, msgs, mode)
 	result.GasWanted = gasWanted
 
