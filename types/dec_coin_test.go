@@ -279,20 +279,20 @@ func TestParseDecCoins(t *testing.T) {
 		expectedErr    bool
 	}{
 		{"", nil, false},
-		{"4stake", nil, true},
-		{"5.5atom,4stake", nil, true},
-		{"0.0stake", nil, true},
-		{"0.004STAKE", nil, true},
+		{"4upokt", nil, true},
+		{"5.5atom,4upokt", nil, true},
+		{"0.0upokt", nil, true},
+		{"0.004UPOKT", nil, true},
 		{
-			"0.004stake",
-			DecCoins{NewDecCoinFromDec("stake", NewDecWithPrec(4000000000000000, Precision))},
+			"0.004upokt",
+			DecCoins{NewDecCoinFromDec("upokt", NewDecWithPrec(4000000000000000, Precision))},
 			false,
 		},
 		{
-			"5.04atom,0.004stake",
+			"5.04atom,0.004upokt",
 			DecCoins{
 				NewDecCoinFromDec("atom", NewDecWithPrec(5040000000000000000, Precision)),
-				NewDecCoinFromDec("stake", NewDecWithPrec(4000000000000000, Precision)),
+				NewDecCoinFromDec("upokt", NewDecWithPrec(4000000000000000, Precision)),
 			},
 			false,
 		},
@@ -318,9 +318,9 @@ func TestDecCoinsString(t *testing.T) {
 		{
 			DecCoins{
 				NewDecCoinFromDec("atom", NewDecWithPrec(5040000000000000000, Precision)),
-				NewDecCoinFromDec("stake", NewDecWithPrec(4000000000000000, Precision)),
+				NewDecCoinFromDec("upokt", NewDecWithPrec(4000000000000000, Precision)),
 			},
-			"5.040000000000000000atom,0.004000000000000000stake",
+			"5.040000000000000000atom,0.004000000000000000upokt",
 		},
 	}
 
@@ -337,16 +337,16 @@ func TestDecCoinsIntersect(t *testing.T) {
 		expectedResult string
 	}{
 		{"", "", ""},
-		{"1.0stake", "", ""},
-		{"1.0stake", "1.0stake", "1.0stake"},
-		{"", "1.0stake", ""},
-		{"1.0stake", "", ""},
-		{"2.0stake,1.0trope", "1.9stake", "1.9stake"},
-		{"2.0stake,1.0trope", "2.1stake", "2.0stake"},
-		{"2.0stake,1.0trope", "0.9trope", "0.9trope"},
-		{"2.0stake,1.0trope", "1.9stake,0.9trope", "1.9stake,0.9trope"},
-		{"2.0stake,1.0trope", "1.9stake,0.9trope,20.0other", "1.9stake,0.9trope"},
-		{"2.0stake,1.0trope", "1.0other", ""},
+		{"1.0upokt", "", ""},
+		{"1.0upokt", "1.0upokt", "1.0upokt"},
+		{"", "1.0upokt", ""},
+		{"1.0upokt", "", ""},
+		{"2.0upokt,1.0trope", "1.9upokt", "1.9upokt"},
+		{"2.0upokt,1.0trope", "2.1upokt", "2.0upokt"},
+		{"2.0upokt,1.0trope", "0.9trope", "0.9trope"},
+		{"2.0upokt,1.0trope", "1.9upokt,0.9trope", "1.9upokt,0.9trope"},
+		{"2.0upokt,1.0trope", "1.9upokt,0.9trope,20.0other", "1.9upokt,0.9trope"},
+		{"2.0upokt,1.0trope", "1.0other", ""},
 	}
 
 	for i, tc := range testCases {

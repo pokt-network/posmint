@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	stakeDenom = "stake"
+	stakeDenom = "upokt"
 	feeDenom   = "fee"
 )
 

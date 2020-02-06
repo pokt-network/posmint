@@ -90,6 +90,6 @@ func newTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, passphr
 		account.GetSequence(),
 		chainID,
 		"",
-		sdk.NewCoins(sdk.NewCoin("stake", sdk.NewInt(10)))).WithKeybase(keybase) // todo get stake denom
+		sdk.NewCoins(sdk.NewCoin("upokt", sdk.NewInt(10)))).WithKeybase(keybase) // todo get stake denom
 	return
 }
