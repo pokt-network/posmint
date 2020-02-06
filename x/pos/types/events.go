@@ -4,7 +4,7 @@ package types
 const (
 	EventTypeCompleteUnstaking     = "complete_unstaking"
 	EventTypeCreateValidator       = "create_validator"
-	EventTypeStake                 = "stake"
+	EventTypeStake                 = "upokt"
 	EventTypeBeginUnstake          = "begin_unstake"
 	EventTypeUnstake               = "unstake"
 	EventTypeProposerReward        = "proposer_reward"
