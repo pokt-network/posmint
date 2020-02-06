@@ -167,8 +167,8 @@ func TestViewKeeper(t *testing.T) {
 // 	ctx := input.ctx.WithBlockHeader(abci.Header{Time: now})
 // 	endTime := now.Add(24 * time.Hour)
 
-// 	origCoins := sdk.NewCoins(sdk.NewInt64Coin("stake", 100))
-// 	sendCoins := sdk.NewCoins(sdk.NewInt64Coin("stake", 50))
+// 	origCoins := sdk.NewCoins(sdk.NewInt64Coin("upokt", 100))
+// 	sendCoins := sdk.NewCoins(sdk.NewInt64Coin("upokt", 50))
 
 // 	addr1 := sdk.Address([]byte("addr1"))
 // 	addr2 := sdk.Address([]byte("addr2"))
@@ -199,8 +199,8 @@ func TestViewKeeper(t *testing.T) {
 // 	ctx := input.ctx.WithBlockHeader(abci.Header{Time: now})
 // 	endTime := now.Add(24 * time.Hour)
 
-// 	origCoins := sdk.NewCoins(sdk.NewInt64Coin("stake", 100))
-// 	sendCoins := sdk.NewCoins(sdk.NewInt64Coin("stake", 50))
+// 	origCoins := sdk.NewCoins(sdk.NewInt64Coin("upokt", 100))
+// 	sendCoins := sdk.NewCoins(sdk.NewInt64Coin("upokt", 50))
 
 // 	addr1 := sdk.Address([]byte("addr1"))
 // 	addr2 := sdk.Address([]byte("addr2"))

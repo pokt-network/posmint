@@ -22,7 +22,7 @@ var (
 func TestStdTx(t *testing.T) {
 	msgs := []sdk.Msg{sdk.NewTestMsg(addr)}
 	sigs := []StdSignature{}
-	fee := sdk.NewCoins(sdk.NewCoin("stake", sdk.NewInt(5)))
+	fee := sdk.NewCoins(sdk.NewCoin("upokt", sdk.NewInt(5)))
 
 	tx := NewStdTx(msgs, fee, sigs, "")
 	require.Equal(t, msgs, tx.GetMsgs())
