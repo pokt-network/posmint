@@ -28,7 +28,7 @@ const (
 // cacheMultiStore which is for cache-wrapping other MultiStores. It implements
 // the CommitMultiStore interface.
 type Store struct {
-	db           dbm.DB
+	DB           dbm.DB
 	lastCommitID types.CommitID
 	pruningOpts  types.PruningOptions
 	storesParams map[types.StoreKey]storeParams
@@ -46,10 +46,40 @@ var _ types.Queryable = (*Store)(nil)
 // nolint
 func NewStore(db dbm.DB) *Store {
 	return &Store{
-		db:           db,
+		DB:           db,
 		storesParams: make(map[types.StoreKey]storeParams),
 		stores:       make(map[types.StoreKey]types.CommitStore),
 		keysByName:   make(map[string]types.StoreKey),
+	}
+}
+
+func (rs *Store) CopyStore() *Store {
+	newParams := make(map[types.StoreKey]storeParams)
+	for k, v := range rs.storesParams {
+		newParams[k] = v
+	}
+	newStores := make(map[types.StoreKey]types.CommitStore)
+	for k, v := range rs.stores {
+		newStores[k] = v
+	}
+	newKeysByName := make(map[string]types.StoreKey)
+	for k, v := range rs.keysByName {
+		newKeysByName[k] = v
+	}
+	newTraceCtx := map[string]interface{}{}
+	for k, v := range rs.traceContext {
+		newTraceCtx[k] = v
+	}
+	return &Store{
+		DB:           rs.DB,
+		lastCommitID: rs.lastCommitID,
+		pruningOpts:  rs.pruningOpts,
+		storesParams: newParams,
+		stores:       newStores,
+		keysByName:   newKeysByName,
+		lazyLoading:  rs.lazyLoading,
+		traceWriter:  rs.traceWriter,
+		traceContext: newTraceCtx,
 	}
 }
 
@@ -102,7 +132,7 @@ func (rs *Store) GetCommitKVStore(key types.StoreKey) types.CommitKVStore {
 
 // Implements CommitMultiStore.
 func (rs *Store) LoadLatestVersion() error {
-	ver := getLatestVersion(rs.db)
+	ver := getLatestVersion(rs.DB)
 	return rs.LoadVersion(ver)
 }
 
@@ -124,7 +154,7 @@ func (rs *Store) LoadVersion(ver int64) error {
 		return nil
 	}
 
-	cInfo, err := getCommitInfo(rs.db, ver)
+	cInfo, err := getCommitInfo(rs.DB, ver)
 	if err != nil {
 		return err
 	}
@@ -203,7 +233,7 @@ func (rs *Store) Commit() types.CommitID {
 	commitInfo := commitStores(version, rs.stores)
 
 	// Need to update atomically.
-	batch := rs.db.NewBatch()
+	batch := rs.DB.NewBatch()
 	defer batch.Close()
 	setCommitInfo(batch, version, commitInfo)
 	setLatestVersion(batch, version)
@@ -238,7 +268,7 @@ func (rs *Store) CacheMultiStore() types.CacheMultiStore {
 		stores[k] = v
 	}
 
-	return cachemulti.NewStore(rs.db, stores, rs.keysByName, rs.traceWriter, rs.traceContext)
+	return cachemulti.NewStore(rs.DB, stores, rs.keysByName, rs.traceWriter, rs.traceContext)
 }
 
 // CacheMultiStoreWithVersion is analogous to CacheMultiStore except that it
@@ -264,7 +294,7 @@ func (rs *Store) CacheMultiStoreWithVersion(version int64) (types.CacheMultiStor
 		}
 	}
 
-	return cachemulti.NewStore(rs.db, cachedStores, rs.keysByName, rs.traceWriter, rs.traceContext), nil
+	return cachemulti.NewStore(rs.DB, cachedStores, rs.keysByName, rs.traceWriter, rs.traceContext), nil
 }
 
 // Implements MultiStore.
@@ -344,7 +374,7 @@ func (rs *Store) Query(req abci.RequestQuery) abci.ResponseQuery {
 		return errors.ErrInternal("proof is unexpectedly empty; ensure height has not been pruned").QueryResult()
 	}
 
-	commitInfo, errMsg := getCommitInfo(rs.db, res.Height)
+	commitInfo, errMsg := getCommitInfo(rs.DB, res.Height)
 	if errMsg != nil {
 		return errors.ErrInternal(errMsg.Error()).QueryResult()
 	}
@@ -387,7 +417,7 @@ func (rs *Store) loadCommitStoreFromParams(key types.StoreKey, id types.CommitID
 	if params.db != nil {
 		db = dbm.NewPrefixDB(params.db, []byte("s/_/"))
 	} else {
-		db = dbm.NewPrefixDB(rs.db, []byte("s/k:"+params.key.Name()+"/"))
+		db = dbm.NewPrefixDB(rs.DB, []byte("s/k:"+params.key.Name()+"/"))
 	}
 
 	switch params.typ {
@@ -436,7 +466,6 @@ type storeParams struct {
 
 // NOTE: Keep commitInfo a simple immutable struct.
 type commitInfo struct {
-
 	// Version
 	Version int64
 
