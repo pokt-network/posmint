@@ -1,7 +1,6 @@
 package types
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/pokt-network/posmint/crypto"
@@ -167,33 +166,4 @@ func (acc BaseAccount) MarshalYAML() (interface{}, error) {
 	}
 
 	return string(bs), err
-}
-
-// MarshalJSON returns the JSON representation of an account.
-func (acc BaseAccount) MarshalJSON() ([]byte, error) {
-	var bs []byte
-	var err error
-	var pubkey string
-
-	if acc.PubKey != nil {
-		pubkey = acc.PubKey.RawString()
-	}
-
-	bs, err = json.Marshal(struct {
-		Address       sdk.Address
-		Coins         sdk.Coins
-		PubKey        string
-		AccountNumber uint64
-		Sequence      uint64
-	}{
-		Address:       acc.Address,
-		Coins:         acc.Coins,
-		PubKey:        pubkey,
-		AccountNumber: acc.AccountNumber,
-		Sequence:      acc.Sequence,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return bs, err
 }
