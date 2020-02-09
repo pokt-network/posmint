@@ -22,6 +22,7 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 
+	rootMulti "github.com/pokt-network/posmint/store/rootmulti"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto/tmhash"
 	"github.com/tendermint/tendermint/libs/log"
@@ -604,8 +605,9 @@ func handleQueryCustom(app *BaseApp, path []string, req abci.RequestQuery) (res 
 	if req.Height <= 1 && req.Prove {
 		return sdk.ErrInternal("cannot query with proof when height <= 1; please provide a valid height").QueryResult()
 	}
-
-	err := app.cms.LoadVersion(req.Height)
+	// new multistore for copy
+	newMS := app.cms.(*rootMulti.Store).CopyStore()
+	err := newMS.LoadVersion(req.Height)
 	if err != nil {
 		return sdk.ErrInternal(
 			fmt.Sprintf(
@@ -617,7 +619,7 @@ func handleQueryCustom(app *BaseApp, path []string, req abci.RequestQuery) (res 
 
 	// cache wrap the commit-multistore for safety
 	ctx := sdk.NewContext(
-		app.cms, app.checkState.ctx.BlockHeader(), true, app.logger,
+		newMS, app.checkState.ctx.BlockHeader(), true, app.logger,
 	).WithMinGasPrices(app.minGasPrices).WithBlockStore(app.checkState.ctx.BlockStore())
 
 	// Passes the rest of the path as an argument to the querier.
@@ -852,21 +854,15 @@ func (app *BaseApp) getState(mode runTxMode) *state {
 // a cache wrapped multi-store.
 func (app *BaseApp) txContext(ctx sdk.Context, txBytes []byte) (
 	sdk.Context, sdk.MultiStore) { // todo edit here!!!
-
-	ms := ctx.MultiStore() // todo edit here!!!
-	// TODO: https://github.com/pokt-network/posmint/issues/2824
-	msCache := ms
-	if msCache.TracingEnabled() {
-		msCache = msCache.SetTracingContext(
-			sdk.TraceContext(
-				map[string]interface{}{
-					"txHash": fmt.Sprintf("%X", tmhash.Sum(txBytes)),
-				},
-			),
+	newMS := store.MultiStore(app.cms.(store.CommitMultiStore).(*rootMulti.Store).CopyStore())
+	if newMS.TracingEnabled() {
+		newMS = newMS.SetTracingContext(
+			map[string]interface{}{
+				"txHash": fmt.Sprintf("%X", tmhash.Sum(txBytes)),
+			},
 		)
 	}
-
-	return ctx.WithMultiStore(msCache), msCache
+	return ctx.WithMultiStore(newMS), newMS
 }
 
 // txContext returns a new context based off of the provided context with
@@ -968,7 +964,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 		// writes do not happen if aborted/failed.  This may have some
 		// performance benefits, but it'll be more difficult to get right.
 		anteCtx, msCache = app.cacheTxContext(ctx, txBytes)
-		anteCtx.WithMultiStore(msCache.CacheMultiStore())
+
 		newCtx, result, abort := app.anteHandler(anteCtx, tx, mode == runTxModeSimulate)
 		if !newCtx.IsZero() {
 			// At this point, newCtx.MultiStore() is cache-wrapped, or something else
@@ -994,7 +990,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 
 	// Create a new context based off of the existing context with a cache wrapped
 	// multi-store in case message processing fails.
-	runMsgCtx, msCache := app.txContext(ctx, txBytes)
+	runMsgCtx, newMS := app.txContext(ctx, txBytes) // todo edit here!!!
 	result = app.runMsgs(runMsgCtx, msgs, mode)
 	result.GasWanted = gasWanted
 
@@ -1005,7 +1001,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 
 	// only update state if all messages pass
 	if result.IsOK() {
-		msCache.CacheMultiStore().Write() // todo edit here!!!
+		newMS.CacheMultiStore().Write() // todo edit here!!!
 	}
 
 	return result
