@@ -27,6 +27,18 @@ func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteH
 			return newCtx, sdk.ErrInternal("tx must be StdTx").Result(), true
 		}
 
+		//Default Fee
+		defaultFee := sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(100000))
+
+		//Check Tx Amount and Denomination.
+		if !stdTx.Fee.AmountOf(sdk.DefaultStakeDenom).Equal(defaultFee.Amount) {
+			return newCtx, sdk.ErrInsufficientFee(
+				fmt.Sprintf(
+					"insufficient fees; got: %q required: %q", stdTx.Fee, defaultFee,
+				),
+			).Result(), true
+		}
+
 		params := ak.GetParams(ctx)
 		// Ensure that the provided fees meet a minimum threshold for the validator,
 		// if this is a CheckTx. This is only for local mempool purposes, and thus
