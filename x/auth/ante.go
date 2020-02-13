@@ -7,29 +7,24 @@ import (
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/auth/types"
 	"github.com/tendermint/tendermint/crypto"
+	"github.com/tendermint/tendermint/node"
+	"github.com/tendermint/tendermint/rpc/client"
+	tmTypes "github.com/tendermint/tendermint/types"
 )
 
-// NewAnteHandler returns an AnteHandler that checks and increments sequence
-// numbers, checks signatures & account numbers, and deducts fees from the first
-// signer.
+// NewAnteHandler returns an AnteHandler that checks signatures and deducts fees from the first signer.
 func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteHandler {
-	return func(
-		ctx sdk.Context, tx sdk.Tx, simulate bool,
-	) (newCtx sdk.Context, res sdk.Result, abort bool) {
-
+	return func(ctx sdk.Context, tx sdk.Tx, txBz []byte, tmNode *node.Node, simulate bool, ) (newCtx sdk.Context, res sdk.Result, abort bool) {
 		if addr := supplyKeeper.GetModuleAddress(types.FeeCollectorName); addr == nil {
 			panic(fmt.Sprintf("%s module account has not been set", types.FeeCollectorName))
 		}
-
 		// all transactions must be of type auth.StdTx
 		stdTx, ok := tx.(StdTx)
 		if !ok {
 			return newCtx, sdk.ErrInternal("tx must be StdTx").Result(), true
 		}
-
 		//Default Fee
 		defaultFee := sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(100000))
-
 		//Check Tx Amount and Denomination.
 		if !stdTx.Fee.AmountOf(sdk.DefaultStakeDenom).Equal(defaultFee.Amount) {
 			return newCtx, sdk.ErrInsufficientFee(
@@ -38,7 +33,6 @@ func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteH
 				),
 			).Result(), true
 		}
-
 		params := ak.GetParams(ctx)
 		// Ensure that the provided fees meet a minimum threshold for the validator,
 		// if this is a CheckTx. This is only for local mempool purposes, and thus
@@ -49,31 +43,24 @@ func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteH
 				return newCtx, res, true
 			}
 		}
-
 		if res := ValidateSigCount(stdTx, params); !res.IsOK() {
 			return newCtx, res, true
 		}
-
 		if err := tx.ValidateBasic(); err != nil {
 			return newCtx, err.Result(), true
 		}
-
 		if res := ValidateMemo(stdTx, params); !res.IsOK() {
 			return newCtx, res, true
 		}
-
 		// stdSigs contains the sequence number, account number, and signatures.
 		// When simulating, this would just be a 0-length slice.
 		signerAddrs := stdTx.GetSigners()
 		signerAccs := make([]Account, len(signerAddrs))
-		isGenesis := ctx.BlockHeight() == 0
-
 		// fetch first signer, who's going to pay the fees
 		signerAccs[0], res = GetSignerAcc(ctx, ak, signerAddrs[0])
 		if !res.IsOK() {
 			return newCtx, res, true
 		}
-
 		// deduct the fees
 		if !stdTx.Fee.IsZero() {
 			res = DeductFees(supplyKeeper, ctx, signerAccs[0], stdTx.Fee)
@@ -84,11 +71,9 @@ func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteH
 			// reload the account as fees have been deducted
 			signerAccs[0] = ak.GetAccount(ctx, signerAccs[0].GetAddress())
 		}
-
 		// stdSigs contains the sequence number, account number, and signatures.
 		// When simulating, this would just be a 0-length slice.
 		stdSigs := stdTx.GetSignatures()
-
 		for i := 0; i < len(stdSigs); i++ {
 			// skip the fee payer, account is cached and fees were deducted already
 			if i != 0 {
@@ -97,18 +82,23 @@ func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteH
 					return newCtx, res, true
 				}
 			}
-
 			// check signature, return account with incremented nonce
-			signBytes := GetSignBytes(ctx.ChainID(), stdTx, signerAccs[i], isGenesis)
+			signBytes := GetSignBytes(ctx.ChainID(), stdTx)
 			signerAccs[i], res = processSig(signerAccs[i], stdSigs[i], signBytes, simulate)
+			// check for duplicate transaction not in cache todo added
+			// todo when editing tendermint, pass txIndexer so no http
+			c := client.NewHTTP(tmNode.Config().RPC.ListenAddress, "/websocket")
+			_, err := c.Tx(tmTypes.Tx(txBz).Hash(), false)
+			if err == nil {
+				return newCtx,
+					sdk.ErrUnauthorized(fmt.Sprint("transaction with this hash already found, possible replay attack, please try a different entropy")).Result(),
+					true
+			}
 			if !res.IsOK() {
 				return newCtx, res, true
 			}
-
 			ak.SetAccount(ctx, signerAccs[i])
 		}
-
-		// TODO: tx tags (?)
 		return ctx, sdk.Result{}, false // continue...
 	}
 }
@@ -171,9 +161,10 @@ func processSig(acc Account, sig StdSignature, signBytes []byte, simulate bool) 
 		return nil, sdk.ErrUnauthorized("signature verification failed; verify correct account sequence and chain-id").Result()
 	}
 
-	if err := acc.SetSequence(acc.GetSequence() + 1); err != nil {
-		panic(err)
-	}
+	//if err := acc.SetSequence(acc.GetSequence() + 1); err != nil {
+	//	panic(err)
+	//}
+	// TODO removed
 
 	return acc, res
 }
@@ -261,12 +252,8 @@ func EnsureSufficientMempoolFees(ctx sdk.Context, stdFee sdk.Coins) sdk.Result {
 
 // GetSignBytes returns a slice of bytes to sign over for a given transaction
 // and an account.
-func GetSignBytes(chainID string, stdTx StdTx, acc Account, genesis bool) []byte {
-	var accNum uint64
-	if !genesis {
-		accNum = acc.GetAccountNumber()
-	}
+func GetSignBytes(chainID string, stdTx StdTx) []byte {
 	return StdSignBytes(
-		chainID, accNum, acc.GetSequence(), stdTx.Fee, stdTx.Msgs, stdTx.Memo,
+		chainID, stdTx.Entropy, stdTx.Fee, stdTx.Msgs, stdTx.Memo,
 	)
 }

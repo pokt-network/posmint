@@ -11,6 +11,7 @@ import (
 	"github.com/pokt-network/posmint/store"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/auth"
+	authTypes "github.com/pokt-network/posmint/x/auth/types"
 	"github.com/pokt-network/posmint/x/bank/internal/types"
 	"github.com/pokt-network/posmint/x/params"
 )
@@ -50,7 +51,7 @@ func setupTestInput() testInput {
 	)
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
 
-	ak.SetParams(ctx, auth.DefaultParams())
+	ak.SetParams(ctx, authTypes.DefaultParams())
 
 	bankKeeper := NewBaseKeeper(ak, pk.Subspace(types.DefaultParamspace), types.DefaultCodespace, blacklistedAddrs)
 	bankKeeper.SetSendEnabled(ctx, true)

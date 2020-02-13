@@ -16,46 +16,22 @@ const (
 	FeeCollectorName              = types.FeeCollectorName
 	QuerierRoute                  = types.QuerierRoute
 	DefaultParamspace             = types.DefaultParamspace
-	DefaultMaxMemoCharacters      = types.DefaultMaxMemoCharacters
-	DefaultTxSigLimit             = types.DefaultTxSigLimit
-	DefaultTxSizeCostPerByte      = types.DefaultTxSizeCostPerByte
-	DefaultSigVerifyCostED25519   = types.DefaultSigVerifyCostED25519
-	DefaultSigVerifyCostSecp256k1 = types.DefaultSigVerifyCostSecp256k1
 	QueryAccount                  = types.QueryAccount
 )
 
-// Var function aliases
 var (
-	NewBaseAccount            = types.NewBaseAccount
 	ProtoBaseAccount          = types.ProtoBaseAccount
 	NewBaseAccountWithAddress = types.NewBaseAccountWithAddress
 	RegisterCodec             = types.RegisterCodec
 	NewGenesisState           = types.NewGenesisState
 	DefaultGenesisState       = types.DefaultGenesisState
-	ValidateGenesis           = types.ValidateGenesis
-	AddressStoreKey           = types.AddressStoreKey
-	NewParams                 = types.NewParams
-	ParamKeyTable             = types.ParamKeyTable
-	DefaultParams             = types.DefaultParams
-	NewQueryAccountParams     = types.NewQueryAccountParams
-	NewStdTx                  = types.NewStdTx
 	CountSubKeys              = types.CountSubKeys
 	StdSignBytes              = types.StdSignBytes
 	DefaultTxDecoder          = types.DefaultTxDecoder
 	DefaultTxEncoder          = types.DefaultTxEncoder
 	NewTxBuilder              = types.NewTxBuilder
-	MakeSignature             = types.MakeSignature
 	NewAccountRetriever       = types.NewAccountRetriever
-
-	// variable aliases
 	ModuleCdc                 = types.ModuleCdc
-	AddressStoreKeyPrefix     = types.AddressStoreKeyPrefix
-	GlobalAccountNumberKey    = types.GlobalAccountNumberKey
-	KeyMaxMemoCharacters      = types.KeyMaxMemoCharacters
-	KeyTxSigLimit             = types.KeyTxSigLimit
-	KeyTxSizeCostPerByte      = types.KeyTxSizeCostPerByte
-	KeySigVerifyCostED25519   = types.KeySigVerifyCostED25519
-	KeySigVerifyCostSecp256k1 = types.KeySigVerifyCostSecp256k1
 )
 
 // Type exported types
@@ -65,7 +41,6 @@ type (
 	GenesisState       = types.GenesisState
 	Params             = types.Params
 	QueryAccountParams = types.QueryAccountParams
-	StdSignMsg         = types.StdSignMsg
 	StdTx              = types.StdTx
 	StdSignDoc         = types.StdSignDoc
 	StdSignature       = types.StdSignature

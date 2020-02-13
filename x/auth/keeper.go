@@ -55,19 +55,11 @@ func (ak AccountKeeper) NewAccountWithAddress(ctx sdk.Context, addr sdk.Address)
 		// Handle w/ #870
 		panic(err)
 	}
-	err = acc.SetAccountNumber(ak.GetNextAccountNumber(ctx))
-	if err != nil {
-		// Handle w/ #870
-		panic(err)
-	}
 	return acc
 }
 
 // NewAccount creates a new account
 func (ak AccountKeeper) NewAccount(ctx sdk.Context, acc exported.Account) exported.Account {
-	if err := acc.SetAccountNumber(ak.GetNextAccountNumber(ctx)); err != nil {
-		panic(err)
-	}
 	return acc
 }
 
@@ -137,35 +129,6 @@ func (ak AccountKeeper) GetPubKey(ctx sdk.Context, addr sdk.Address) (crypto.Pub
 		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))
 	}
 	return acc.GetPubKey(), nil
-}
-
-// GetSequence Returns the Sequence of the account at address
-func (ak AccountKeeper) GetSequence(ctx sdk.Context, addr sdk.Address) (uint64, sdk.Error) {
-	acc := ak.GetAccount(ctx, addr)
-	if acc == nil {
-		return 0, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))
-	}
-	return acc.GetSequence(), nil
-}
-
-// GetNextAccountNumber Returns and increments the global account number counter
-func (ak AccountKeeper) GetNextAccountNumber(ctx sdk.Context) uint64 {
-	var accNumber uint64
-	store := ctx.KVStore(ak.key)
-	bz := store.Get(types.GlobalAccountNumberKey)
-	if bz == nil {
-		accNumber = 0
-	} else {
-		err := ak.cdc.UnmarshalBinaryLengthPrefixed(bz, &accNumber)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	bz = ak.cdc.MustMarshalBinaryLengthPrefixed(accNumber + 1)
-	store.Set(types.GlobalAccountNumberKey, bz)
-
-	return accNumber
 }
 
 // -----------------------------------------------------------------------------

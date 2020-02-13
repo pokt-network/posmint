@@ -80,14 +80,11 @@ func newTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, passphr
 	cliCtx = util.NewCLIContext(tmNode, fromAddr, passphrase).WithCodec(cdc)
 	accGetter := auth.NewAccountRetriever(cliCtx)
 	err = accGetter.EnsureExists(fromAddr)
-	account, err := accGetter.GetAccount(fromAddr)
 	if err != nil {
 		panic(err)
 	}
 	txBuilder = auth.NewTxBuilder(
 		auth.DefaultTxEncoder(cdc),
-		account.GetAccountNumber(),
-		account.GetSequence(),
 		chainID,
 		"",
 		sdk.NewCoins(sdk.NewCoin("upokt", sdk.NewInt(10)))).WithKeybase(keybase) // todo get stake denom

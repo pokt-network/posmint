@@ -3,7 +3,6 @@ package types
 import (
 	"encoding/json"
 	"fmt"
-
 	"github.com/pokt-network/posmint/codec"
 	posCrypto "github.com/pokt-network/posmint/crypto"
 	sdk "github.com/pokt-network/posmint/types"
@@ -25,14 +24,16 @@ type StdTx struct {
 	Fee        sdk.Coins      `json:"fee" yaml:"fee"`
 	Signatures []StdSignature `json:"signatures" yaml:"signatures"`
 	Memo       string         `json:"memo" yaml:"memo"`
+	Entropy    int64          `json:"entropy" yaml:"entropy"`
 }
 
-func NewStdTx(msgs []sdk.Msg, fee sdk.Coins, sigs []StdSignature, memo string) StdTx {
+func NewStdTx(msgs []sdk.Msg, fee sdk.Coins, sigs []StdSignature, memo string, entropy int64) StdTx {
 	return StdTx{
 		Msgs:       msgs,
 		Fee:        fee,
 		Signatures: sigs,
 		Memo:       memo,
+		Entropy:    entropy,
 	}
 }
 
@@ -103,67 +104,21 @@ func (tx StdTx) GetMemo() string { return tx.Memo }
 // .Empty().
 func (tx StdTx) GetSignatures() []StdSignature { return tx.Signatures }
 
-//__________________________________________________________
-
-// StdFee includes the amount of coins paid in fees and the maximum
-// gas to be used by the transaction. The ratio yields an effective "gasprice",
-// which must be above some miminum to be accepted into the mempool.
-// type StdFee struct {
-// 	Amount sdk.Coins `json:"amount" yaml:"amount"`
-// 	Gas    uint64    `json:"gas" yaml:"gas"`
-// }
-
-// NewStdFee returns a new instance of StdFee
-// func NewStdFee(gas uint64, amount sdk.Coins) StdFee {
-// 	return StdFee{
-// 		Amount: amount,
-// 		Gas:    gas,
-// 	}
-// }
-
-// RawBytes for signing later
-// func (fee StdFee) RawBytes() []byte {
-// 	// normalize. XXX
-// 	// this is a sign of something ugly
-// 	// (in the lcd_test, client side its null,
-// 	// server side its [])
-// 	if len(fee.Amount) == 0 {
-// 		fee.Amount = sdk.NewCoins()
-// 	}
-// 	bz, err := ModuleCdc.MarshalJSON(fee) // TODO
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	return bz
-// }
-
-// GasPrices returns the gas prices for a StdFee.
-//
-// NOTE: The gas prices returned are not the true gas prices that were
-// originally part of the submitted transaction because the fee is computed
-// as fee = ceil(gasWanted * gasPrices).
-// func (fee StdFee) GasPrices() sdk.DecCoins {
-// 	return sdk.NewDecCoins(fee.Amount).QuoDec(sdk.NewDec(int64(fee.Gas)))
-// }
-
-//__________________________________________________________
-
 // StdSignDoc is replay-prevention structure.
 // It includes the result of msg.GetSignBytes(),
 // as well as the ChainID (prevent cross chain replay)
-// and the Sequence numbers for each signature (prevent
+// and the Entropy numbers for each signature (prevent
 // inchain replay and enforce tx ordering per account).
 type StdSignDoc struct {
-	AccountNumber uint64            `json:"account_number" yaml:"account_number"`
-	ChainID       string            `json:"chain_id" yaml:"chain_id"`
-	Fee           json.RawMessage   `json:"fee" yaml:"fee"`
-	Memo          string            `json:"memo" yaml:"memo"`
-	Msgs          []json.RawMessage `json:"msgs" yaml:"msgs"`
-	Sequence      uint64            `json:"sequence" yaml:"sequence"`
+	ChainID string            `json:"chain_id" yaml:"chain_id"`
+	Fee     json.RawMessage   `json:"fee" yaml:"fee"`
+	Memo    string            `json:"memo" yaml:"memo"`
+	Msgs    []json.RawMessage `json:"msgs" yaml:"msgs"`
+	Entropy int64             `json:"entropy" yaml:"entropy"`
 }
 
 // StdSignBytes returns the bytes to sign for a transaction.
-func StdSignBytes(chainID string, accnum uint64, sequence uint64, fee sdk.Coins, msgs []sdk.Msg, memo string) []byte {
+func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msgs []sdk.Msg, memo string) []byte {
 	var msgsBytes []json.RawMessage
 	for _, msg := range msgs {
 		msgsBytes = append(msgsBytes, json.RawMessage(msg.GetSignBytes()))
@@ -174,12 +129,11 @@ func StdSignBytes(chainID string, accnum uint64, sequence uint64, fee sdk.Coins,
 		panic(err)
 	}
 	bz, err := ModuleCdc.MarshalJSON(StdSignDoc{
-		AccountNumber: accnum,
-		ChainID:       chainID,
-		Fee:           json.RawMessage(feeBytes),
-		Memo:          memo,
-		Msgs:          msgsBytes,
-		Sequence:      sequence,
+		ChainID: chainID,
+		Fee:     json.RawMessage(feeBytes),
+		Memo:    memo,
+		Msgs:    msgsBytes,
+		Entropy: entropy,
 	})
 	if err != nil {
 		panic(err)
@@ -190,7 +144,7 @@ func StdSignBytes(chainID string, accnum uint64, sequence uint64, fee sdk.Coins,
 // StdSignature represents a sig
 type StdSignature struct {
 	posCrypto.PublicKey `json:"pub_key" yaml:"pub_key"` // optional
-	Signature           []byte                          `json:"signature" yaml:"signature"`
+	Signature           []byte `json:"signature" yaml:"signature"`
 }
 
 // DefaultTxDecoder logic for standard transaction decoding

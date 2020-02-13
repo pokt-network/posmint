@@ -14,7 +14,6 @@ import (
 
 //-----------------------------------------------------------------------------
 // BaseAccount
-
 var _ exported.Account = (*BaseAccount)(nil)
 
 // BaseAccount - a base account structure.
@@ -22,25 +21,21 @@ var _ exported.Account = (*BaseAccount)(nil)
 // However one doesn't have to use BaseAccount as long as your struct
 // implements Account.
 type BaseAccount struct {
-	Address       sdk.Address      `json:"address" yaml:"address"`
-	Coins         sdk.Coins        `json:"coins" yaml:"coins"`
-	PubKey        crypto.PublicKey `json:"public_key" yaml:"public_key"`
-	AccountNumber uint64           `json:"account_number" yaml:"account_number"`
-	Sequence      uint64           `json:"sequence" yaml:"sequence"`
+	Address sdk.Address      `json:"address" yaml:"address"`
+	Coins   sdk.Coins        `json:"coins" yaml:"coins"`
+	PubKey  crypto.PublicKey `json:"public_key" yaml:"public_key"`
 }
 
 type Accounts []exported.Account
 
 // NewBaseAccount creates a new BaseAccount object
 func NewBaseAccount(address sdk.Address, coins sdk.Coins,
-	pubKey crypto.PublicKey, accountNumber uint64, sequence uint64) *BaseAccount {
+	pubKey crypto.PublicKey) *BaseAccount {
 
 	return &BaseAccount{
-		Address:       address,
-		Coins:         coins,
-		PubKey:        pubKey,
-		AccountNumber: accountNumber,
-		Sequence:      sequence,
+		Address: address,
+		Coins:   coins,
+		PubKey:  pubKey,
 	}
 }
 
@@ -55,10 +50,8 @@ func (acc BaseAccount) String() string {
 	return fmt.Sprintf(`Account:
   Address:       %s
   Pubkey:        %s
-  Coins:         %s
-  AccountNumber: %d
-  Sequence:      %d`,
-		acc.Address, pubkey, acc.Coins, acc.AccountNumber, acc.Sequence,
+  Coins:         %s`,
+		acc.Address, pubkey, acc.Coins,
 	)
 }
 
@@ -110,28 +103,6 @@ func (acc *BaseAccount) SetCoins(coins sdk.Coins) error {
 	return nil
 }
 
-// GetAccountNumber - Implements Account
-func (acc *BaseAccount) GetAccountNumber() uint64 {
-	return acc.AccountNumber
-}
-
-// SetAccountNumber - Implements Account
-func (acc *BaseAccount) SetAccountNumber(accNumber uint64) error {
-	acc.AccountNumber = accNumber
-	return nil
-}
-
-// GetSequence - Implements sdk.Account.
-func (acc *BaseAccount) GetSequence() uint64 {
-	return acc.Sequence
-}
-
-// SetSequence - Implements sdk.Account.
-func (acc *BaseAccount) SetSequence(seq uint64) error {
-	acc.Sequence = seq
-	return nil
-}
-
 // SpendableCoins returns the total set of spendable coins. For a base account,
 // this is simply the base coins.
 func (acc *BaseAccount) SpendableCoins(_ time.Time) sdk.Coins {
@@ -148,22 +119,20 @@ func (acc BaseAccount) MarshalYAML() (interface{}, error) {
 		pubkey = acc.PubKey.RawString()
 	}
 
-	bs, err = yaml.Marshal(struct {
-		Address       sdk.Address
-		Coins         sdk.Coins
-		PubKey        string
-		AccountNumber uint64
-		Sequence      uint64
-	}{
-		Address:       acc.Address,
-		Coins:         acc.Coins,
-		PubKey:        pubkey,
-		AccountNumber: acc.AccountNumber,
-		Sequence:      acc.Sequence,
+	bs, err = yaml.Marshal(marshalBaseAccount{
+		Address: acc.Address,
+		Coins:   acc.Coins,
+		PubKey:  pubkey,
 	})
 	if err != nil {
 		return nil, err
 	}
 
 	return string(bs), err
+}
+
+type marshalBaseAccount struct {
+	Address sdk.Address
+	Coins   sdk.Coins
+	PubKey  string
 }
