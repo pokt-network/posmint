@@ -103,7 +103,6 @@ func createTestAccs(ctx sdk.Context, numAccs int, initialCoins sdk.Coins, ak *au
 		acc := auth.NewBaseAccountWithAddress(addr)
 		acc.Coins = initialCoins
 		acc.PubKey = crypto.PubKeyToPublicKey(pubKey)
-		acc.AccountNumber = uint64(i)
 		ak.SetAccount(ctx, &acc)
 	}
 	return

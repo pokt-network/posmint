@@ -20,12 +20,6 @@ type Account interface {
 	GetPubKey() crypto.PublicKey // can return nil.
 	SetPubKey(crypto.PublicKey) error
 
-	GetAccountNumber() uint64
-	SetAccountNumber(uint64) error
-
-	GetSequence() uint64
-	SetSequence(uint64) error
-
 	GetCoins() sdk.Coins
 	SetCoins(sdk.Coins) error
 

@@ -101,16 +101,12 @@ func (ma ModuleAccount) MarshalYAML() (interface{}, error) {
 		Address       sdk.Address
 		Coins         sdk.Coins
 		PubKey        string
-		AccountNumber uint64
-		Sequence      uint64
 		Name          string
 		Permissions   []string
 	}{
 		Address:       ma.Address,
 		Coins:         ma.Coins,
 		PubKey:        "",
-		AccountNumber: ma.AccountNumber,
-		Sequence:      ma.Sequence,
 		Name:          ma.Name,
 		Permissions:   ma.Permissions,
 	})

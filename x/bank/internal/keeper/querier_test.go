@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"github.com/pokt-network/posmint/crypto"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -9,7 +10,6 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	sdk "github.com/pokt-network/posmint/types"
-	authtypes "github.com/pokt-network/posmint/x/auth/types"
 	"github.com/pokt-network/posmint/x/bank/internal/types"
 )
 
@@ -26,7 +26,7 @@ func TestBalances(t *testing.T) {
 	require.NotNil(t, err)
 	require.Nil(t, res)
 
-	_, _, addr := authtypes.KeyTestPubAddr()
+	addr := sdk.Address(crypto.GenerateEd25519PrivKey().PublicKey().Address())
 	req.Data = input.cdc.MustMarshalJSON(types.NewQueryBalanceParams(addr))
 	res, err = querier(input.ctx, []string{"balances"}, req)
 	require.Nil(t, err) // the account does not exist, no error returned anyway

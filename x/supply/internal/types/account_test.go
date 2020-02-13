@@ -22,8 +22,6 @@ func TestModuleAccountMarshalYAML(t *testing.T) {
   address: %s
   coins: []
   pubkey: ""
-  accountnumber: 0
-  sequence: 0
   name: %s
   permissions:
   - %s

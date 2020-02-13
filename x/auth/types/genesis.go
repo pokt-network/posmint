@@ -29,12 +29,6 @@ func ValidateGenesis(data GenesisState) error {
 	if data.Params.TxSigLimit == 0 {
 		return fmt.Errorf("invalid tx signature limit: %d", data.Params.TxSigLimit)
 	}
-	if data.Params.SigVerifyCostED25519 == 0 {
-		return fmt.Errorf("invalid ED25519 signature verification cost: %d", data.Params.SigVerifyCostED25519)
-	}
-	if data.Params.SigVerifyCostSecp256k1 == 0 {
-		return fmt.Errorf("invalid SECK256k1 signature verification cost: %d", data.Params.SigVerifyCostSecp256k1)
-	}
 	if data.Params.MaxMemoCharacters == 0 {
 		return fmt.Errorf("invalid max memo characters: %d", data.Params.MaxMemoCharacters)
 	}
