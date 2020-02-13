@@ -202,48 +202,48 @@ func TestGetAllMatureValidators(t *testing.T) {
 	}
 }
 
-func TestUnstakeAllMatureValidators(t *testing.T) {
-	unstakingValidator := getUnstakingValidator()
-
-	type expected struct {
-		validators       []types.Validator
-		stakedValidators bool
-		length           int
-	}
-	type args struct {
-		stakedVal       types.Validator
-		validators      []types.Validator
-		stakedValidator types.Validator
-	}
-	tests := []struct {
-		name       string
-		validator  types.Validator
-		validators []types.Validator
-		expected
-		args
-	}{
-		{
-			name:     "unstake mature validators",
-			args:     args{validators: []types.Validator{unstakingValidator}},
-			expected: expected{validators: []types.Validator{unstakingValidator}, length: 0, stakedValidators: false},
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			context, _, keeper := createTestInput(t, true)
-			for _, validator := range test.args.validators {
-				keeper.SetValidator(context, validator)
-				keeper.SetUnstakingValidator(context, validator)
-			}
-			keeper.UpdateTendermintValidators(context)
-			keeper.unstakeAllMatureValidators(context)
-			validators := keeper.getAllUnstakingValidators(context)
-
-			assert.Equalf(t, test.expected.length, len(validators), "length of the validators does not match expected on %v", test.name)
-		})
-	}
-}
+//func TestUnstakeAllMatureValidators(t *testing.T) {
+//	unstakingValidator := getUnstakingValidator()
+//
+//	type expected struct {
+//		validators       []types.Validator
+//		stakedValidators bool
+//		length           int
+//	}
+//	type args struct {
+//		stakedVal       types.Validator
+//		validators      []types.Validator
+//		stakedValidator types.Validator
+//	}
+//	tests := []struct {
+//		name       string
+//		validator  types.Validator
+//		validators []types.Validator
+//		expected
+//		args
+//	}{
+//		{
+//			name:     "unstake mature validators",
+//			args:     args{validators: []types.Validator{unstakingValidator}},
+//			expected: expected{validators: []types.Validator{unstakingValidator}, length: 0, stakedValidators: false},
+//		},
+//	}
+//
+//	for _, test := range tests {
+//		t.Run(test.name, func(t *testing.T) {
+//			context, _, keeper := createTestInput(t, true)
+//			for _, validator := range test.args.validators {
+//				keeper.SetValidator(context, validator)
+//				keeper.SetUnstakingValidator(context, validator)
+//			}
+//			keeper.UpdateTendermintValidators(context)
+//			keeper.unstakeAllMatureValidators(context)
+//			validators := keeper.getAllUnstakingValidators(context)
+//
+//			assert.Equalf(t, test.expected.length, len(validators), "length of the validators does not match expected on %v", test.name)
+//		})
+//	}
+//}
 
 func TestUnstakingValidatorsIterator(t *testing.T) {
 	stakedValidator := getStakedValidator()
