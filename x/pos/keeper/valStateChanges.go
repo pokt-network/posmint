@@ -102,7 +102,7 @@ func (k Keeper) StakeValidator(ctx sdk.Context, validator types.Validator, amoun
 	// send the coins from address to staked module account
 	k.coinsFromUnstakedToStaked(ctx, validator, amount)
 	// add coins to the staked field
-	validator.AddStakedTokens(amount)
+	validator = validator.AddStakedTokens(amount)
 	// set the status to staked
 	validator = validator.UpdateStatus(sdk.Staked)
 	// save in the validator store
@@ -175,10 +175,10 @@ func (k Keeper) FinishUnstakingValidator(ctx sdk.Context, validator types.Valida
 	k.deleteUnstakingValidator(ctx, validator)
 	// amount unstaked = stakedTokens
 	amount := sdk.NewInt(validator.StakedTokens.Int64())
-	// removed the staked tokens field from validator structure
-	validator = validator.RemoveStakedTokens(amount)
 	// send the tokens from staking module account to validator account
 	k.coinsFromStakedToUnstaked(ctx, validator)
+	// removed the staked tokens field from validator structure
+	validator = validator.RemoveStakedTokens(amount)
 	// update the status to unstaked
 	validator = validator.UpdateStatus(sdk.Unstaked)
 	// update the validator in the main store
