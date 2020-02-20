@@ -765,7 +765,7 @@ func validateBasicTxMsgs(msgs []sdk.Msg) sdk.Error {
 }
 
 // retrieve the context for the tx w/ txBytes and other memoized values.
-func (app *BaseApp) getContextForTx(mode runTxMode, txBytes []byte) (ctx sdk.Context) {
+func (app *BaseApp) getContextForTx(mode runTxMode, txBytes []byte) (ctx sdk.Ctx) {
 	ctx = app.getState(mode).ctx.
 		WithTxBytes(txBytes).
 		WithVoteInfos(app.voteInfos).
@@ -780,7 +780,7 @@ func (app *BaseApp) getContextForTx(mode runTxMode, txBytes []byte) (ctx sdk.Con
 
 // runMsgs iterates through all the messages and executes them.
 // nolint: gocyclo
-func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (result sdk.Result) {
+func (app *BaseApp) runMsgs(ctx sdk.Ctx, msgs []sdk.Msg, mode runTxMode) (result sdk.Result) {
 	msgLogs := make(sdk.ABCIMessageLogs, 0, len(msgs))
 
 	var (
@@ -852,7 +852,7 @@ func (app *BaseApp) getState(mode runTxMode) *state {
 
 // txContext returns a new context based off of the provided context with
 // a cache wrapped multi-store.
-func (app *BaseApp) txContext(ctx sdk.Context, txBytes []byte) (
+func (app *BaseApp) txContext(ctx sdk.Ctx, txBytes []byte) (
 	sdk.Context, sdk.MultiStore) { // todo edit here!!!
 	newMS := store.MultiStore(app.cms.(store.CommitMultiStore).(*rootMulti.Store).CopyStore())
 	if newMS.TracingEnabled() {
@@ -867,7 +867,7 @@ func (app *BaseApp) txContext(ctx sdk.Context, txBytes []byte) (
 
 // txContext returns a new context based off of the provided context with
 // a cache wrapped multi-store.
-func (app *BaseApp) cacheTxContext(ctx sdk.Context, txBytes []byte) (
+func (app *BaseApp) cacheTxContext(ctx sdk.Ctx, txBytes []byte) (
 	sdk.Context, sdk.CacheMultiStore) {
 
 	ms := ctx.MultiStore()

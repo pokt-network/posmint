@@ -86,8 +86,8 @@ func (bm BasicManager) ValidateGenesis(genesis map[string]json.RawMessage) error
 // AppModuleGenesis is the standard form for an application module genesis functions
 type AppModuleGenesis interface {
 	AppModuleBasic
-	InitGenesis(sdk.Context, json.RawMessage) []abci.ValidatorUpdate
-	ExportGenesis(sdk.Context) json.RawMessage
+	InitGenesis(sdk.Ctx, json.RawMessage) []abci.ValidatorUpdate
+	ExportGenesis(sdk.Ctx) json.RawMessage
 }
 
 // AppModule is the standard form for an application module
@@ -103,8 +103,8 @@ type AppModule interface {
 	QuerierRoute() string
 	NewQuerierHandler() sdk.Querier
 
-	BeginBlock(sdk.Context, abci.RequestBeginBlock)
-	EndBlock(sdk.Context, abci.RequestEndBlock) []abci.ValidatorUpdate
+	BeginBlock(sdk.Ctx, abci.RequestBeginBlock)
+	EndBlock(sdk.Ctx, abci.RequestEndBlock) []abci.ValidatorUpdate
 }
 
 //___________________________
@@ -136,10 +136,10 @@ func (GenesisOnlyAppModule) QuerierRoute() string { return "" }
 func (gam GenesisOnlyAppModule) NewQuerierHandler() sdk.Querier { return nil }
 
 // module begin-block
-func (gam GenesisOnlyAppModule) BeginBlock(ctx sdk.Context, req abci.RequestBeginBlock) {}
+func (gam GenesisOnlyAppModule) BeginBlock(ctx sdk.Ctx, req abci.RequestBeginBlock) {}
 
 // module end-block
-func (GenesisOnlyAppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+func (GenesisOnlyAppModule) EndBlock(_ sdk.Ctx, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
 }
 
@@ -222,7 +222,7 @@ func (m *Manager) RegisterRoutes(router sdk.Router, queryRouter sdk.QueryRouter)
 }
 
 // perform init genesis functionality for modules
-func (m *Manager) InitGenesis(ctx sdk.Context, genesisData map[string]json.RawMessage) abci.ResponseInitChain {
+func (m *Manager) InitGenesis(ctx sdk.Ctx, genesisData map[string]json.RawMessage) abci.ResponseInitChain {
 	var validatorUpdates []abci.ValidatorUpdate
 	for _, moduleName := range m.OrderInitGenesis {
 		var moduleValUpdates []abci.ValidatorUpdate
@@ -247,7 +247,7 @@ func (m *Manager) InitGenesis(ctx sdk.Context, genesisData map[string]json.RawMe
 }
 
 // perform export genesis functionality for modules
-func (m *Manager) ExportGenesis(ctx sdk.Context) map[string]json.RawMessage {
+func (m *Manager) ExportGenesis(ctx sdk.Ctx) map[string]json.RawMessage {
 	genesisData := make(map[string]json.RawMessage)
 	for _, moduleName := range m.OrderExportGenesis {
 		genesisData[moduleName] = m.Modules[moduleName].ExportGenesis(ctx)
@@ -258,7 +258,7 @@ func (m *Manager) ExportGenesis(ctx sdk.Context) map[string]json.RawMessage {
 // BeginBlock performs begin block functionality for all modules. It creates a
 // child context with an event manager to aggregate events emitted from all
 // modules.
-func (m *Manager) BeginBlock(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
+func (m *Manager) BeginBlock(ctx sdk.Ctx, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
 	ctx = ctx.WithEventManager(sdk.NewEventManager())
 
 	for _, moduleName := range m.OrderBeginBlockers {
@@ -273,7 +273,7 @@ func (m *Manager) BeginBlock(ctx sdk.Context, req abci.RequestBeginBlock) abci.R
 // EndBlock performs end block functionality for all modules. It creates a
 // child context with an event manager to aggregate events emitted from all
 // modules.
-func (m *Manager) EndBlock(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
+func (m *Manager) EndBlock(ctx sdk.Ctx, req abci.RequestEndBlock) abci.ResponseEndBlock {
 	ctx = ctx.WithEventManager(sdk.NewEventManager())
 	validatorUpdates := []abci.ValidatorUpdate{}
 

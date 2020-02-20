@@ -6,15 +6,15 @@ import (
 	"time"
 )
 
-func (k Keeper) GetLatestBlockID(ctx sdk.Context) abci.BlockID {
+func (k Keeper) GetLatestBlockID(ctx sdk.Ctx) abci.BlockID {
 	header := ctx.BlockHeader()
 	return header.GetLastBlockId()
 }
 
-func (k Keeper) GetBlockHeight(ctx sdk.Context) int64 {
+func (k Keeper) GetBlockHeight(ctx sdk.Ctx) int64 {
 	return ctx.BlockHeight()
 }
 
-func (k Keeper) GetBlockTime(ctx sdk.Context) time.Time {
+func (k Keeper) GetBlockTime(ctx sdk.Ctx) time.Time {
 	return ctx.BlockTime()
 }

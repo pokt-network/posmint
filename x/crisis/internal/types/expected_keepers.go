@@ -6,5 +6,5 @@ import (
 
 // SupplyKeeper defines the expected supply keeper (noalias)
 type SupplyKeeper interface {
-	SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.Address, recipientModule string, amt sdk.Coins) sdk.Error
+	SendCoinsFromAccountToModule(ctx sdk.Ctx, senderAddr sdk.Address, recipientModule string, amt sdk.Coins) sdk.Error
 }

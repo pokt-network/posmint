@@ -7,7 +7,7 @@ import (
 )
 
 // set staked validator
-func (k Keeper) SetStakedValidator(ctx sdk.Context, validator types.Validator) {
+func (k Keeper) SetStakedValidator(ctx sdk.Ctx, validator types.Validator) {
 	if validator.Jailed {
 		return // jailed validators are not kept in the power index
 	}
@@ -16,13 +16,13 @@ func (k Keeper) SetStakedValidator(ctx sdk.Context, validator types.Validator) {
 }
 
 // delete validator from staked set
-func (k Keeper) deleteValidatorFromStakingSet(ctx sdk.Context, validator types.Validator) {
+func (k Keeper) deleteValidatorFromStakingSet(ctx sdk.Ctx, validator types.Validator) {
 	store := ctx.KVStore(k.storeKey)
 	store.Delete(types.KeyForValidatorInStakingSet(validator))
 }
 
 // Update the staked tokens of an existing validator, update the validators power index key
-func (k Keeper) removeValidatorTokens(ctx sdk.Context, v types.Validator, tokensToRemove sdk.Int) types.Validator {
+func (k Keeper) removeValidatorTokens(ctx sdk.Ctx, v types.Validator, tokensToRemove sdk.Int) types.Validator {
 	k.deleteValidatorFromStakingSet(ctx, v)
 	v = v.RemoveStakedTokens(tokensToRemove)
 	k.SetValidator(ctx, v)
@@ -31,7 +31,7 @@ func (k Keeper) removeValidatorTokens(ctx sdk.Context, v types.Validator, tokens
 }
 
 // get the current staked validators sorted by power-rank
-func (k Keeper) getStakedValidators(ctx sdk.Context) types.Validators {
+func (k Keeper) getStakedValidators(ctx sdk.Ctx) types.Validators {
 	maxValidators := k.MaxValidators(ctx)
 	validators := make([]types.Validator, maxValidators)
 	iterator := k.stakedValsIterator(ctx)
@@ -49,14 +49,14 @@ func (k Keeper) getStakedValidators(ctx sdk.Context) types.Validators {
 }
 
 // returns an iterator for the current staked validators
-func (k Keeper) stakedValsIterator(ctx sdk.Context) sdk.Iterator {
+func (k Keeper) stakedValsIterator(ctx sdk.Ctx) sdk.Iterator {
 	store := ctx.KVStore(k.storeKey)
 	return sdk.KVStoreReversePrefixIterator(store, types.StakedValidatorsKey)
 }
 
 // iterate through the staked validator set and perform the provided function
 func (k Keeper) IterateAndExecuteOverStakedVals(
-	ctx sdk.Context, fn func(index int64, validator exported.ValidatorI) (stop bool)) {
+	ctx sdk.Ctx, fn func(index int64, validator exported.ValidatorI) (stop bool)) {
 	store := ctx.KVStore(k.storeKey)
 	maxValidators := k.MaxValidators(ctx)
 	iterator := sdk.KVStoreReversePrefixIterator(store, types.StakedValidatorsKey)

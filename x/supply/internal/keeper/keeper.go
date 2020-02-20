@@ -38,12 +38,12 @@ func NewKeeper(cdc *codec.Codec, key sdk.StoreKey, ak types.AccountKeeper, bk ty
 }
 
 // Logger returns a module-specific logger.
-func (k Keeper) Logger(ctx sdk.Context) log.Logger {
+func (k Keeper) Logger(ctx sdk.Ctx) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
 // GetSupply retrieves the Supply from store
-func (k Keeper) GetSupply(ctx sdk.Context) (supply exported.SupplyI) {
+func (k Keeper) GetSupply(ctx sdk.Ctx) (supply exported.SupplyI) {
 	store := ctx.KVStore(k.storeKey)
 	b := store.Get(SupplyKey)
 	if b == nil {
@@ -54,7 +54,7 @@ func (k Keeper) GetSupply(ctx sdk.Context) (supply exported.SupplyI) {
 }
 
 // SetSupply sets the Supply to store
-func (k Keeper) SetSupply(ctx sdk.Context, supply exported.SupplyI) {
+func (k Keeper) SetSupply(ctx sdk.Ctx, supply exported.SupplyI) {
 	store := ctx.KVStore(k.storeKey)
 	b := k.cdc.MustMarshalBinaryLengthPrefixed(supply)
 	store.Set(SupplyKey, b)

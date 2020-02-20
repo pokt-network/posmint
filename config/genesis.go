@@ -12,7 +12,7 @@ import (
 type GenesisState map[string]json.RawMessage
 
 //  expected usage
-//  func (app *nameServiceApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
+//  func (app *nameServiceApp) InitChainer(ctx sdk.Ctx, req abci.RequestInitChain) abci.ResponseInitChain {
 //	genesisState := GetGensisFromFile(app.cdc, "genesis.go")
 //	return app.mm.InitGenesis(ctx, genesisState)
 //}

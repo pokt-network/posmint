@@ -8,7 +8,7 @@ import (
 	sdk "github.com/pokt-network/posmint/types"
 )
 
-var testHandler = func(_ sdk.Context, _ sdk.Msg) sdk.Result {
+var testHandler = func(_ sdk.Ctx, _ sdk.Msg) sdk.Result {
 	return sdk.Result{}
 }
 

@@ -7,12 +7,12 @@ import (
 )
 
 // new crisis genesis
-func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, data types.GenesisState) {
+func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, data types.GenesisState) {
 	keeper.SetConstantFee(ctx, data.ConstantFee)
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper.
-func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) types.GenesisState {
+func ExportGenesis(ctx sdk.Ctx, keeper keeper.Keeper) types.GenesisState {
 	constantFee := keeper.GetConstantFee(ctx)
 	return types.NewGenesisState(constantFee)
 }

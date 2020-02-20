@@ -2,7 +2,6 @@ package types
 
 import (
 	"encoding/binary"
-	"fmt"
 	"github.com/pokt-network/posmint/crypto"
 	"github.com/pokt-network/posmint/types"
 	"github.com/tendermint/tendermint/crypto/ed25519"
@@ -67,9 +66,9 @@ func TestGetValMissedBlockKey(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fmt.Print(ca.String())
 			if got := GetValMissedBlockKey(tt.args.v, tt.args.i); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetValMissedBlockKey() = %v, want %v", got, tt.want)
+				t.FailNow()
 			}
 		})
 	}

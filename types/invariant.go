@@ -6,7 +6,7 @@ import "fmt"
 // The invariant returns a descriptive message about what happened
 // and a boolean indicating whether the invariant has been broken.
 // The simulator will then halt and print the logs.
-type Invariant func(ctx Context) (string, bool)
+type Invariant func(ctx Ctx) (string, bool)
 
 // Invariants defines a group of invariants
 type Invariants []Invariant

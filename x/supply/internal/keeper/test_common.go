@@ -95,7 +95,7 @@ func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64)
 }
 
 // nolint: unparam deadcode unused
-func createTestAccs(ctx sdk.Context, numAccs int, initialCoins sdk.Coins, ak *auth.AccountKeeper) (accs []auth.Account) {
+func createTestAccs(ctx sdk.Ctx, numAccs int, initialCoins sdk.Coins, ak *auth.AccountKeeper) (accs []auth.Account) {
 	for i := 0; i < numAccs; i++ {
 		privKey := crypto.Secp256k1PrivateKey{}.GenPrivateKey()
 		pubKey := privKey.PubKey()

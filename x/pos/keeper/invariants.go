@@ -20,7 +20,7 @@ func RegisterInvariants(ir sdk.InvariantRegistry, k Keeper) {
 // ModuleAccountInvariants checks that the staked ModuleAccounts pools
 // reflects the tokens actively staked and not staked
 func ModuleAccountInvariants(k Keeper) sdk.Invariant {
-	return func(ctx sdk.Context) (string, bool) {
+	return func(ctx sdk.Ctx) (string, bool) {
 		staked := sdk.ZeroInt()
 		notStaked := sdk.ZeroInt()
 		stakedPool := k.GetStakedTokens(ctx)
@@ -57,7 +57,7 @@ func ModuleAccountInvariants(k Keeper) sdk.Invariant {
 
 // NonNegativePowerInvariant checks that all stored validators have >= 0 power.
 func NonNegativePowerInvariant(k Keeper) sdk.Invariant {
-	return func(ctx sdk.Context) (string, bool) {
+	return func(ctx sdk.Ctx) (string, bool) {
 		var msg string
 		var broken bool
 

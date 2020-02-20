@@ -69,14 +69,14 @@ func (s Subspace) WithKeyTable(table KeyTable) Subspace {
 }
 
 // Returns a KVStore identical with ctx.KVStore(s.key).Prefix()
-func (s Subspace) kvStore(ctx sdk.Context) sdk.KVStore {
+func (s Subspace) kvStore(ctx sdk.Ctx) sdk.KVStore {
 	// append here is safe, appends within a function won't cause
 	// weird side effects when its singlethreaded
 	return prefix.NewStore(ctx.KVStore(s.key), append(s.name, '/'))
 }
 
 // Returns a transient store for modification
-func (s Subspace) transientStore(ctx sdk.Context) sdk.KVStore {
+func (s Subspace) transientStore(ctx sdk.Ctx) sdk.KVStore {
 	// append here is safe, appends within a function won't cause
 	// weird side effects when its singlethreaded
 	return prefix.NewStore(ctx.TransientStore(s.tkey), append(s.name, '/'))
@@ -91,7 +91,7 @@ func concatKeys(key, subkey []byte) (res []byte) {
 }
 
 // Get parameter from store
-func (s Subspace) Get(ctx sdk.Context, key []byte, ptr interface{}) {
+func (s Subspace) Get(ctx sdk.Ctx, key []byte, ptr interface{}) {
 	store := s.kvStore(ctx)
 	bz := store.Get(key)
 	err := s.cdc.UnmarshalJSON(bz, ptr)
@@ -101,7 +101,7 @@ func (s Subspace) Get(ctx sdk.Context, key []byte, ptr interface{}) {
 }
 
 // GetIfExists do not modify ptr if the stored parameter is nil
-func (s Subspace) GetIfExists(ctx sdk.Context, key []byte, ptr interface{}) {
+func (s Subspace) GetIfExists(ctx sdk.Ctx, key []byte, ptr interface{}) {
 	store := s.kvStore(ctx)
 	bz := store.Get(key)
 	if bz == nil {
@@ -114,30 +114,30 @@ func (s Subspace) GetIfExists(ctx sdk.Context, key []byte, ptr interface{}) {
 }
 
 // GetWithSubkey returns a parameter with a given key and a subkey.
-func (s Subspace) GetWithSubkey(ctx sdk.Context, key, subkey []byte, ptr interface{}) {
+func (s Subspace) GetWithSubkey(ctx sdk.Ctx, key, subkey []byte, ptr interface{}) {
 	s.Get(ctx, concatKeys(key, subkey), ptr)
 }
 
 // GetWithSubkeyIfExists  returns a parameter with a given key and a subkey but does not
 // modify ptr if the stored parameter is nil.
-func (s Subspace) GetWithSubkeyIfExists(ctx sdk.Context, key, subkey []byte, ptr interface{}) {
+func (s Subspace) GetWithSubkeyIfExists(ctx sdk.Ctx, key, subkey []byte, ptr interface{}) {
 	s.GetIfExists(ctx, concatKeys(key, subkey), ptr)
 }
 
 // Get raw bytes of parameter from store
-func (s Subspace) GetRaw(ctx sdk.Context, key []byte) []byte {
+func (s Subspace) GetRaw(ctx sdk.Ctx, key []byte) []byte {
 	store := s.kvStore(ctx)
 	return store.Get(key)
 }
 
 // Check if the parameter is set in the store
-func (s Subspace) Has(ctx sdk.Context, key []byte) bool {
+func (s Subspace) Has(ctx sdk.Ctx, key []byte) bool {
 	store := s.kvStore(ctx)
 	return store.Has(key)
 }
 
 // Returns true if the parameter is set in the block
-func (s Subspace) Modified(ctx sdk.Context, key []byte) bool {
+func (s Subspace) Modified(ctx sdk.Ctx, key []byte) bool {
 	tstore := s.transientStore(ctx)
 	return tstore.Has(key)
 }
@@ -161,7 +161,7 @@ func (s Subspace) checkType(store sdk.KVStore, key []byte, param interface{}) {
 
 // Set stores the parameter. It returns error if stored parameter has different type from input.
 // It also set to the transient store to record change.
-func (s Subspace) Set(ctx sdk.Context, key []byte, param interface{}) {
+func (s Subspace) Set(ctx sdk.Ctx, key []byte, param interface{}) {
 	store := s.kvStore(ctx)
 
 	s.checkType(store, key, param)
@@ -180,7 +180,7 @@ func (s Subspace) Set(ctx sdk.Context, key []byte, param interface{}) {
 // Update stores raw parameter bytes. It returns error if the stored parameter
 // has a different type from the input. It also sets to the transient store to
 // record change.
-func (s Subspace) Update(ctx sdk.Context, key []byte, param []byte) error {
+func (s Subspace) Update(ctx sdk.Ctx, key []byte, param []byte) error {
 	attr, ok := s.table.m[string(key)]
 	if !ok {
 		panic("Parameter not registered")
@@ -203,7 +203,7 @@ func (s Subspace) Update(ctx sdk.Context, key []byte, param []byte) error {
 
 // SetWithSubkey set a parameter with a key and subkey
 // Checks parameter type only over the key
-func (s Subspace) SetWithSubkey(ctx sdk.Context, key []byte, subkey []byte, param interface{}) {
+func (s Subspace) SetWithSubkey(ctx sdk.Ctx, key []byte, subkey []byte, param interface{}) {
 	store := s.kvStore(ctx)
 
 	s.checkType(store, key, param)
@@ -222,7 +222,7 @@ func (s Subspace) SetWithSubkey(ctx sdk.Context, key []byte, subkey []byte, para
 
 // UpdateWithSubkey stores raw parameter bytes  with a key and subkey. It checks
 // the parameter type only over the key.
-func (s Subspace) UpdateWithSubkey(ctx sdk.Context, key []byte, subkey []byte, param []byte) error {
+func (s Subspace) UpdateWithSubkey(ctx sdk.Ctx, key []byte, subkey []byte, param []byte) error {
 	concatkey := concatKeys(key, subkey)
 
 	attr, ok := s.table.m[string(concatkey)]
@@ -246,14 +246,14 @@ func (s Subspace) UpdateWithSubkey(ctx sdk.Context, key []byte, subkey []byte, p
 }
 
 // Get to ParamSet
-func (s Subspace) GetParamSet(ctx sdk.Context, ps ParamSet) {
+func (s Subspace) GetParamSet(ctx sdk.Ctx, ps ParamSet) {
 	for _, pair := range ps.ParamSetPairs() {
 		s.Get(ctx, pair.Key, pair.Value)
 	}
 }
 
 // Set from ParamSet
-func (s Subspace) SetParamSet(ctx sdk.Context, ps ParamSet) {
+func (s Subspace) SetParamSet(ctx sdk.Ctx, ps ParamSet) {
 	for _, pair := range ps.ParamSetPairs() {
 		// pair.Field is a pointer to the field, so indirecting the ptr.
 		// go-amino automatically handles it but just for sure,
@@ -275,22 +275,22 @@ type ReadOnlySubspace struct {
 }
 
 // Exposes Get
-func (ros ReadOnlySubspace) Get(ctx sdk.Context, key []byte, ptr interface{}) {
+func (ros ReadOnlySubspace) Get(ctx sdk.Ctx, key []byte, ptr interface{}) {
 	ros.s.Get(ctx, key, ptr)
 }
 
 // Exposes GetRaw
-func (ros ReadOnlySubspace) GetRaw(ctx sdk.Context, key []byte) []byte {
+func (ros ReadOnlySubspace) GetRaw(ctx sdk.Ctx, key []byte) []byte {
 	return ros.s.GetRaw(ctx, key)
 }
 
 // Exposes Has
-func (ros ReadOnlySubspace) Has(ctx sdk.Context, key []byte) bool {
+func (ros ReadOnlySubspace) Has(ctx sdk.Ctx, key []byte) bool {
 	return ros.s.Has(ctx, key)
 }
 
 // Exposes Modified
-func (ros ReadOnlySubspace) Modified(ctx sdk.Context, key []byte) bool {
+func (ros ReadOnlySubspace) Modified(ctx sdk.Ctx, key []byte) bool {
 	return ros.s.Modified(ctx, key)
 }
 

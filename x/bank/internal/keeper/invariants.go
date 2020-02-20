@@ -15,7 +15,7 @@ func RegisterInvariants(ir sdk.InvariantRegistry, ak types.AccountKeeper) {
 
 // NonnegativeBalanceInvariant checks that all accounts in the application have non-negative balances
 func NonnegativeBalanceInvariant(ak types.AccountKeeper) sdk.Invariant {
-	return func(ctx sdk.Context) (string, bool) {
+	return func(ctx sdk.Ctx) (string, bool) {
 		var msg string
 		var count int
 

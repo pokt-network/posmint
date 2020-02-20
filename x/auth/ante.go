@@ -14,7 +14,7 @@ import (
 
 // NewAnteHandler returns an AnteHandler that checks signatures and deducts fees from the first signer.
 func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteHandler {
-	return func(ctx sdk.Context, tx sdk.Tx, txBz []byte, tmNode *node.Node, simulate bool, ) (newCtx sdk.Context, res sdk.Result, abort bool) {
+	return func(ctx sdk.Ctx, tx sdk.Tx, txBz []byte, tmNode *node.Node, simulate bool, ) (newCtx sdk.Ctx, res sdk.Result, abort bool) {
 		if addr := supplyKeeper.GetModuleAddress(types.FeeCollectorName); addr == nil {
 			panic(fmt.Sprintf("%s module account has not been set", types.FeeCollectorName))
 		}
@@ -105,7 +105,7 @@ func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteH
 
 // GetSignerAcc returns an account for a given address that is expected to sign
 // a transaction.
-func GetSignerAcc(ctx sdk.Context, ak AccountKeeper, addr sdk.Address) (Account, sdk.Result) {
+func GetSignerAcc(ctx sdk.Ctx, ak AccountKeeper, addr sdk.Address) (Account, sdk.Result) {
 	if acc := ak.GetAccount(ctx, addr); acc != nil {
 		return acc, sdk.Result{}
 	}
@@ -195,7 +195,7 @@ func ProcessPubKey(acc Account, sig StdSignature) (crypto.PubKey, sdk.Result) {
 //
 // NOTE: We could use the CoinKeeper (in addition to the AccountKeeper, because
 // the CoinKeeper doesn't give us accounts), but it seems easier to do this.
-func DeductFees(supplyKeeper types.SupplyKeeper, ctx sdk.Context, acc Account, fees sdk.Coins) sdk.Result {
+func DeductFees(supplyKeeper types.SupplyKeeper, ctx sdk.Ctx, acc Account, fees sdk.Coins) sdk.Result {
 	blockTime := ctx.BlockHeader().Time
 	coins := acc.GetCoins()
 
@@ -234,7 +234,7 @@ func DeductFees(supplyKeeper types.SupplyKeeper, ctx sdk.Context, acc Account, f
 //
 // Contract: This should only be called during CheckTx as it cannot be part of
 // consensus.
-func EnsureSufficientMempoolFees(ctx sdk.Context, stdFee sdk.Coins) sdk.Result {
+func EnsureSufficientMempoolFees(ctx sdk.Ctx, stdFee sdk.Coins) sdk.Result {
 	minGasPrices := ctx.MinGasPrices()
 	if !minGasPrices.IsZero() {
 		requiredFees := make(sdk.Coins, len(minGasPrices))

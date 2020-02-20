@@ -10,7 +10,7 @@ import (
 )
 
 func NewHandler(k keeper.Keeper) sdk.Handler {
-	return func(ctx sdk.Context, msg sdk.Msg) sdk.Result {
+	return func(ctx sdk.Ctx, msg sdk.Msg) sdk.Result {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 		switch msg := msg.(type) {
 		case types.MsgStake:
@@ -30,7 +30,7 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 
 // These functions assume everything has been authenticated,
 // now we just perform action and save
-func handleStake(ctx sdk.Context, msg types.MsgStake, k keeper.Keeper) sdk.Result {
+func handleStake(ctx sdk.Ctx, msg types.MsgStake, k keeper.Keeper) sdk.Result {
 	if _, found := k.GetValidator(ctx, sdk.Address(msg.PubKey.Address())); found {
 		return stakeRegisteredValidator(ctx, msg, k)
 	} else {
@@ -38,7 +38,7 @@ func handleStake(ctx sdk.Context, msg types.MsgStake, k keeper.Keeper) sdk.Resul
 	}
 }
 
-func stakeNewValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keeper) sdk.Result {
+func stakeNewValidator(ctx sdk.Ctx, msg types.MsgStake, k keeper.Keeper) sdk.Result {
 	// check to see if teh public key has already been register for that validator
 	if _, found := k.GetValidator(ctx, sdk.GetAddress(msg.PubKey)); found {
 		return types.ErrValidatorPubKeyExists(k.Codespace()).Result()
@@ -85,7 +85,7 @@ func stakeNewValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keeper) sdk
 	return sdk.Result{Events: ctx.EventManager().Events()}
 }
 
-func stakeRegisteredValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keeper) sdk.Result {
+func stakeRegisteredValidator(ctx sdk.Ctx, msg types.MsgStake, k keeper.Keeper) sdk.Result {
 	// move coins from the msg.Address account to a (self-delegation) delegator account
 	// the validator account and global shares are updated within here
 	validator, found := k.GetValidator(ctx, sdk.Address(msg.PubKey.Address()))
@@ -114,7 +114,7 @@ func stakeRegisteredValidator(ctx sdk.Context, msg types.MsgStake, k keeper.Keep
 	return sdk.Result{Events: ctx.EventManager().Events()}
 }
 
-func handleMsgBeginUnstake(ctx sdk.Context, msg types.MsgBeginUnstake, k keeper.Keeper) sdk.Result {
+func handleMsgBeginUnstake(ctx sdk.Ctx, msg types.MsgBeginUnstake, k keeper.Keeper) sdk.Result {
 	// move coins from the msg.Address account to a (self-delegation) delegator account
 	// the validator account and global shares are updated within here
 	validator, found := k.GetValidator(ctx, msg.Address)
@@ -145,7 +145,7 @@ func handleMsgBeginUnstake(ctx sdk.Context, msg types.MsgBeginUnstake, k keeper.
 
 // Validators must submit a transaction to unjail itself after todo
 // having been jailed (and thus unstaked) for downtime
-func handleMsgUnjail(ctx sdk.Context, msg types.MsgUnjail, k keeper.Keeper) sdk.Result {
+func handleMsgUnjail(ctx sdk.Ctx, msg types.MsgUnjail, k keeper.Keeper) sdk.Result {
 	address, err := validateUnjailMessage(ctx, msg, k)
 	if err != nil {
 		return err.Result()
@@ -161,7 +161,7 @@ func handleMsgUnjail(ctx sdk.Context, msg types.MsgUnjail, k keeper.Keeper) sdk.
 	return sdk.Result{Events: ctx.EventManager().Events()}
 }
 
-func validateUnjailMessage(ctx sdk.Context, msg types.MsgUnjail, k keeper.Keeper) (address sdk.Address, err sdk.Error) {
+func validateUnjailMessage(ctx sdk.Ctx, msg types.MsgUnjail, k keeper.Keeper) (address sdk.Address, err sdk.Error) {
 	validator := k.Validator(ctx, msg.ValidatorAddr)
 	if validator == nil {
 		return nil, types.ErrNoValidatorForAddress(k.Codespace())
@@ -194,7 +194,7 @@ func validateUnjailMessage(ctx sdk.Context, msg types.MsgUnjail, k keeper.Keeper
 	return
 }
 
-func handleMsgSend(ctx sdk.Context, msg types.MsgSend, k keeper.Keeper) sdk.Result {
+func handleMsgSend(ctx sdk.Ctx, msg types.MsgSend, k keeper.Keeper) sdk.Result {
 	err := k.SendCoins(ctx, msg.FromAddress, msg.ToAddress, msg.Amount)
 	if err != nil {
 		return err.Result()

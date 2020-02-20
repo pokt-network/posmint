@@ -22,7 +22,7 @@ var (
 	initCoins  = sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, initTokens))
 )
 
-func getCoinsByName(ctx sdk.Context, k Keeper, moduleName string) sdk.Coins {
+func getCoinsByName(ctx sdk.Ctx, k Keeper, moduleName string) sdk.Coins {
 	moduleAddress := k.GetModuleAddress(moduleName)
 	macc := k.ak.GetAccount(ctx, moduleAddress)
 	if macc == nil {

@@ -43,12 +43,12 @@ func NewAccountKeeper(
 }
 
 // Logger returns a module-specific logger.
-func (ak AccountKeeper) Logger(ctx sdk.Context) log.Logger {
+func (ak AccountKeeper) Logger(ctx sdk.Ctx) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
 // NewAccountWithAddress implements sdk.AccountKeeper.
-func (ak AccountKeeper) NewAccountWithAddress(ctx sdk.Context, addr sdk.Address) exported.Account {
+func (ak AccountKeeper) NewAccountWithAddress(ctx sdk.Ctx, addr sdk.Address) exported.Account {
 	acc := ak.proto()
 	err := acc.SetAddress(addr)
 	if err != nil {
@@ -59,12 +59,12 @@ func (ak AccountKeeper) NewAccountWithAddress(ctx sdk.Context, addr sdk.Address)
 }
 
 // NewAccount creates a new account
-func (ak AccountKeeper) NewAccount(ctx sdk.Context, acc exported.Account) exported.Account {
+func (ak AccountKeeper) NewAccount(ctx sdk.Ctx, acc exported.Account) exported.Account {
 	return acc
 }
 
 // GetAccount implements sdk.AccountKeeper.
-func (ak AccountKeeper) GetAccount(ctx sdk.Context, addr sdk.Address) exported.Account {
+func (ak AccountKeeper) GetAccount(ctx sdk.Ctx, addr sdk.Address) exported.Account {
 	store := ctx.KVStore(ak.key)
 	bz := store.Get(types.AddressStoreKey(addr))
 	if bz == nil {
@@ -75,7 +75,7 @@ func (ak AccountKeeper) GetAccount(ctx sdk.Context, addr sdk.Address) exported.A
 }
 
 // GetAllAccounts returns all accounts in the accountKeeper.
-func (ak AccountKeeper) GetAllAccounts(ctx sdk.Context) []exported.Account {
+func (ak AccountKeeper) GetAllAccounts(ctx sdk.Ctx) []exported.Account {
 	accounts := []exported.Account{}
 	appendAccount := func(acc exported.Account) (stop bool) {
 		accounts = append(accounts, acc)
@@ -86,7 +86,7 @@ func (ak AccountKeeper) GetAllAccounts(ctx sdk.Context) []exported.Account {
 }
 
 // SetAccount implements sdk.AccountKeeper.
-func (ak AccountKeeper) SetAccount(ctx sdk.Context, acc exported.Account) {
+func (ak AccountKeeper) SetAccount(ctx sdk.Ctx, acc exported.Account) {
 	addr := acc.GetAddress()
 	store := ctx.KVStore(ak.key)
 	bz, err := ak.cdc.MarshalBinaryBare(acc)
@@ -98,14 +98,14 @@ func (ak AccountKeeper) SetAccount(ctx sdk.Context, acc exported.Account) {
 
 // RemoveAccount removes an account for the account mapper store.
 // NOTE: this will cause supply invariant violation if called
-func (ak AccountKeeper) RemoveAccount(ctx sdk.Context, acc exported.Account) {
+func (ak AccountKeeper) RemoveAccount(ctx sdk.Ctx, acc exported.Account) {
 	addr := acc.GetAddress()
 	store := ctx.KVStore(ak.key)
 	store.Delete(types.AddressStoreKey(addr))
 }
 
 // IterateAccounts implements sdk.AccountKeeper.
-func (ak AccountKeeper) IterateAccounts(ctx sdk.Context, process func(exported.Account) (stop bool)) {
+func (ak AccountKeeper) IterateAccounts(ctx sdk.Ctx, process func(exported.Account) (stop bool)) {
 	store := ctx.KVStore(ak.key)
 	iter := sdk.KVStorePrefixIterator(store, types.AddressStoreKeyPrefix)
 	defer iter.Close()
@@ -123,7 +123,7 @@ func (ak AccountKeeper) IterateAccounts(ctx sdk.Context, process func(exported.A
 }
 
 // GetPubKey Returns the PublicKey of the account at address
-func (ak AccountKeeper) GetPubKey(ctx sdk.Context, addr sdk.Address) (crypto.PublicKey, sdk.Error) {
+func (ak AccountKeeper) GetPubKey(ctx sdk.Ctx, addr sdk.Address) (crypto.PublicKey, sdk.Error) {
 	acc := ak.GetAccount(ctx, addr)
 	if acc == nil {
 		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", addr))
@@ -135,12 +135,12 @@ func (ak AccountKeeper) GetPubKey(ctx sdk.Context, addr sdk.Address) (crypto.Pub
 // Params
 
 // SetParams sets the auth module's parameters.
-func (ak AccountKeeper) SetParams(ctx sdk.Context, params types.Params) {
+func (ak AccountKeeper) SetParams(ctx sdk.Ctx, params types.Params) {
 	ak.paramSubspace.SetParamSet(ctx, &params)
 }
 
 // GetParams gets the auth module's parameters.
-func (ak AccountKeeper) GetParams(ctx sdk.Context) (params types.Params) {
+func (ak AccountKeeper) GetParams(ctx sdk.Ctx) (params types.Params) {
 	ak.paramSubspace.GetParamSet(ctx, &params)
 	return
 }
