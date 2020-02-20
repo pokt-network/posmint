@@ -51,6 +51,13 @@ func defaultContext(key types.StoreKey) types.Context {
 	ctx := types.NewContext(cms, abci.Header{}, false, log.NewNopLogger())
 	return ctx
 }
+func TestImplementsCtx(t *testing.T) {
+	key := types.NewKVStoreKey(t.Name())
+
+	ctx := defaultContext(key)
+
+	require.Implements(t, (*types.Ctx)(nil), ctx)
+}
 
 func TestCacheContext(t *testing.T) {
 	key := types.NewKVStoreKey(t.Name())
@@ -206,3 +213,4 @@ func TestContextHeaderClone(t *testing.T) {
 		})
 	}
 }
+
