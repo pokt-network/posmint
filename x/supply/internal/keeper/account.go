@@ -26,7 +26,7 @@ func (k Keeper) GetModuleAddressAndPermissions(moduleName string) (addr sdk.Addr
 
 // GetModuleAccountAndPermissions gets the module account from the auth account store and its
 // registered permissions
-func (k Keeper) GetModuleAccountAndPermissions(ctx sdk.Context, moduleName string) (exported.ModuleAccountI, []string) {
+func (k Keeper) GetModuleAccountAndPermissions(ctx sdk.Ctx, moduleName string) (exported.ModuleAccountI, []string) {
 	addr, perms := k.GetModuleAddressAndPermissions(moduleName)
 	if addr == nil {
 		return nil, []string{}
@@ -50,12 +50,12 @@ func (k Keeper) GetModuleAccountAndPermissions(ctx sdk.Context, moduleName strin
 }
 
 // GetModuleAccount gets the module account from the auth account store
-func (k Keeper) GetModuleAccount(ctx sdk.Context, moduleName string) exported.ModuleAccountI {
+func (k Keeper) GetModuleAccount(ctx sdk.Ctx, moduleName string) exported.ModuleAccountI {
 	acc, _ := k.GetModuleAccountAndPermissions(ctx, moduleName)
 	return acc
 }
 
 // SetModuleAccount sets the module account to the auth account store
-func (k Keeper) SetModuleAccount(ctx sdk.Context, macc exported.ModuleAccountI) {
+func (k Keeper) SetModuleAccount(ctx sdk.Ctx, macc exported.ModuleAccountI) {
 	k.ak.SetAccount(ctx, macc)
 }

@@ -8,7 +8,7 @@ import (
 )
 
 // SendCoinsFromModuleToAccount transfers coins from a ModuleAccount to an Address
-func (k Keeper) SendCoinsFromModuleToAccount(ctx sdk.Context, senderModule string,
+func (k Keeper) SendCoinsFromModuleToAccount(ctx sdk.Ctx, senderModule string,
 	recipientAddr sdk.Address, amt sdk.Coins) sdk.Error {
 
 	senderAddr := k.GetModuleAddress(senderModule)
@@ -20,7 +20,7 @@ func (k Keeper) SendCoinsFromModuleToAccount(ctx sdk.Context, senderModule strin
 }
 
 // SendCoinsFromModuleToModule transfers coins from a ModuleAccount to another
-func (k Keeper) SendCoinsFromModuleToModule(ctx sdk.Context, senderModule, recipientModule string, amt sdk.Coins) sdk.Error {
+func (k Keeper) SendCoinsFromModuleToModule(ctx sdk.Ctx, senderModule, recipientModule string, amt sdk.Coins) sdk.Error {
 
 	senderAddr := k.GetModuleAddress(senderModule)
 	if senderAddr == nil {
@@ -37,7 +37,7 @@ func (k Keeper) SendCoinsFromModuleToModule(ctx sdk.Context, senderModule, recip
 }
 
 // SendCoinsFromAccountToModule transfers coins from an Address to a ModuleAccount
-func (k Keeper) SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.Address,
+func (k Keeper) SendCoinsFromAccountToModule(ctx sdk.Ctx, senderAddr sdk.Address,
 	recipientModule string, amt sdk.Coins) sdk.Error {
 
 	// create the account if it doesn't yet exist
@@ -51,7 +51,7 @@ func (k Keeper) SendCoinsFromAccountToModule(ctx sdk.Context, senderAddr sdk.Add
 
 // MintCoins creates new coins from thin air and adds it to the module account.
 // Panics if the name maps to a non-minter module account or if the amount is invalid.
-func (k Keeper) MintCoins(ctx sdk.Context, moduleName string, amt sdk.Coins) sdk.Error {
+func (k Keeper) MintCoins(ctx sdk.Ctx, moduleName string, amt sdk.Coins) sdk.Error {
 
 	// create the account if it doesn't yet exist
 	acc := k.GetModuleAccount(ctx, moduleName)
@@ -82,7 +82,7 @@ func (k Keeper) MintCoins(ctx sdk.Context, moduleName string, amt sdk.Coins) sdk
 
 // BurnCoins burns coins deletes coins from the balance of the module account.
 // Panics if the name maps to a non-burner module account or if the amount is invalid.
-func (k Keeper) BurnCoins(ctx sdk.Context, moduleName string, amt sdk.Coins) sdk.Error {
+func (k Keeper) BurnCoins(ctx sdk.Ctx, moduleName string, amt sdk.Coins) sdk.Error {
 
 	// create the account if it doesn't yet exist
 	acc := k.GetModuleAccount(ctx, moduleName)

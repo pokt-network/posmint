@@ -17,7 +17,7 @@ const (
 
 // NewQuerier returns a new sdk.Keeper instance.
 func NewQuerier(k Keeper) sdk.Querier {
-	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
+	return func(ctx sdk.Ctx, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
 		switch path[0] {
 		case QueryBalance:
 			return queryBalance(ctx, req, k)
@@ -30,7 +30,7 @@ func NewQuerier(k Keeper) sdk.Querier {
 
 // queryBalance fetch an account's balance for the supplied height.
 // Height and account address are passed as first and second path components respectively.
-func queryBalance(ctx sdk.Context, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
+func queryBalance(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
 	var params types.QueryBalanceParams
 
 	if err := types.ModuleCdc.UnmarshalJSON(req.Data, &params); err != nil {

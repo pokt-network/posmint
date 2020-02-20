@@ -6,7 +6,7 @@ import (
 	sdk "github.com/pokt-network/posmint/types"
 )
 
-func NewTestTx(ctx sdk.Context, msgs []sdk.Msg, privs []crypto.PrivateKey, entropy int64, fee sdk.Coins) sdk.Tx {
+func NewTestTx(ctx sdk.Ctx, msgs []sdk.Msg, privs []crypto.PrivateKey, entropy int64, fee sdk.Coins) sdk.Tx {
 	sigs := make([]StdSignature, len(privs))
 	for i, priv := range privs {
 		signBytes := StdSignBytes(ctx.ChainID(), entropy, fee, msgs, "")

@@ -9,7 +9,7 @@ import (
 // InitGenesis sets supply information for genesis.
 //
 // CONTRACT: all types of accounts must have been already initialized/created
-func InitGenesis(ctx sdk.Context, keeper Keeper, ak types.AccountKeeper, data GenesisState) {
+func InitGenesis(ctx sdk.Ctx, keeper Keeper, ak types.AccountKeeper, data GenesisState) {
 	// manually set the total supply based on accounts if not provided
 	if data.Supply.Empty() {
 		var totalSupply sdk.Coins
@@ -27,7 +27,7 @@ func InitGenesis(ctx sdk.Context, keeper Keeper, ak types.AccountKeeper, data Ge
 }
 
 // ExportGenesis returns a GenesisState for a given context and keeper.
-func ExportGenesis(ctx sdk.Context, keeper Keeper) GenesisState {
+func ExportGenesis(ctx sdk.Ctx, keeper Keeper) GenesisState {
 	return NewGenesisState(keeper.GetSupply(ctx).GetTotal())
 }
 

@@ -10,7 +10,7 @@ import (
 
 // NewQuerier creates a querier for supply REST endpoints
 func NewQuerier(k Keeper) sdk.Querier {
-	return func(ctx sdk.Context, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
+	return func(ctx sdk.Ctx, path []string, req abci.RequestQuery) (res []byte, err sdk.Error) {
 		switch path[0] {
 
 		case types.QueryTotalSupply:
@@ -25,7 +25,7 @@ func NewQuerier(k Keeper) sdk.Querier {
 	}
 }
 
-func queryTotalSupply(ctx sdk.Context, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
+func queryTotalSupply(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
 	var params types.QueryTotalSupplyParams
 
 	err := types.ModuleCdc.UnmarshalJSON(req.Data, &params)
@@ -50,7 +50,7 @@ func queryTotalSupply(ctx sdk.Context, req abci.RequestQuery, k Keeper) ([]byte,
 	return res, nil
 }
 
-func querySupplyOf(ctx sdk.Context, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
+func querySupplyOf(ctx sdk.Ctx, req abci.RequestQuery, k Keeper) ([]byte, sdk.Error) {
 	var params types.QuerySupplyOfParams
 
 	err := types.ModuleCdc.UnmarshalJSON(req.Data, &params)

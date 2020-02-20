@@ -12,7 +12,7 @@ import (
 
 // NewQuerier creates a querier for auth REST endpoints
 func NewQuerier(keeper AccountKeeper) sdk.Querier {
-	return func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
+	return func(ctx sdk.Ctx, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
 		switch path[0] {
 		case types.QueryAccount:
 			return queryAccount(ctx, req, keeper)
@@ -22,7 +22,7 @@ func NewQuerier(keeper AccountKeeper) sdk.Querier {
 	}
 }
 
-func queryAccount(ctx sdk.Context, req abci.RequestQuery, keeper AccountKeeper) ([]byte, sdk.Error) {
+func queryAccount(ctx sdk.Ctx, req abci.RequestQuery, keeper AccountKeeper) ([]byte, sdk.Error) {
 	var params types.QueryAccountParams
 	if err := keeper.cdc.UnmarshalJSON(req.Data, &params); err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))

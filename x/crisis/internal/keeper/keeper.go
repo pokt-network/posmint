@@ -38,7 +38,7 @@ func NewKeeper(
 }
 
 // Logger returns a module-specific logger.
-func (k Keeper) Logger(ctx sdk.Context) log.Logger {
+func (k Keeper) Logger(ctx sdk.Ctx) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
@@ -64,7 +64,7 @@ func (k Keeper) Invariants() []sdk.Invariant {
 
 // AssertInvariants asserts all registered invariants. If any invariant fails,
 // the method panics.
-func (k Keeper) AssertInvariants(ctx sdk.Context) {
+func (k Keeper) AssertInvariants(ctx sdk.Ctx) {
 	logger := k.Logger(ctx)
 
 	start := time.Now()
@@ -90,6 +90,6 @@ func (k Keeper) AssertInvariants(ctx sdk.Context) {
 func (k Keeper) InvCheckPeriod() uint { return k.invCheckPeriod }
 
 // SendCoinsFromAccountToFeeCollector transfers amt to the fee collector account.
-func (k Keeper) SendCoinsFromAccountToFeeCollector(ctx sdk.Context, senderAddr sdk.Address, amt sdk.Coins) sdk.Error {
+func (k Keeper) SendCoinsFromAccountToFeeCollector(ctx sdk.Ctx, senderAddr sdk.Address, amt sdk.Coins) sdk.Error {
 	return k.supplyKeeper.SendCoinsFromAccountToModule(ctx, senderAddr, k.feeCollectorName, amt)
 }

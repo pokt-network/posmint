@@ -13,7 +13,7 @@ import (
 // Apply and return accumulated updates to the staked validator set
 // It gets called once after genesis, another time maybe after genesis transactions,
 // then once at every EndBlock.
-func (k Keeper) UpdateTendermintValidators(ctx sdk.Context) (updates []abci.ValidatorUpdate) {
+func (k Keeper) UpdateTendermintValidators(ctx sdk.Ctx) (updates []abci.ValidatorUpdate) {
 	// get the world state
 	store := ctx.KVStore(k.storeKey)
 	maxValidators := k.GetParams(ctx).MaxValidators
@@ -73,7 +73,7 @@ func (k Keeper) UpdateTendermintValidators(ctx sdk.Context) (updates []abci.Vali
 }
 
 // register the validator in the necessary stores in the world state
-func (k Keeper) RegisterValidator(ctx sdk.Context, validator types.Validator) {
+func (k Keeper) RegisterValidator(ctx sdk.Ctx, validator types.Validator) {
 	k.BeforeValidatorRegistered(ctx, validator.Address)
 	k.SetValidator(ctx, validator)                     // store validator here (master list)
 	k.AddPubKeyRelation(ctx, validator.GetPublicKey()) // store relationshiop between address and consPub key
@@ -81,7 +81,7 @@ func (k Keeper) RegisterValidator(ctx sdk.Context, validator types.Validator) {
 }
 
 // validate check called before staking
-func (k Keeper) ValidateValidatorStaking(ctx sdk.Context, validator types.Validator, amount sdk.Int) sdk.Error {
+func (k Keeper) ValidateValidatorStaking(ctx sdk.Ctx, validator types.Validator, amount sdk.Int) sdk.Error {
 	coin := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), amount))
 	if !validator.IsUnstaked() {
 		return types.ErrValidatorStatus(k.codespace)
@@ -96,7 +96,7 @@ func (k Keeper) ValidateValidatorStaking(ctx sdk.Context, validator types.Valida
 }
 
 // store ops when a validator stakes
-func (k Keeper) StakeValidator(ctx sdk.Context, validator types.Validator, amount sdk.Int) {
+func (k Keeper) StakeValidator(ctx sdk.Ctx, validator types.Validator, amount sdk.Int) {
 	// call the before hook
 	k.BeforeValidatorStaked(ctx, validator.GetAddress())
 	// send the coins from address to staked module account
@@ -123,7 +123,7 @@ func (k Keeper) StakeValidator(ctx sdk.Context, validator types.Validator, amoun
 	k.AfterValidatorStaked(ctx, validator.GetAddress())
 }
 
-func (k Keeper) ValidateValidatorBeginUnstaking(ctx sdk.Context, validator types.Validator) sdk.Error {
+func (k Keeper) ValidateValidatorBeginUnstaking(ctx sdk.Ctx, validator types.Validator) sdk.Error {
 	// must be staked to begin unstaking
 	if !validator.IsStaked() {
 		return types.ErrValidatorStatus(k.codespace)
@@ -136,7 +136,7 @@ func (k Keeper) ValidateValidatorBeginUnstaking(ctx sdk.Context, validator types
 }
 
 // store ops when validator begins to unstake -> starts the unstaking timer
-func (k Keeper) BeginUnstakingValidator(ctx sdk.Context, validator types.Validator) sdk.Error {
+func (k Keeper) BeginUnstakingValidator(ctx sdk.Ctx, validator types.Validator) sdk.Error {
 	// call before unstaking hook
 	k.BeforeValidatorBeginUnstaking(ctx, validator.GetAddress())
 	// get params
@@ -156,7 +156,7 @@ func (k Keeper) BeginUnstakingValidator(ctx sdk.Context, validator types.Validat
 	return nil
 }
 
-func (k Keeper) ValidateValidatorFinishUnstaking(ctx sdk.Context, validator types.Validator) sdk.Error {
+func (k Keeper) ValidateValidatorFinishUnstaking(ctx sdk.Ctx, validator types.Validator) sdk.Error {
 	if !validator.IsUnstaking() {
 		return types.ErrValidatorStatus(k.codespace)
 	}
@@ -168,7 +168,7 @@ func (k Keeper) ValidateValidatorFinishUnstaking(ctx sdk.Context, validator type
 }
 
 // store ops to unstake a validator -> called after unstaking time is up
-func (k Keeper) FinishUnstakingValidator(ctx sdk.Context, validator types.Validator) sdk.Error {
+func (k Keeper) FinishUnstakingValidator(ctx sdk.Ctx, validator types.Validator) sdk.Error {
 	// call the before hook
 	k.BeforeValidatorUnstaked(ctx, validator.GetAddress())
 	// delete the validator from the unstaking queue
@@ -202,7 +202,7 @@ func (k Keeper) FinishUnstakingValidator(ctx sdk.Context, validator types.Valida
 }
 
 // force unstake (called when slashed below the minimum)
-func (k Keeper) ForceValidatorUnstake(ctx sdk.Context, validator types.Validator) sdk.Error {
+func (k Keeper) ForceValidatorUnstake(ctx sdk.Ctx, validator types.Validator) sdk.Error {
 	// call the before unstaked hook
 	k.BeforeValidatorUnstaked(ctx, validator.GetAddress())
 	// delete the validator from staking set as they are unstaked
@@ -237,7 +237,7 @@ func (k Keeper) ForceValidatorUnstake(ctx sdk.Context, validator types.Validator
 }
 
 // send a validator to jail
-func (k Keeper) JailValidator(ctx sdk.Context, addr sdk.Address) {
+func (k Keeper) JailValidator(ctx sdk.Ctx, addr sdk.Address) {
 	validator := k.mustGetValidator(ctx, addr)
 	if validator.Jailed {
 		panic(fmt.Sprintf("cannot jail already jailed validator, validator: %v\n", validator))
@@ -250,7 +250,7 @@ func (k Keeper) JailValidator(ctx sdk.Context, addr sdk.Address) {
 }
 
 // remove a validator from jail
-func (k Keeper) UnjailValidator(ctx sdk.Context, addr sdk.Address) {
+func (k Keeper) UnjailValidator(ctx sdk.Ctx, addr sdk.Address) {
 	validator := k.mustGetValidator(ctx, addr)
 	if !validator.Jailed {
 		panic(fmt.Sprintf("cannot unjail already unjailed validator, validator: %v\n", validator))

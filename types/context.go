@@ -46,6 +46,7 @@ type Ctx interface {
 	Context() context.Context
 	MultiStore() MultiStore
 	BlockHeight() int64
+	BlockTime() time.Time
 	ChainID() string
 	TxBytes() []byte
 	Logger() log.Logger
@@ -82,6 +83,7 @@ type Ctx interface {
 	KVStore(key StoreKey) KVStore
 	TransientStore(key StoreKey) KVStore
 	CacheContext() (cc Context, writeCache func())
+	IsZero() bool
 }
 
 // Proposed rename, not done to avoid API breakage

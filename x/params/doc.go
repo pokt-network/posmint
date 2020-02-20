@@ -69,7 +69,7 @@ inheriting the key properties.
 	}
 
 
-	func (k Keeper) GetDynamicParameter(ctx sdk.Context, subkey []byte) (res MyStruct) {
+	func (k Keeper) GetDynamicParameter(ctx sdk.Ctx, subkey []byte) (res MyStruct) {
 		k.ps.GetWithSubkey(ctx, KeyParamMain, subkey, &res)
 	}
 
@@ -92,7 +92,7 @@ be able to be passed to SetParamSet.
 		}
 	}
 
-	func InitGenesis(ctx sdk.Context, k Keeper, data GenesisState) {
+	func InitGenesis(ctx sdk.Ctx, k Keeper, data GenesisState) {
 		k.ps.SetParamSet(ctx, &data.params)
 	}
 
@@ -108,7 +108,7 @@ params.Keeper itself to access all subspace(using GetSubspace)
 		pk params.Keeper
 	}
 
-	func (k MasterKeeper) SetParam(ctx sdk.Context, space string, key string, param interface{}) {
+	func (k MasterKeeper) SetParam(ctx sdk.Ctx, space string, key string, param interface{}) {
 		space, ok := k.pk.GetSubspace(space)
 		if !ok {
 			return

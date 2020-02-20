@@ -12,11 +12,11 @@ import (
 	"github.com/pokt-network/posmint/x/params"
 )
 
-func testPassingInvariant(_ sdk.Context) (string, bool) {
+func testPassingInvariant(_ sdk.Ctx) (string, bool) {
 	return "", false
 }
 
-func testFailingInvariant(_ sdk.Context) (string, bool) {
+func testFailingInvariant(_ sdk.Ctx) (string, bool) {
 	return "", true
 }
 

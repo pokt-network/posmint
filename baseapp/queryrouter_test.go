@@ -10,7 +10,7 @@ import (
 	sdk "github.com/pokt-network/posmint/types"
 )
 
-var testQuerier = func(_ sdk.Context, _ []string, _ abci.RequestQuery) (res []byte, err sdk.Error) {
+var testQuerier = func(_ sdk.Ctx, _ []string, _ abci.RequestQuery) (res []byte, err sdk.Error) {
 	return nil, nil
 }
 
