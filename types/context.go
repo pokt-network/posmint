@@ -22,6 +22,9 @@ It contains a context.Context object inside if you want to use that,
 but please do not over-use it. We try to keep all data structured
 and standard additions here would be better just to add to the Context struct
 */
+
+//var _ Ctx = Context
+
 type Context struct {
 	ctx           context.Context
 	ms            MultiStore
@@ -37,6 +40,48 @@ type Context struct {
 	minGasPrice   DecCoins
 	consParams    *abci.ConsensusParams
 	eventManager  *EventManager
+}
+
+type Ctx interface {
+	Context() context.Context
+	MultiStore() MultiStore
+	BlockHeight() int64
+	ChainID() string
+	TxBytes() []byte
+	Logger() log.Logger
+	VoteInfos() []abci.VoteInfo
+	GasMeter() GasMeter
+	BlockGasMeter() GasMeter
+	IsCheckTx() bool
+	MinGasPrices() DecCoins
+	EventManager() *EventManager
+	BlockHeader() abci.Header
+	ConsensusParams() *abci.ConsensusParams
+	MustGetPrevCtx(height int64) Context
+	PrevCtx(height int64) (Context, error)
+	WithBlockStore(bs *store.BlockStore) Context
+	BlockStore() *store.BlockStore
+	WithContext(ctx context.Context) Context
+	WithMultiStore(ms MultiStore) Context
+	WithBlockHeader(header abci.Header) Context
+	WithBlockTime(newTime time.Time) Context
+	WithProposer(addr Address) Context
+	WithBlockHeight(height int64) Context
+	WithChainID(chainID string) Context
+	WithTxBytes(txBytes []byte) Context
+	WithLogger(logger log.Logger) Context
+	WithVoteInfos(voteInfo []abci.VoteInfo) Context
+	WithGasMeter(meter GasMeter) Context
+	WithBlockGasMeter(meter GasMeter) Context
+	WithIsCheckTx(isCheckTx bool) Context
+	WithMinGasPrices(gasPrices DecCoins) Context
+	WithConsensusParams(params *abci.ConsensusParams) Context
+	WithEventManager(em *EventManager) Context
+	WithValue(key, value interface{}) Context
+	Value(key interface{}) interface{}
+	KVStore(key StoreKey) KVStore
+	TransientStore(key StoreKey) KVStore
+	CacheContext() (cc Context, writeCache func())
 }
 
 // Proposed rename, not done to avoid API breakage
@@ -227,7 +272,7 @@ func (c Context) WithMinGasPrices(gasPrices DecCoins) Context {
 	return c
 }
 
-func (c Context) WithConsensusParams(params *abci.ConsensusParams) Context {
+func (c Context) WithConsensusParams(params *abci.ConsensusParams)  Context {
 	c.consParams = params
 	return c
 }
