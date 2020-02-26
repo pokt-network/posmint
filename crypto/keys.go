@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"encoding/hex"
+	"errors"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
@@ -51,7 +52,7 @@ func NewPublicKeyBz(b []byte) (PublicKey, error) {
 	case Secp256k1PublicKeySize:
 		return Secp256k1PublicKey{}.NewPublicKey(b)
 	}
-	panic("unsupported public key type")
+	return nil, errors.New("unsupported public key type")
 }
 
 func PubKeyToPublicKey(key crypto.PubKey) PublicKey {
