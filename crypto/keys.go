@@ -3,6 +3,7 @@ package crypto
 import (
 	"encoding/hex"
 	"errors"
+
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
@@ -55,32 +56,34 @@ func NewPublicKeyBz(b []byte) (PublicKey, error) {
 	return nil, errors.New("unsupported public key type")
 }
 
-func PubKeyToPublicKey(key crypto.PubKey) PublicKey {
+func PubKeyToPublicKey(key crypto.PubKey) (PublicKey, error) {
 	switch key.(type) {
 	case secp256k1.PubKeySecp256k1:
-		return Secp256k1PublicKey{}.PubKeyToPublicKey(key)
+		return Secp256k1PublicKey{}.PubKeyToPublicKey(key), nil
 	case ed25519.PubKeyEd25519:
-		return Ed25519PublicKey(key.(ed25519.PubKeyEd25519))
+		return Ed25519PublicKey(key.(ed25519.PubKeyEd25519)), nil
 	case Ed25519PublicKey:
-		return key.(Ed25519PublicKey)
+		return key.(Ed25519PublicKey), nil
 	case Secp256k1PublicKey:
-		return key.(Secp256k1PublicKey)
+		return key.(Secp256k1PublicKey), nil
+	default:
+		return nil, errors.New("error converting pubkey to public key -> unsupported public key type")
 	}
-	panic("error converting pubkey to public key -> unsupported public key type")
 }
 
-func PrivKeyToPrivateKey(key crypto.PrivKey) PrivateKey {
+func PrivKeyToPrivateKey(key crypto.PrivKey) (PrivateKey, error) {
 	switch key.(type) {
 	case secp256k1.PrivKeySecp256k1:
-		return Secp256k1PrivateKey{}.PrivKeyToPrivateKey(key)
+		return Secp256k1PrivateKey{}.PrivKeyToPrivateKey(key), nil
 	case ed25519.PrivKeyEd25519:
-		return Ed25519PrivateKey{}.PrivKeyToPrivateKey(key)
+		return Ed25519PrivateKey{}.PrivKeyToPrivateKey(key), nil
 	case Secp256k1PrivateKey:
-		return key.(Secp256k1PrivateKey)
+		return key.(Secp256k1PrivateKey), nil
 	case Ed25519PrivateKey:
-		return key.(Ed25519PrivateKey)
+		return key.(Ed25519PrivateKey), nil
+	default:
+		return nil, errors.New("error converting privkey to private key -> unsupported private key type")
 	}
-	panic("error converting privkey to private key -> unsupported private key type")
 }
 
 func PrivKeyFromBytes(privKeyBytes []byte) (privKey PrivateKey, err error) {
