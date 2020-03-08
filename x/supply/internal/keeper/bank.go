@@ -30,7 +30,7 @@ func (k Keeper) SendCoinsFromModuleToModule(ctx sdk.Ctx, senderModule, recipient
 	// create the account if it doesn't yet exist
 	recipientAcc := k.GetModuleAccount(ctx, recipientModule)
 	if recipientAcc == nil {
-		panic(fmt.Sprintf("module account %s isn't able to be created", recipientModule))
+		return sdk.ErrModuleAccountCreate(fmt.Sprintf("module account %s isn't able to be created", recipientModule))
 	}
 
 	return k.bk.SendCoins(ctx, senderAddr, recipientAcc.GetAddress(), amt)
@@ -43,7 +43,7 @@ func (k Keeper) SendCoinsFromAccountToModule(ctx sdk.Ctx, senderAddr sdk.Address
 	// create the account if it doesn't yet exist
 	recipientAcc := k.GetModuleAccount(ctx, recipientModule)
 	if recipientAcc == nil {
-		panic(fmt.Sprintf("module account %s isn't able to be created", recipientModule))
+		return sdk.ErrModuleAccountCreate(fmt.Sprintf("module account %s isn't able to be created", recipientModule))
 	}
 
 	return k.bk.SendCoins(ctx, senderAddr, recipientAcc.GetAddress(), amt)
@@ -60,12 +60,12 @@ func (k Keeper) MintCoins(ctx sdk.Ctx, moduleName string, amt sdk.Coins) sdk.Err
 	}
 
 	if !acc.HasPermission(types.Minter) {
-		panic(fmt.Sprintf("module account %s does not have permissions to mint tokens", moduleName))
+		return sdk.ErrForbidden(fmt.Sprintf("module account %s does not have permissions to mint tokens", moduleName))
 	}
 
 	_, err := k.bk.AddCoins(ctx, acc.GetAddress(), amt)
 	if err != nil {
-		panic(err)
+		return sdk.ErrInternal(err.Error())
 	}
 
 	// update total supply
@@ -91,12 +91,12 @@ func (k Keeper) BurnCoins(ctx sdk.Ctx, moduleName string, amt sdk.Coins) sdk.Err
 	}
 
 	if !acc.HasPermission(types.Burner) {
-		panic(fmt.Sprintf("module account %s does not have permissions to burn tokens", moduleName))
+		return sdk.ErrModuleAccountCreate(fmt.Sprintf("module account %s does not have permissions to burn tokens", moduleName))
 	}
 
 	_, err := k.bk.SubtractCoins(ctx, acc.GetAddress(), amt)
 	if err != nil {
-		panic(err)
+		return sdk.ErrInternal(err.Error())
 	}
 
 	// update total supply

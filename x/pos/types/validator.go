@@ -3,8 +3,9 @@ package types
 import (
 	"bytes"
 	"fmt"
-	"github.com/pokt-network/posmint/crypto"
 	"time"
+
+	"github.com/pokt-network/posmint/crypto"
 
 	sdk "github.com/pokt-network/posmint/types"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -67,10 +68,10 @@ func (v Validator) PotentialConsensusPower() int64 {
 // RemoveStakedTokens removes tokens from a validator
 func (v Validator) RemoveStakedTokens(tokens sdk.Int) Validator {
 	if tokens.IsNegative() {
-		panic(fmt.Sprintf("should not happen: trying to remove negative tokens %v", tokens))
+		panic(fmt.Errorf("should not happen: trying to remove negative tokens %v", tokens))
 	}
 	if v.StakedTokens.LT(tokens) {
-		panic(fmt.Sprintf("should not happen: only have %v tokens, trying to remove %v", v.StakedTokens, tokens))
+		panic(fmt.Errorf("should not happen: only have %v tokens, trying to remove %v", v.StakedTokens, tokens))
 	}
 	v.StakedTokens = v.StakedTokens.Sub(tokens)
 	return v
@@ -79,7 +80,7 @@ func (v Validator) RemoveStakedTokens(tokens sdk.Int) Validator {
 // AddStakedTokens tokens to staked field for a validator
 func (v Validator) AddStakedTokens(tokens sdk.Int) Validator {
 	if tokens.IsNegative() {
-		panic(fmt.Sprintf("should not happen: trying to add negative tokens %v", tokens))
+		panic(fmt.Errorf("should not happen: trying to add negative tokens %v", tokens))
 	}
 	v.StakedTokens = v.StakedTokens.Add(tokens)
 	return v

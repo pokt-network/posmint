@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"fmt"
+
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/auth"
 	"github.com/pokt-network/posmint/x/pos/types"
@@ -59,8 +61,8 @@ func (k Keeper) coinsFromUnstakedToStaked(ctx sdk.Ctx, validator types.Validator
 
 // burnStakedTokens removes coins from the staked pool module account
 func (k Keeper) burnStakedTokens(ctx sdk.Ctx, amt sdk.Int) sdk.Error {
-	if !amt.IsPositive() { // TODO: return sdk Error for trying to burn a negative ammount
-		return nil
+	if !amt.IsPositive() {
+		return sdk.ErrNegativeAmount(fmt.Sprintf("%d is not positive", amt.ToDec()))
 	}
 	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), amt))
 	return k.supplyKeeper.BurnCoins(ctx, types.StakedPoolName, coins)

@@ -16,7 +16,7 @@ func TestMustGetValidator(t *testing.T) {
 	}
 	type expected struct {
 		validator types.Validator
-		message   string
+		message  error
 	}
 	tests := []struct {
 		name   string
@@ -34,7 +34,7 @@ func TestMustGetValidator(t *testing.T) {
 			name:     "panics if no validator",
 			panics:   true,
 			args:     args{validator: stakedValidator},
-			expected: expected{message: fmt.Sprintf("validator record not found for address: %X\n", stakedValidator.Address)},
+			expected: expected{message: fmt.Errorf("validator record not found for address: %X", stakedValidator.Address)},
 		},
 	}
 
@@ -45,7 +45,7 @@ func TestMustGetValidator(t *testing.T) {
 			case true:
 				defer func() {
 					err := recover()
-					assert.Contains(t, test.expected.message, err, "does not cointain error message")
+					assert.Equal(t, test.expected.message, err, "does not cointain error message")
 				}()
 				_ = keeper.mustGetValidator(context, test.args.validator.Address)
 			default:

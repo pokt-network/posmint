@@ -96,13 +96,17 @@ func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64)
 
 // nolint: unparam deadcode unused
 func createTestAccs(ctx sdk.Ctx, numAccs int, initialCoins sdk.Coins, ak *auth.AccountKeeper) (accs []auth.Account) {
+	var err error
 	for i := 0; i < numAccs; i++ {
 		privKey := crypto.Secp256k1PrivateKey{}.GenPrivateKey()
 		pubKey := privKey.PubKey()
 		addr := sdk.Address(pubKey.Address())
 		acc := auth.NewBaseAccountWithAddress(addr)
 		acc.Coins = initialCoins
-		acc.PubKey = crypto.PubKeyToPublicKey(pubKey)
+		acc.PubKey, err = crypto.PubKeyToPublicKey(pubKey)
+		if err != nil {
+			panic(err)
+		}
 		ak.SetAccount(ctx, &acc)
 	}
 	return

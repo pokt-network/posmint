@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"fmt"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/pos/types"
 	"github.com/stretchr/testify/assert"
@@ -61,7 +62,7 @@ func TestRemoveStakedValidatorTokens(t *testing.T) {
 	type expected struct {
 		tokens       sdk.Int
 		validators   []types.Validator
-		errorMessage string
+		errorMessage error
 	}
 	tests := []struct {
 		name      string
@@ -82,7 +83,7 @@ func TestRemoveStakedValidatorTokens(t *testing.T) {
 			validator: stakedValidator,
 			amount:    sdk.NewInt(-5),
 			panics:    true,
-			expected:  expected{tokens: sdk.NewInt(99999999995), validators: []types.Validator{}, errorMessage: "trying to remove negative tokens"},
+			expected:  expected{tokens: sdk.NewInt(99999999995), validators: []types.Validator{}, errorMessage: fmt.Errorf("should not happen: trying to remove negative tokens -5")},
 		},
 	}
 
@@ -95,7 +96,7 @@ func TestRemoveStakedValidatorTokens(t *testing.T) {
 			case true:
 				defer func() {
 					err := recover()
-					assert.Contains(t, err, test.expected.errorMessage)
+					assert.Equal(t, err, test.expected.errorMessage)
 				}()
 				_ = keeper.removeValidatorTokens(context, test.validator, test.amount)
 			default:

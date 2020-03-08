@@ -3,10 +3,11 @@ package keeper
 import (
 	"bytes"
 	"fmt"
+	"sort"
+
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/pos/exported"
 	"github.com/pokt-network/posmint/x/pos/types"
-	"sort"
 )
 
 // Cache the amino decoding of validators, as it can be the case that repeated slashing calls
@@ -51,7 +52,7 @@ func (k Keeper) validatorCaching(value []byte, addr sdk.Address) types.Validator
 func (k Keeper) mustGetValidator(ctx sdk.Ctx, addr sdk.Address) types.Validator {
 	validator, found := k.GetValidator(ctx, addr)
 	if !found {
-		panic(fmt.Sprintf("validator record not found for address: %X\n", addr))
+		panic(fmt.Errorf("validator record not found for address: %X", addr))
 	}
 	return validator
 }

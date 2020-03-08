@@ -3,8 +3,9 @@ package keeper
 import (
 	"bytes"
 	"fmt"
-	abci "github.com/tendermint/tendermint/abci/types"
 	"time"
+
+	abci "github.com/tendermint/tendermint/abci/types"
 
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/pos/types"
@@ -162,7 +163,7 @@ func (k Keeper) ValidateValidatorFinishUnstaking(ctx sdk.Ctx, validator types.Va
 	}
 	// sanity check
 	if validator.StakedTokens.LT(sdk.NewInt(k.MinimumStake(ctx))) {
-		panic("should not happen: validator trying to begin unstaking has less than the minimum stake")
+		return types.ErrValidatorStatus(k.codespace)
 	}
 	return nil
 }
