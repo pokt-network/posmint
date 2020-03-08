@@ -1,6 +1,7 @@
 package crypto
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -76,7 +77,8 @@ func TestKeyEncodings(t *testing.T) {
 		require.EqualValues(t, sig1, sig2)
 
 		// Check (de/en)codings of PubKeys.
-		pubKey := PubKeyToPublicKey(tc.privKey.PubKey())
+		pubKey, err := PubKeyToPublicKey(tc.privKey.PubKey())
+		assert.Nil(t, err)
 		var pub2, pub3 PublicKey
 		checkAminoBinary(t, pubKey, &pub2, tc.pubSize)
 		require.EqualValues(t, pubKey, pub2)
