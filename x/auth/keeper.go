@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+
 	"github.com/pokt-network/posmint/crypto"
 	"github.com/tendermint/tendermint/libs/log"
 
@@ -70,7 +71,10 @@ func (ak AccountKeeper) GetAccount(ctx sdk.Ctx, addr sdk.Address) exported.Accou
 	if bz == nil {
 		return nil
 	}
-	acc := ak.decodeAccount(bz)
+	acc, err := ak.decodeAccount(bz)
+	if err != nil {
+		return nil // Could not decode account
+	}
 	return acc
 }
 
@@ -114,7 +118,10 @@ func (ak AccountKeeper) IterateAccounts(ctx sdk.Ctx, process func(exported.Accou
 			return
 		}
 		val := iter.Value()
-		acc := ak.decodeAccount(val)
+		acc, err := ak.decodeAccount(val)
+		if err != nil {
+			panic(err)
+		}
 		if process(acc) {
 			return
 		}
@@ -148,10 +155,7 @@ func (ak AccountKeeper) GetParams(ctx sdk.Ctx) (params types.Params) {
 // -----------------------------------------------------------------------------
 // Misc.
 
-func (ak AccountKeeper) decodeAccount(bz []byte) (acc exported.Account) {
-	err := ak.cdc.UnmarshalBinaryBare(bz, &acc)
-	if err != nil {
-		panic(err)
-	}
+func (ak AccountKeeper) decodeAccount(bz []byte) (acc exported.Account, err error) {
+	err = ak.cdc.UnmarshalBinaryBare(bz, &acc)
 	return
 }

@@ -11,12 +11,15 @@ import (
 )
 
 func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, amount sdk.Int, kp keys.KeyPair, passphrase string) (*sdk.TxResponse, error) {
-	txBuilder, cliCtx := newTx(cdc, tmNode, keybase, passphrase)
+	txBuilder, cliCtx, err := newTx(cdc, tmNode, keybase, passphrase)
+	if err != nil {
+		return nil, err
+	}
 	msg := types.MsgStake{
 		PubKey: kp.PublicKey,
 		Value:  amount,
 	}
-	err := msg.ValidateBasic()
+	err = msg.ValidateBasic()
 	if err != nil {
 		return nil, err
 	}
@@ -24,9 +27,12 @@ func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, amoun
 }
 
 func UnstakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
-	txBuilder, cliCtx := newTx(cdc, tmNode, keybase, passphrase)
+	txBuilder, cliCtx, err := newTx(cdc, tmNode, keybase, passphrase)
+	if err != nil {
+		return nil, err
+	}
 	msg := types.MsgBeginUnstake{Address: address}
-	err := msg.ValidateBasic()
+	err = msg.ValidateBasic()
 	if err != nil {
 		return nil, err
 	}
@@ -34,9 +40,12 @@ func UnstakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, add
 }
 
 func UnjailTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
-	txBuilder, cliCtx := newTx(cdc, tmNode, keybase, passphrase)
+	txBuilder, cliCtx, err := newTx(cdc, tmNode, keybase, passphrase)
+	if err != nil {
+		return nil, err
+	}
 	msg := types.MsgUnjail{ValidatorAddr: address}
-	err := msg.ValidateBasic()
+	err = msg.ValidateBasic()
 	if err != nil {
 		return nil, err
 	}
@@ -44,13 +53,16 @@ func UnjailTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, addr
 }
 
 func Send(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, fromAddr, toAddr sdk.Address, passphrase string, amount sdk.Int) (*sdk.TxResponse, error) {
-	txBuilder, cliCtx := newTx(cdc, tmNode, keybase, passphrase)
+	txBuilder, cliCtx, err := newTx(cdc, tmNode, keybase, passphrase)
+	if err != nil {
+		return nil, err
+	}
 	msg := types.MsgSend{
 		FromAddress: fromAddr,
 		ToAddress:   toAddr,
 		Amount:      amount,
 	}
-	err := msg.ValidateBasic()
+	err = msg.ValidateBasic()
 	if err != nil {
 		return nil, err
 	}
@@ -66,27 +78,27 @@ func RawTx(cdc *codec.Codec, tmNode client.Client, fromAddr sdk.Address, txBytes
 	}.BroadcastTx(txBytes)
 }
 
-func newTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, passphrase string) (txBuilder auth.TxBuilder, cliCtx util.CLIContext) {
+func newTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, passphrase string) (auth.TxBuilder, util.CLIContext, error) {
 	genDoc, err := tmNode.Genesis()
 	if err != nil {
-		panic(err)
+		return auth.TxBuilder{}, util.CLIContext{}, err
 	}
 	kp, err := keybase.List()
 	if err != nil {
-		panic(err)
+		return auth.TxBuilder{}, util.CLIContext{}, err
 	}
 	chainID := genDoc.Genesis.ChainID
 	fromAddr := kp[0].GetAddress()
-	cliCtx = util.NewCLIContext(tmNode, fromAddr, passphrase).WithCodec(cdc)
+	cliCtx := util.NewCLIContext(tmNode, fromAddr, passphrase).WithCodec(cdc)
 	accGetter := auth.NewAccountRetriever(cliCtx)
 	err = accGetter.EnsureExists(fromAddr)
 	if err != nil {
-		panic(err)
+		return auth.TxBuilder{}, cliCtx, err
 	}
-	txBuilder = auth.NewTxBuilder(
+	txBuilder := auth.NewTxBuilder(
 		auth.DefaultTxEncoder(cdc),
 		chainID,
 		"",
 		sdk.NewCoins(sdk.NewCoin("upokt", sdk.NewInt(10)))).WithKeybase(keybase) // todo get stake denom
-	return
+	return txBuilder, cliCtx, nil
 }

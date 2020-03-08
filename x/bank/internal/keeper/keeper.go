@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+
 	"github.com/tendermint/tendermint/libs/log"
 
 	sdk "github.com/pokt-network/posmint/types"
@@ -214,7 +215,7 @@ func (keeper BaseSendKeeper) SetCoins(ctx sdk.Ctx, addr sdk.Address, amt sdk.Coi
 
 	err := acc.SetCoins(amt)
 	if err != nil {
-		panic(err)
+		return sdk.ErrInternal(err.Error())
 	}
 
 	keeper.ak.SetAccount(ctx, acc)

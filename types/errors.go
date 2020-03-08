@@ -26,24 +26,30 @@ func (code CodeType) IsOK() bool {
 // SDK error codes
 const (
 	// Base error codes
-	CodeOK                CodeType = 0
-	CodeInternal          CodeType = 1
-	CodeTxDecode          CodeType = 2
-	CodeInvalidSequence   CodeType = 3
-	CodeUnauthorized      CodeType = 4
-	CodeInsufficientFunds CodeType = 5
-	CodeUnknownRequest    CodeType = 6
-	CodeInvalidAddress    CodeType = 7
-	CodeInvalidPubKey     CodeType = 8
-	CodeUnknownAddress    CodeType = 9
-	CodeInsufficientCoins CodeType = 10
-	CodeInvalidCoins      CodeType = 11
-	CodeOutOfGas          CodeType = 12
-	CodeMemoTooLarge      CodeType = 13
-	CodeInsufficientFee   CodeType = 14
-	CodeTooManySignatures CodeType = 15
-	CodeGasOverflow       CodeType = 16
-	CodeNoSignatures      CodeType = 17
+	CodeOK                    CodeType = 0
+	CodeInternal              CodeType = 1
+	CodeTxDecode              CodeType = 2
+	CodeInvalidSequence       CodeType = 3
+	CodeUnauthorized          CodeType = 4
+	CodeInsufficientFunds     CodeType = 5
+	CodeUnknownRequest        CodeType = 6
+	CodeInvalidAddress        CodeType = 7
+	CodeInvalidPubKey         CodeType = 8
+	CodeUnknownAddress        CodeType = 9
+	CodeInsufficientCoins     CodeType = 10
+	CodeInvalidCoins          CodeType = 11
+	CodeOutOfGas              CodeType = 12
+	CodeMemoTooLarge          CodeType = 13
+	CodeInsufficientFee       CodeType = 14
+	CodeTooManySignatures     CodeType = 15
+	CodeGasOverflow           CodeType = 16
+	CodeNoSignatures          CodeType = 17
+	CodeNegativeAmont         CodeType = 18
+	CodeBurnStakedTokens      CodeType = 19
+	CodeForceValidatorUnstake CodeType = 20
+	CodeInvalidSlash          CodeType = 21
+	CodeModuleAccountCreate   CodeType = 22
+	CodeForbidden             CodeType = 23
 
 	// CodespaceRoot is a codespace for error codes in this file only.
 	// Notice that 0 is an "unset" codespace, which can be overridden with
@@ -151,6 +157,24 @@ func ErrNoSignatures(msg string) Error {
 }
 func ErrGasOverflow(msg string) Error {
 	return newErrorWithRootCodespace(CodeGasOverflow, msg)
+}
+func ErrInvalidSlash(msg string) Error {
+	return newErrorWithRootCodespace(CodeInvalidSlash, msg)
+}
+func ErrNegativeAmount(msg string) Error {
+	return newErrorWithRootCodespace(CodeNegativeAmont, msg)
+}
+func ErrBurnStakedTokens(msg string) Error {
+	return newErrorWithRootCodespace(CodeBurnStakedTokens, msg)
+}
+func ErrForceValidatorUnstake(msg string) Error {
+	return newErrorWithRootCodespace(CodeForceValidatorUnstake, msg)
+}
+func ErrModuleAccountCreate(msg string) Error {
+	return newErrorWithRootCodespace(CodeModuleAccountCreate, msg)
+}
+func ErrForbidden(msg string) Error {
+	return newErrorWithRootCodespace(CodeForbidden, msg)
 }
 
 //----------------------------------------
@@ -305,7 +329,7 @@ func AppendMsgToErr(msg string, err string) string {
 func mustGetMsgIndex(abciLog string) int {
 	msgIdx := strings.Index(abciLog, "message\":\"")
 	if msgIdx == -1 {
-		panic(fmt.Sprintf("invalid error format: %s", abciLog))
+		panic(fmt.Errorf("invalid error format: %s", abciLog))
 	}
 	return msgIdx + len("message\":\"")
 }

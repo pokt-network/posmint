@@ -3,8 +3,9 @@ package types
 
 import (
 	"fmt"
-	sdk "github.com/pokt-network/posmint/types"
 	"strings"
+
+	sdk "github.com/pokt-network/posmint/types"
 )
 
 type CodeType = sdk.CodeType
@@ -25,6 +26,7 @@ const (
 	CodeNotEnoughCoins        CodeType          = 112
 	CodeValidatorTombstoned   CodeType          = 113
 	CodeCantHandleEvidence    CodeType          = 114
+	CodeMinimumUnstake        CodeType          = 115
 )
 
 func ErrNilValidatorAddr(codespace sdk.CodespaceType) sdk.Error {
@@ -51,6 +53,9 @@ func ErrCantHandleEvidence(codespace sdk.CodespaceType) sdk.Error {
 
 func ErrMinimumStake(codespace sdk.CodespaceType) sdk.Error {
 	return sdk.NewError(codespace, CodeMinimumStake, "validator isn't staking above the minimum")
+}
+func ErrMinimumUnstake(codespace sdk.CodespaceType) sdk.Error {
+	return sdk.NewError(codespace, CodeMinimumUnstake, "validator trying to begin unstaking has less than the minimum stake")
 }
 
 func ErrValidatorPubKeyExists(codespace sdk.CodespaceType) sdk.Error {

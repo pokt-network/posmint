@@ -128,6 +128,7 @@ func TestBurnStakedTokens(t *testing.T) {
 		validator  types.Validator
 		burnAmount sdk.Int
 		amount     sdk.Int
+		codeErr    sdk.CodeType
 		errs       bool
 	}{
 		{
@@ -142,6 +143,7 @@ func TestBurnStakedTokens(t *testing.T) {
 			validator:  types.Validator{Address: validatorAddress},
 			burnAmount: sdk.NewInt(-1),
 			amount:     sdk.NewInt(10),
+			codeErr: sdk.CodeNegativeAmont,
 			errs:       true,
 		},
 	}
@@ -155,7 +157,8 @@ func TestBurnStakedTokens(t *testing.T) {
 				sendFromModuleToAccount(t, context, &keeper, types.StakedPoolName, test.validator.Address, supplySize)
 				keeper.coinsFromUnstakedToStaked(context, test.validator, test.amount)
 				err := keeper.burnStakedTokens(context, test.burnAmount)
-				assert.Nil(t, err, "error is not nil")
+				assert.NotNil(t, err, "error is not nil")
+				assert.Equal(t, err.Code(), test.codeErr)
 			default:
 				addMintedCoinsToModule(t, context, &keeper, types.StakedPoolName)
 				sendFromModuleToAccount(t, context, &keeper, types.StakedPoolName, test.validator.Address, supplySize)

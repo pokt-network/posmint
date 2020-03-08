@@ -152,7 +152,11 @@ func processSig(acc Account, sig StdSignature, signBytes []byte, simulate bool) 
 	if !res.IsOK() {
 		return nil, res
 	}
-	err := acc.SetPubKey(posCrypto.PubKeyToPublicKey(pubKey))
+	key, err := posCrypto.PubKeyToPublicKey(pubKey)
+	if err != nil {
+		return nil, sdk.ErrInternal("could not convert pubKey to Public Key").Result()
+	}
+	err = acc.SetPubKey(key)
 	if err != nil {
 		return nil, sdk.ErrInternal("setting PubKey on signer's account").Result()
 	}
