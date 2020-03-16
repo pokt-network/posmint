@@ -16,7 +16,7 @@ func CompleteAndBroadcastTxCLI(txBldr auth.TxBuilder, cliCtx CLIContext, msgs []
 		return nil, err
 	}
 	// build and sign the transaction
-	txBytes, err := txBldr.BuildAndSign(cliCtx.FromAddress, cliCtx.Passphrase, msgs)
+	txBytes, err := txBldr.BuildAndSign(cliCtx.FromAddress, cliCtx.PrivateKey, msgs)
 	if err != nil {
 		return nil, err
 	}

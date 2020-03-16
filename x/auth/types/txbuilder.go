@@ -88,7 +88,7 @@ func (bldr TxBuilder) WithMemo(memo string) TxBuilder {
 
 // BuildAndSign builds a single message to be signed, and signs a transaction
 // with the built message given a address, passphrase, and a set of messages.
-func (bldr TxBuilder) BuildAndSign(address sdk.Address, passphrase string, msgs []sdk.Msg) ([]byte, error) {
+func (bldr TxBuilder) BuildAndSign(address sdk.Address, privateKey crypto.PrivateKey, msgs []sdk.Msg) ([]byte, error) {
 	if bldr.keybase == nil {
 		return nil, errors.New(fmt.Sprintf("cant build and sign transaciton: the keybase is nil"))
 	}
@@ -97,7 +97,7 @@ func (bldr TxBuilder) BuildAndSign(address sdk.Address, passphrase string, msgs 
 	}
 	entropy := common.RandInt64()
 	bytesToSign := StdSignBytes(bldr.chainID, entropy, bldr.fees, msgs, bldr.memo)
-	sigBytes, _, err := bldr.keybase.Sign(address, passphrase, bytesToSign)
+	sigBytes, err := privateKey.Sign(bytesToSign)
 	if err != nil {
 		return nil, err
 	}
