@@ -3,6 +3,7 @@ package util
 import (
 	"errors"
 	"fmt"
+	"github.com/pokt-network/posmint/crypto"
 
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
@@ -19,6 +20,7 @@ type CLIContext struct { // TODO consider module passing clicontext instead of n
 	Passphrase    string
 	Height        int64
 	BroadcastMode BroadcastType
+	PrivateKey    crypto.PrivateKey
 }
 
 // NewCLIContext returns a new initialized CLIContext with parameters from the
