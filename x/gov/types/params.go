@@ -26,7 +26,7 @@ var _ sdk.ParamSet = &Params{}
 type Params struct {
 	ACL      ACL         `json:"acl"`
 	DAOOwner sdk.Address `json:"dao_owner"`
-	Upgrade  Upgrade    `json:"upgrade"`
+	Upgrade  Upgrade     `json:"upgrade"`
 }
 
 // NewParams creates a new Params object

@@ -87,7 +87,7 @@ func (k Keeper) ModifyParam(ctx sdk.Ctx, aclKey string, paramValue interface{}, 
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 			sdk.NewAttribute(sdk.AttributeKeyAction, fmt.Sprintf("UPGRADE CONFRIMED: %s at height %v", u.UpgradeVersion(), u.UpgradeHeight())),
 			sdk.NewAttribute(sdk.AttributeKeySender, owner.String()),
-		), )
+		))
 	}
 	return sdk.Result{Events: ctx.EventManager().Events()}
 }

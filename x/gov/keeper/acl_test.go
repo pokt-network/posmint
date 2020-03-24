@@ -20,7 +20,7 @@ func TestKeeper_VerifyACL(t *testing.T) {
 	keeper.SetParams(ctx, types.Params{
 		ACL:      acl,
 		DAOOwner: addr,
-		Upgrade: types.Upgrade{},
+		Upgrade:  types.Upgrade{},
 	})
 	assert.Nil(t, keeper.VerifyACL(ctx, posACLKey, addr))
 	assert.NotNil(t, keeper.VerifyACL(ctx, posACLKey, addr2))

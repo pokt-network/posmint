@@ -7,8 +7,8 @@ import (
 
 // GenesisState - all auth state that must be provided at genesis
 type GenesisState struct {
-	Params    Params   `json:"params" yaml:"params"`
-	DAOTokens sdk.Int  `json:"DAO_Tokens"`
+	Params    Params  `json:"params" yaml:"params"`
+	DAOTokens sdk.Int `json:"DAO_Tokens"`
 }
 
 // NewGenesisState - Create a new genesis state
