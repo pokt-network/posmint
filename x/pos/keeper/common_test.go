@@ -18,7 +18,7 @@ import (
 	"github.com/pokt-network/posmint/store"
 	"github.com/pokt-network/posmint/x/auth"
 	"github.com/pokt-network/posmint/x/bank"
-	"github.com/pokt-network/posmint/x/params"
+	"github.com/pokt-network/posmint/x/gov"
 	"github.com/pokt-network/posmint/x/pos/types"
 	//"github.com/pokt-network/posmint/x/supply/internal/types"
 
@@ -33,7 +33,7 @@ var (
 	ModuleBasics = module.NewBasicManager(
 		auth.AppModuleBasic{},
 		bank.AppModuleBasic{},
-		params.AppModuleBasic{},
+		gov.AppModuleBasic{},
 		supply.AppModuleBasic{},
 	)
 )
@@ -46,7 +46,7 @@ func makeTestCodec() *codec.Codec {
 	bank.RegisterCodec(cdc)
 	auth.RegisterCodec(cdc)
 	supply.RegisterCodec(cdc)
-	params.RegisterCodec(cdc)
+	gov.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
 
@@ -59,8 +59,8 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Context, []auth.Account,
 	nAccs := int64(4)
 
 	keyAcc := sdk.NewKVStoreKey(auth.StoreKey)
-	keyParams := sdk.NewKVStoreKey(params.StoreKey)
-	tkeyParams := sdk.NewTransientStoreKey(params.TStoreKey)
+	keyParams := sdk.ParamsKey
+	tkeyParams := sdk.ParamsTKey
 	keySupply := sdk.NewKVStoreKey(supply.StoreKey)
 
 	db := dbm.NewMemDB()
@@ -85,34 +85,28 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Context, []auth.Account,
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName: nil,
 		types.StakedPoolName:  {supply.Burner, supply.Staking, supply.Minter},
-		types.DAOPoolName:     {supply.Burner, supply.Staking, supply.Minter},
 	}
 	modAccAddrs := make(map[string]bool)
 	for acc := range maccPerms {
 		modAccAddrs[supply.NewModuleAddress(acc).String()] = true
 	}
 	valTokens := sdk.TokensFromConsensusPower(initPower)
-
-	pk := params.NewKeeper(cdc, keyParams, tkeyParams, params.DefaultCodespace)
-	ak := auth.NewAccountKeeper(cdc, keyAcc, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
-	bk := bank.NewBaseKeeper(ak, pk.Subspace(bank.DefaultParamspace), bank.DefaultCodespace, modAccAddrs)
+	akSubspace := sdk.NewSubspace(auth.DefaultParamspace)
+	bkSubspace := sdk.NewSubspace(bank.DefaultParamspace)
+	posSubspace := sdk.NewSubspace(DefaultParamspace)
+	ak := auth.NewAccountKeeper(cdc, keyAcc, akSubspace, auth.ProtoBaseAccount)
+	bk := bank.NewBaseKeeper(ak, bkSubspace, bank.DefaultCodespace, modAccAddrs)
 	sk := supply.NewKeeper(cdc, keySupply, ak, bk, maccPerms)
-
 	moduleManager := module.NewManager(
 		auth.NewAppModule(ak),
 		bank.NewAppModule(bk, ak),
 		supply.NewAppModule(sk, ak),
 	)
-
 	genesisState := ModuleBasics.DefaultGenesis()
 	moduleManager.InitGenesis(ctx, genesisState)
-
-	posSubSpace := pk.Subspace(DefaultParamspace)
 	initialCoins := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, valTokens))
 	accs := createTestAccs(ctx, int(nAccs), initialCoins, &ak)
-
-	keeper := NewKeeper(cdc, keySupply, bk, sk, posSubSpace, sdk.CodespaceType("pos"))
-
+	keeper := NewKeeper(cdc, keySupply, bk, sk, posSubspace, "pos")
 	params := types.DefaultParams()
 	keeper.SetParams(ctx, params)
 	return ctx, accs, keeper

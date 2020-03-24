@@ -7,7 +7,6 @@ import (
 
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/bank/internal/types"
-	"github.com/pokt-network/posmint/x/params"
 )
 
 var _ Keeper = (*BaseKeeper)(nil)
@@ -23,12 +22,12 @@ type BaseKeeper struct {
 	BaseSendKeeper
 
 	ak         types.AccountKeeper
-	paramSpace params.Subspace
+	paramSpace sdk.Subspace
 }
 
 // NewBaseKeeper returns a new BaseKeeper
 func NewBaseKeeper(ak types.AccountKeeper,
-	paramSpace params.Subspace,
+	paramSpace sdk.Subspace,
 	codespace sdk.CodespaceType, blacklistedAddrs map[string]bool) BaseKeeper {
 
 	ps := paramSpace.WithKeyTable(types.ParamKeyTable())
@@ -65,7 +64,7 @@ type BaseSendKeeper struct {
 	BaseViewKeeper
 
 	ak         types.AccountKeeper
-	paramSpace params.Subspace
+	paramSpace sdk.Subspace
 
 	// list of addresses that are restricted from receiving transactions
 	blacklistedAddrs map[string]bool
@@ -73,7 +72,7 @@ type BaseSendKeeper struct {
 
 // NewBaseSendKeeper returns a new BaseSendKeeper.
 func NewBaseSendKeeper(ak types.AccountKeeper,
-	paramSpace params.Subspace, codespace sdk.CodespaceType, blacklistedAddrs map[string]bool) BaseSendKeeper {
+	paramSpace sdk.Subspace, codespace sdk.CodespaceType, blacklistedAddrs map[string]bool) BaseSendKeeper {
 
 	return BaseSendKeeper{
 		BaseViewKeeper:   NewBaseViewKeeper(ak, codespace),

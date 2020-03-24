@@ -143,7 +143,7 @@ func TestBurnStakedTokens(t *testing.T) {
 			validator:  types.Validator{Address: validatorAddress},
 			burnAmount: sdk.NewInt(-1),
 			amount:     sdk.NewInt(10),
-			codeErr: sdk.CodeNegativeAmont,
+			codeErr:    sdk.CodeNegativeAmont,
 			errs:       true,
 		},
 	}

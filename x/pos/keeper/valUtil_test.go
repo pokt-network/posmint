@@ -16,7 +16,7 @@ func TestMustGetValidator(t *testing.T) {
 	}
 	type expected struct {
 		validator types.Validator
-		message  error
+		message   error
 	}
 	tests := []struct {
 		name   string

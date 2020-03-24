@@ -7,7 +7,7 @@ import (
 // RouterKey is they name of the bank module
 const RouterKey = ModuleName
 
-// MsgSend - high level transaction of the coin module
+// MsgChangeParam - high level transaction of the coin module
 type MsgSend struct {
 	FromAddress sdk.Address `json:"from_address" yaml:"from_address"`
 	ToAddress   sdk.Address `json:"to_address" yaml:"to_address"`

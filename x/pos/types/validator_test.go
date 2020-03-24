@@ -370,7 +370,7 @@ func TestValidator_Equals(t *testing.T) {
 				UnstakingCompletionTime: tt.fields.UnstakingCompletionTime,
 			}
 			if got := v.Equals(tt.args.v2); got != tt.want {
-				t.Errorf("Equals() = %v, want %v", got, tt.want)
+				t.Errorf("EqualsMulti() = %v, want %v", got, tt.want)
 			}
 		})
 	}

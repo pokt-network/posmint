@@ -178,6 +178,7 @@ func (app *BaseApp) MountStores(keys ...sdk.StoreKey) {
 // MountStores mounts all IAVL or DB stores to the provided keys in the BaseApp
 // multistore.
 func (app *BaseApp) MountKVStores(keys map[string]*sdk.KVStoreKey) {
+	keys[sdk.ParamsKey.Name()] = sdk.ParamsKey
 	for _, key := range keys {
 		if !app.fauxMerkleMode {
 			app.MountStore(key, sdk.StoreTypeIAVL)
@@ -192,6 +193,7 @@ func (app *BaseApp) MountKVStores(keys map[string]*sdk.KVStoreKey) {
 // MountStores mounts all IAVL or DB stores to the provided keys in the BaseApp
 // multistore.
 func (app *BaseApp) MountTransientStores(keys map[string]*sdk.TransientStoreKey) {
+	keys[sdk.ParamsTKey.Name()] = sdk.ParamsTKey
 	for _, key := range keys {
 		app.MountStore(key, sdk.StoreTypeTransient)
 	}
@@ -966,7 +968,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 		anteCtx, msCache = app.cacheTxContext(ctx, txBytes)
 
 		newCtx, result, abort := app.anteHandler(anteCtx, tx, txBytes, app.tmNode, mode == runTxModeSimulate)
-		if !newCtx.IsZero() {
+		if newCtx != nil && !newCtx.IsZero() {
 			// At this point, newCtx.MultiStore() is cache-wrapped, or something else
 			// replaced by the ante handler. We want the original multistore, not one
 			// which was cache-wrapped for the ante handler.

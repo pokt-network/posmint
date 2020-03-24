@@ -3,6 +3,7 @@ package keeper
 // DONTCOVER
 
 import (
+	"github.com/pokt-network/posmint/x/gov/keeper"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
@@ -13,7 +14,7 @@ import (
 	"github.com/pokt-network/posmint/x/auth"
 	authTypes "github.com/pokt-network/posmint/x/auth/types"
 	"github.com/pokt-network/posmint/x/bank/internal/types"
-	"github.com/pokt-network/posmint/x/params"
+	"github.com/pokt-network/posmint/x/gov"
 )
 
 type testInput struct {
@@ -21,7 +22,7 @@ type testInput struct {
 	ctx sdk.Context
 	k   Keeper
 	ak  auth.AccountKeeper
-	pk  params.Keeper
+	pk  keeper.Keeper
 }
 
 func setupTestInput() testInput {
@@ -32,8 +33,8 @@ func setupTestInput() testInput {
 	codec.RegisterCrypto(cdc)
 
 	authCapKey := sdk.NewKVStoreKey("authCapKey")
-	keyParams := sdk.NewKVStoreKey("params")
-	tkeyParams := sdk.NewTransientStoreKey("transient_params")
+	keyParams := sdk.ParamsKey
+	tkeyParams := sdk.ParamsTKey
 
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(authCapKey, sdk.StoreTypeIAVL, db)
@@ -43,18 +44,15 @@ func setupTestInput() testInput {
 
 	blacklistedAddrs := make(map[string]bool)
 	blacklistedAddrs[sdk.Address([]byte("moduleAcc")).String()] = true
-
-	pk := params.NewKeeper(cdc, keyParams, tkeyParams, params.DefaultCodespace)
-
+	akSubspace := sdk.NewSubspace(auth.DefaultParamspace)
 	ak := auth.NewAccountKeeper(
-		cdc, authCapKey, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount,
+		cdc, authCapKey, akSubspace, auth.ProtoBaseAccount,
 	)
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "test-chain-id"}, false, log.NewNopLogger())
-
 	ak.SetParams(ctx, authTypes.DefaultParams())
-
-	bankKeeper := NewBaseKeeper(ak, pk.Subspace(types.DefaultParamspace), types.DefaultCodespace, blacklistedAddrs)
+	bkSubspace := sdk.NewSubspace(types.DefaultParamspace)
+	bankKeeper := NewBaseKeeper(ak, bkSubspace, types.DefaultCodespace, blacklistedAddrs)
 	bankKeeper.SetSendEnabled(ctx, true)
-
+	pk := keeper.NewKeeper(cdc, keyParams, tkeyParams, gov.DefaultCodespace, nil, akSubspace, bkSubspace)
 	return testInput{cdc: cdc, ctx: ctx, k: bankKeeper, ak: ak, pk: pk}
 }

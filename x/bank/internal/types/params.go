@@ -1,7 +1,7 @@
 package types
 
 import (
-	"github.com/pokt-network/posmint/x/params"
+	sdk "github.com/pokt-network/posmint/types"
 )
 
 const (
@@ -15,8 +15,8 @@ const (
 var ParamStoreKeySendEnabled = []byte("sendenabled")
 
 // ParamKeyTable type declaration for parameters
-func ParamKeyTable() params.KeyTable {
-	return params.NewKeyTable(
+func ParamKeyTable() sdk.KeyTable {
+	return sdk.NewKeyTable(
 		ParamStoreKeySendEnabled, false,
 	)
 }

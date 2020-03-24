@@ -14,7 +14,7 @@ const (
 )
 
 //nolint
-var ( // Keys for store prefixes
+var ( // PublicKeys for store prefixes
 	ProposerKey                     = []byte{0x01} // key for the proposer address used for rewards
 	ValidatorSigningInfoKey         = []byte{0x11} // Prefix for signing info used in slashing
 	ValidatorMissedBlockBitArrayKey = []byte{0x12} // Prefix for missed block bit array used in slashing

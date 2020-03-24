@@ -136,3 +136,75 @@ type marshalBaseAccount struct {
 	Coins   sdk.Coins
 	PubKey  string
 }
+
+// multisig account
+
+var _ exported.Account = (*MultiSigAccount)(nil)
+
+type MultiSigAccount struct {
+	Address   sdk.Address              `json:"address"`
+	PublicKey crypto.PublicKeyMultiSig `json:"public_key_multi_sig"`
+	Coins     sdk.Coins                `json:"coins"`
+}
+
+func NewMultiSigAccount(publicKey crypto.PublicKeyMultiSig, coins sdk.Coins) *MultiSigAccount {
+	return &MultiSigAccount{
+		Address:   sdk.Address(publicKey.Address()),
+		PublicKey: publicKey,
+		Coins:     coins,
+	}
+}
+
+func (m MultiSigAccount) GetAddress() sdk.Address {
+	return m.Address
+}
+
+func (m *MultiSigAccount) SetAddress(_ sdk.Address) error {
+	if m.Address != nil && len(m.Address) != 0 {
+		return sdk.ErrInternal(fmt.Sprintf("address already set: %s", m.Address))
+	}
+	if m.PublicKey == nil {
+		return sdk.ErrInternal("cannot have a nil public key for a multisig account")
+	}
+	m.Address = sdk.Address(m.PublicKey.Address())
+	return nil
+}
+
+func (m MultiSigAccount) GetPubKey() crypto.PublicKey {
+	return m.PublicKey
+}
+
+func (m MultiSigAccount) GetMultiPubKey() crypto.PublicKeyMultiSig {
+	return m.PublicKey
+}
+
+func (m MultiSigAccount) SetPubKey(pk crypto.PublicKey) error {
+	p, ok := pk.(crypto.PublicKeyMultiSig)
+	if !ok {
+		return sdk.ErrInternal("the public key must be of interface type: PublicKeyMultiSig")
+	}
+	m.PublicKey = p
+	return nil
+}
+
+func (m MultiSigAccount) GetCoins() sdk.Coins {
+	return m.Coins
+}
+
+func (m *MultiSigAccount) SetCoins(c sdk.Coins) error {
+	m.Coins = c
+	return nil
+}
+
+func (m MultiSigAccount) SpendableCoins(blockTime time.Time) sdk.Coins {
+	return m.GetCoins()
+}
+
+func (m MultiSigAccount) String() string {
+	return fmt.Sprintf(`
+  Address:       %s
+  Pubkey:        %s
+  Coins:         %s`,
+		m.Address, m.PublicKey, m.Coins,
+	)
+}

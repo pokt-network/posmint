@@ -213,7 +213,7 @@ const (
 )
 
 //----------------------------------------
-// Keys for accessing substores
+// PublicKeys for accessing substores
 
 // StoreKey is a key used to index stores in a MultiStore.
 type StoreKey interface {
