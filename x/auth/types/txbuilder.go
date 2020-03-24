@@ -87,7 +87,7 @@ func (bldr TxBuilder) WithMemo(memo string) TxBuilder {
 }
 
 // BuildAndSign builds a single message to be signed, and signs a transaction
-// with the built message given a address, passphrase, and a set of messages.
+// with the built message given a address, private key, and a set of messages.
 func (bldr TxBuilder) BuildAndSign(address sdk.Address, privateKey crypto.PrivateKey, msgs []sdk.Msg) ([]byte, error) {
 	if bldr.keybase == nil {
 		return nil, errors.New(fmt.Sprintf("cant build and sign transaciton: the keybase is nil"))
@@ -98,6 +98,27 @@ func (bldr TxBuilder) BuildAndSign(address sdk.Address, privateKey crypto.Privat
 	entropy := common.RandInt64()
 	bytesToSign := StdSignBytes(bldr.chainID, entropy, bldr.fees, msgs, bldr.memo)
 	sigBytes, err := privateKey.Sign(bytesToSign)
+	if err != nil {
+		return nil, err
+	}
+	sig := StdSignature{
+		Signature: sigBytes,
+	}
+	return bldr.txEncoder(NewStdTx(msgs, bldr.fees, []StdSignature{sig}, bldr.memo, entropy))
+}
+
+// BuildAndSignWithKeyBase builds a single message to be signed, and signs a transaction
+// with the built message given a address, passphrase, and a set of messages.
+func (bldr TxBuilder) BuildAndSignWithKeyBase(address sdk.Address, passphrase string, msgs []sdk.Msg) ([]byte, error) {
+	if bldr.keybase == nil {
+		return nil, errors.New(fmt.Sprintf("cant build and sign transaciton: the keybase is nil"))
+	}
+	if bldr.chainID == "" {
+		return nil, errors.New(fmt.Sprintf("cant build and sign transaciton: the chainID is empty"))
+	}
+	entropy := common.RandInt64()
+	bytesToSign := StdSignBytes(bldr.chainID, entropy, bldr.fees, msgs, bldr.memo)
+	sigBytes, _, err := bldr.keybase.Sign(address, passphrase, bytesToSign)
 	if err != nil {
 		return nil, err
 	}

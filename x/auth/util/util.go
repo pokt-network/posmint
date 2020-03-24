@@ -15,18 +15,37 @@ func CompleteAndBroadcastTxCLI(txBldr auth.TxBuilder, cliCtx CLIContext, msgs []
 	if err != nil {
 		return nil, err
 	}
+
 	// build and sign the transaction
-	txBytes, err := txBldr.BuildAndSign(cliCtx.FromAddress, cliCtx.PrivateKey, msgs)
-	if err != nil {
-		return nil, err
-	}
-	// broadcast to a Tendermint node
-	tx, err := cliCtx.BroadcastTx(txBytes)
-	if err != nil {
-		return nil, err
+
+	if cliCtx.PrivateKey != nil {
+		txBytes, err := txBldr.BuildAndSign(cliCtx.FromAddress, cliCtx.PrivateKey, msgs)
+		if err != nil {
+			return nil, err
+		}
+		// broadcast to a Tendermint node
+		tx, err := cliCtx.BroadcastTx(txBytes)
+		if err != nil {
+			return nil, err
+		}
+
+		return &tx, nil
+	} else {
+
+		txBytes, err := txBldr.BuildAndSignWithKeyBase(cliCtx.FromAddress, cliCtx.Passphrase, msgs)
+		if err != nil {
+			return nil, err
+		}
+		// broadcast to a Tendermint node
+		tx, err := cliCtx.BroadcastTx(txBytes)
+		if err != nil {
+			return nil, err
+		}
+
+		return &tx, nil
+
 	}
 
-	return &tx, nil
 }
 
 // PrepareTxBuilder populates a TxBuilder in preparation for the build of a Tx.
