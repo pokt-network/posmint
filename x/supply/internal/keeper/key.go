@@ -8,7 +8,7 @@ import (
 // DefaultCodespace from the supply module
 var DefaultCodespace sdk.CodespaceType = types.ModuleName
 
-// Keys for supply store
+// PublicKeys for supply store
 // Items are stored with the following key: values
 //
 // - 0x00: Supply

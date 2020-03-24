@@ -17,8 +17,8 @@ var (
 	//maxGasWanted = uint64((1 << 63) - 1)
 )
 
-// StdTx is a standard way to wrap a Msg with Fee and Signatures.
-// NOTE: the first signature is the fee payer (Signatures must not be nil).
+// StdTx is a standard way to wrap a Msg with Fee and Sigs.
+// NOTE: the first signature is the fee payer (Sigs must not be nil).
 type StdTx struct {
 	Msgs       []sdk.Msg      `json:"msg" yaml:"msg"`
 	Fee        sdk.Coins      `json:"fee" yaml:"fee"`
@@ -144,7 +144,7 @@ func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msgs []sdk.Msg, 
 // StdSignature represents a sig
 type StdSignature struct {
 	posCrypto.PublicKey `json:"pub_key" yaml:"pub_key"` // optional
-	Signature           []byte `json:"signature" yaml:"signature"`
+	Signature           []byte                          `json:"signature" yaml:"signature"`
 }
 
 // DefaultTxDecoder logic for standard transaction decoding

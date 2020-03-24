@@ -15,7 +15,6 @@ import (
 	"github.com/pokt-network/posmint/store"
 	"github.com/pokt-network/posmint/x/auth"
 	"github.com/pokt-network/posmint/x/bank"
-	"github.com/pokt-network/posmint/x/params"
 	"github.com/pokt-network/posmint/x/supply/internal/types"
 
 	sdk "github.com/pokt-network/posmint/types"
@@ -46,8 +45,8 @@ func makeTestCodec() *codec.Codec {
 func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64) (sdk.Context, auth.AccountKeeper, Keeper) {
 
 	keyAcc := sdk.NewKVStoreKey(auth.StoreKey)
-	keyParams := sdk.NewKVStoreKey(params.StoreKey)
-	tkeyParams := sdk.NewTransientStoreKey(params.TStoreKey)
+	keyParams := sdk.ParamsKey
+	tkeyParams := sdk.ParamsTKey
 	keySupply := sdk.NewKVStoreKey(types.StoreKey)
 
 	db := dbm.NewMemDB()
@@ -70,10 +69,8 @@ func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64)
 	cdc := makeTestCodec()
 
 	blacklistedAddrs := make(map[string]bool)
-
-	pk := params.NewKeeper(cdc, keyParams, tkeyParams, params.DefaultCodespace)
-	ak := auth.NewAccountKeeper(cdc, keyAcc, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
-	bk := bank.NewBaseKeeper(ak, pk.Subspace(bank.DefaultParamspace), bank.DefaultCodespace, blacklistedAddrs)
+	ak := auth.NewAccountKeeper(cdc, keyAcc, sdk.NewSubspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
+	bk := bank.NewBaseKeeper(ak, sdk.NewSubspace(bank.DefaultParamspace), bank.DefaultCodespace, blacklistedAddrs)
 
 	valTokens := sdk.TokensFromConsensusPower(initPower)
 

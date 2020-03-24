@@ -191,7 +191,7 @@ func TestHandleValidatorSignature(t *testing.T) {
 		validator           types.Validator
 		tombstoned          bool
 		missedBlocksCounter int64
-		message            	error
+		message             error
 		pubKeyRelation      bool
 		signedInfo          bool
 		jail                bool
@@ -504,15 +504,15 @@ func TestValidateSlash(t *testing.T) {
 		found          bool
 	}
 	tests := []struct {
-		name   string
+		name string
 		errs bool
 		args
 		expected
 	}{
 		{
-			name:   "validates slash",
+			name: "validates slash",
 			errs: false,
-			args:   args{validator: stakedValidator},
+			args: args{validator: stakedValidator},
 			expected: expected{
 				validator:      stakedValidator,
 				found:          true,
@@ -521,9 +521,9 @@ func TestValidateSlash(t *testing.T) {
 			},
 		},
 		{
-			name:   "empty validator if not found",
+			name: "empty validator if not found",
 			errs: false,
-			args:   args{validator: stakedValidator},
+			args: args{validator: stakedValidator},
 			expected: expected{
 				validator:      stakedValidator,
 				found:          true,
@@ -532,9 +532,9 @@ func TestValidateSlash(t *testing.T) {
 			},
 		},
 		{
-			name:   "panics if unstakedValidator",
+			name: "panics if unstakedValidator",
 			errs: true,
-			args:   args{validator: unstakedValidator},
+			args: args{validator: unstakedValidator},
 			expected: expected{
 				validator:      stakedValidator,
 				found:          true,
@@ -545,9 +545,9 @@ func TestValidateSlash(t *testing.T) {
 			},
 		},
 		{
-			name:   "panics with invalid slashFactor",
+			name: "panics with invalid slashFactor",
 			errs: true,
-			args:   args{validator: unstakedValidator, slashFraction: sdk.NewDec(-10)},
+			args: args{validator: unstakedValidator, slashFraction: sdk.NewDec(-10)},
 			expected: expected{
 				validator:      stakedValidator,
 				found:          true,
@@ -558,9 +558,9 @@ func TestValidateSlash(t *testing.T) {
 			},
 		},
 		{
-			name:   "panics with wrong infraction height",
+			name: "panics with wrong infraction height",
 			errs: true,
-			args:   args{validator: unstakedValidator},
+			args: args{validator: unstakedValidator},
 			expected: expected{
 				validator:      stakedValidator,
 				found:          true,

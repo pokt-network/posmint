@@ -11,7 +11,6 @@ import (
 	"github.com/pokt-network/posmint/store"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/auth/types"
-	"github.com/pokt-network/posmint/x/params/subspace"
 	"github.com/pokt-network/posmint/x/supply/exported"
 )
 
@@ -68,7 +67,8 @@ func setupTestInput() testInput {
 	ms.MountStoreWithDB(tkeyParams, sdk.StoreTypeTransient, db)
 	ms.LoadLatestVersion()
 
-	ps := subspace.NewSubspace(cdc, keyParams, tkeyParams, types.DefaultParamspace)
+	ps := sdk.NewSubspace(types.DefaultParamspace)
+	ps.SetCodec(cdc)
 	ak := NewAccountKeeper(cdc, authCapKey, ps, types.ProtoBaseAccount)
 	sk := NewDummySupplyKeeper(ak)
 

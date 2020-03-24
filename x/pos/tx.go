@@ -97,6 +97,7 @@ func newTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, passphr
 	}
 	txBuilder := auth.NewTxBuilder(
 		auth.DefaultTxEncoder(cdc),
+		auth.DefaultTxDecoder(cdc),
 		chainID,
 		"",
 		sdk.NewCoins(sdk.NewCoin("upokt", sdk.NewInt(10)))).WithKeybase(keybase) // todo get stake denom

@@ -70,7 +70,7 @@ func TestMsgSendGetSigners(t *testing.T) {
 }
 
 func TestMsgMultiSendRoute(t *testing.T) {
-	// Construct a MsgSend
+	// Construct a MsgChangeParam
 	addr1 := sdk.Address([]byte("input"))
 	addr2 := sdk.Address([]byte("output"))
 	coins := sdk.NewCoins(sdk.NewInt64Coin("atom", 10))

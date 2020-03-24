@@ -98,17 +98,17 @@ func (ma ModuleAccount) String() string {
 // MarshalYAML returns the YAML representation of a ModuleAccount.
 func (ma ModuleAccount) MarshalYAML() (interface{}, error) {
 	bs, err := yaml.Marshal(struct {
-		Address       sdk.Address
-		Coins         sdk.Coins
-		PubKey        string
-		Name          string
-		Permissions   []string
+		Address     sdk.Address
+		Coins       sdk.Coins
+		PubKey      string
+		Name        string
+		Permissions []string
 	}{
-		Address:       ma.Address,
-		Coins:         ma.Coins,
-		PubKey:        "",
-		Name:          ma.Name,
-		Permissions:   ma.Permissions,
+		Address:     ma.Address,
+		Coins:       ma.Coins,
+		PubKey:      "",
+		Name:        ma.Name,
+		Permissions: ma.Permissions,
 	})
 
 	if err != nil {

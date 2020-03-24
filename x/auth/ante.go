@@ -6,7 +6,6 @@ import (
 	posCrypto "github.com/pokt-network/posmint/crypto"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/auth/types"
-	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/node"
 	"github.com/tendermint/tendermint/rpc/client"
 	tmTypes "github.com/tendermint/tendermint/types"
@@ -14,7 +13,7 @@ import (
 
 // NewAnteHandler returns an AnteHandler that checks signatures and deducts fees from the first signer.
 func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteHandler {
-	return func(ctx sdk.Ctx, tx sdk.Tx, txBz []byte, tmNode *node.Node, simulate bool, ) (newCtx sdk.Ctx, res sdk.Result, abort bool) {
+	return func(ctx sdk.Ctx, tx sdk.Tx, txBz []byte, tmNode *node.Node, simulate bool) (newCtx sdk.Ctx, res sdk.Result, abort bool) {
 		if addr := supplyKeeper.GetModuleAddress(types.FeeCollectorName); addr == nil {
 			panic(fmt.Sprintf("%s module account has not been set", types.FeeCollectorName))
 		}
@@ -71,7 +70,7 @@ func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteH
 			// reload the account as fees have been deducted
 			signerAccs[0] = ak.GetAccount(ctx, signerAccs[0].GetAddress())
 		}
-		// stdSigs contains the sequence number, account number, and signatures.
+		// stdSigs contains signatures.
 		// When simulating, this would just be a 0-length slice.
 		stdSigs := stdTx.GetSignatures()
 		for i := 0; i < len(stdSigs); i++ {
@@ -85,7 +84,6 @@ func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteH
 			// check signature, return account with incremented nonce
 			signBytes := GetSignBytes(ctx.ChainID(), stdTx)
 			signerAccs[i], res = processSig(signerAccs[i], stdSigs[i], signBytes, simulate)
-			// check for duplicate transaction not in cache todo added
 			// todo when editing tendermint, pass txIndexer so no http
 			c := client.NewHTTP(tmNode.Config().RPC.ListenAddress, "/websocket")
 			_, err := c.Tx(tmTypes.Tx(txBz).Hash(), false)
@@ -152,46 +150,43 @@ func processSig(acc Account, sig StdSignature, signBytes []byte, simulate bool) 
 	if !res.IsOK() {
 		return nil, res
 	}
-	key, err := posCrypto.PubKeyToPublicKey(pubKey)
-	if err != nil {
-		return nil, sdk.ErrInternal("could not convert pubKey to Public Key").Result()
+	pk, ok := pubKey.(posCrypto.PublicKeyMultiSig)
+	if ok {
+		if !simulate && !pk.VerifyBytes(signBytes, sig.Signature) {
+			return nil, sdk.ErrUnauthorized("signature verification failed; verify correct account sequence and chain-id").Result()
+		}
 	}
-	err = acc.SetPubKey(key)
-	if err != nil {
-		return nil, sdk.ErrInternal("setting PubKey on signer's account").Result()
-	}
-
 	if !simulate && !pubKey.VerifyBytes(signBytes, sig.Signature) {
 		return nil, sdk.ErrUnauthorized("signature verification failed; verify correct account sequence and chain-id").Result()
 	}
-
-	//if err := acc.SetSequence(acc.GetSequence() + 1); err != nil {
-	//	panic(err)
-	//}
-	// TODO removed
-
 	return acc, res
 }
 
 // ProcessPubKey verifies that the given account address matches that of the
 // StdSignature. In addition, it will set the public key of the account if it
 // has not been set.
-func ProcessPubKey(acc Account, sig StdSignature) (crypto.PubKey, sdk.Result) {
+func ProcessPubKey(acc Account, sig StdSignature) (posCrypto.PublicKey, sdk.Result) {
 	// If pubkey is not known for account, set it from the StdSignature.
 	pubKey := acc.GetPubKey()
-
 	if pubKey == nil {
 		pubKey = sig.PublicKey
 		if pubKey == nil {
 			return nil, sdk.ErrInvalidPubKey("PubKey not found").Result()
 		}
-
 		if !bytes.Equal(pubKey.Address(), acc.GetAddress()) {
 			return nil, sdk.ErrInvalidPubKey(
 				fmt.Sprintf("PubKey does not match Signer address %s", acc.GetAddress())).Result()
 		}
+		//// set the public key because the account public key is nil
+		//key, err := posCrypto.PubKeyToPublicKey(pubKey)
+		//if err != nil {
+		//	return nil, sdk.ErrInternal("could not convert pubKey to Public Key").Result()
+		//}
+		//err = acc.SetPubKey(key)
+		//if err != nil {
+		//	return nil, sdk.ErrInternal("setting PubKey on signer's account").Result()
+		//}
 	}
-
 	return pubKey, sdk.Result{}
 }
 

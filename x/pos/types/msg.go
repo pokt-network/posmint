@@ -100,7 +100,7 @@ func (msg MsgUnjail) ValidateBasic() sdk.Error {
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-// MsgSend structure for sending coins
+// MsgChangeParam structure for sending coins
 type MsgSend struct {
 	FromAddress sdk.Address
 	ToAddress   sdk.Address

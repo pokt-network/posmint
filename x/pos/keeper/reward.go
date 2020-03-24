@@ -30,36 +30,20 @@ func (k Keeper) rewardFromFees(ctx sdk.Ctx, previousProposer sdk.Address) {
 	}
 	// calculate the total reward by adding relays to the
 	totalReward := feesCollected.AmountOf(k.StakeDenom(ctx))
-	// calculate previous proposer reward
-	baseProposerRewardPercentage := k.getProposerRewardPercentage(ctx)
-	// divide up the reward from the proposer reward and the dao reward
-	proposerReward := baseProposerRewardPercentage.Mul(totalReward).Quo(sdk.NewInt(100))
-	daoReward := totalReward.Sub(proposerReward)
 	// get the validator structure
 	proposerValidator := k.Validator(ctx, previousProposer)
 	if proposerValidator != nil {
-		propRewardCoins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), proposerReward))
-		daoRewardCoins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), daoReward))
+		propRewardCoins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), totalReward))
 		// send to validator
 		if err := k.supplyKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName,
 			sdk.Address(proposerValidator.GetAddress()), propRewardCoins); err != nil {
 			panic(err)
 		}
-		// send to rest dao
-		if err := k.supplyKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, types.DAOPoolName, daoRewardCoins); err != nil {
-			panic(err)
-		}
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
 				types.EventTypeProposerReward,
-				sdk.NewAttribute(sdk.AttributeKeyAmount, proposerReward.String()),
+				sdk.NewAttribute(sdk.AttributeKeyAmount, totalReward.String()),
 				sdk.NewAttribute(types.AttributeKeyValidator, proposerValidator.GetAddress().String()),
-			),
-		)
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				types.EventTypeDAOAllocation,
-				sdk.NewAttribute(sdk.AttributeKeyAmount, daoReward.String()),
 			),
 		)
 	} else {

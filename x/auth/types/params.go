@@ -3,9 +3,8 @@ package types
 import (
 	"bytes"
 	"fmt"
+	sdk "github.com/pokt-network/posmint/types"
 	"strings"
-
-	"github.com/pokt-network/posmint/x/params/subspace"
 )
 
 // DefaultParamspace defines the default auth module parameter subspace
@@ -25,7 +24,7 @@ var (
 	KeyTxSizeCostPerByte = []byte("TxSizeCostPerByte")
 )
 
-var _ subspace.ParamSet = &Params{}
+var _ sdk.ParamSet = &Params{}
 
 // Params defines the parameters for the auth module.
 type Params struct {
@@ -46,15 +45,15 @@ func NewParams(maxMemoCharacters, txSigLimit, txSizeCostPerByte,
 }
 
 // ParamKeyTable for auth module
-func ParamKeyTable() subspace.KeyTable {
-	return subspace.NewKeyTable().RegisterParamSet(&Params{})
+func ParamKeyTable() sdk.KeyTable {
+	return sdk.NewKeyTable().RegisterParamSet(&Params{})
 }
 
 // ParamSetPairs implements the ParamSet interface and returns all the key/value pairs
 // pairs of auth module's parameters.
 // nolint
-func (p *Params) ParamSetPairs() subspace.ParamSetPairs {
-	return subspace.ParamSetPairs{
+func (p *Params) ParamSetPairs() sdk.ParamSetPairs {
+	return sdk.ParamSetPairs{
 		{KeyMaxMemoCharacters, &p.MaxMemoCharacters},
 		{KeyTxSigLimit, &p.TxSigLimit},
 		{KeyTxSizeCostPerByte, &p.TxSizeCostPerByte},
@@ -81,7 +80,7 @@ func DefaultParams() Params {
 func (p Params) String() string {
 	var sb strings.Builder
 	sb.WriteString("Params: \n")
-	sb.WriteString(fmt.Sprintf("MaxMemoCharacters: %d\n", p.MaxMemoCharacters))
+	sb.WriteString(fmt.Sprintf("ACLKey: %d\n", p.MaxMemoCharacters))
 	sb.WriteString(fmt.Sprintf("TxSigLimit: %d\n", p.TxSigLimit))
 	sb.WriteString(fmt.Sprintf("TxSizeCostPerByte: %d\n", p.TxSizeCostPerByte))
 	return sb.String()

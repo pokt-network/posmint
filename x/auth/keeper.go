@@ -2,7 +2,6 @@ package auth
 
 import (
 	"fmt"
-
 	"github.com/pokt-network/posmint/crypto"
 	"github.com/tendermint/tendermint/libs/log"
 
@@ -10,7 +9,6 @@ import (
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/auth/exported"
 	"github.com/pokt-network/posmint/x/auth/types"
-	"github.com/pokt-network/posmint/x/params/subspace"
 )
 
 // AccountKeeper encodes/decodes accounts using the go-amino (binary)
@@ -25,14 +23,14 @@ type AccountKeeper struct {
 	// The codec codec for binary encoding/decoding of accounts.
 	cdc *codec.Codec
 
-	paramSubspace subspace.Subspace
+	paramSubspace sdk.Subspace
 }
 
 // NewAccountKeeper returns a new sdk.AccountKeeper that uses go-amino to
 // (binary) encode and decode concrete sdk.Accounts.
 // nolint
 func NewAccountKeeper(
-	cdc *codec.Codec, key sdk.StoreKey, paramstore subspace.Subspace, proto func() exported.Account,
+	cdc *codec.Codec, key sdk.StoreKey, paramstore sdk.Subspace, proto func() exported.Account,
 ) AccountKeeper {
 
 	return AccountKeeper{

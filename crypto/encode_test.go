@@ -69,7 +69,7 @@ func TestKeyEncodings(t *testing.T) {
 		checkAminoJSON(t, tc.privKey, &priv3, false) // TODO also check Prefix bytes.
 		require.EqualValues(t, tc.privKey, priv3)
 
-		// Check (de/en)codings of Signatures.
+		// Check (de/en)codings of Sigs.
 		var sig1, sig2 []byte
 		sig1, err := tc.privKey.Sign([]byte("something"))
 		require.NoError(t, err)

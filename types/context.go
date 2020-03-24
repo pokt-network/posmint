@@ -274,7 +274,7 @@ func (c Context) WithMinGasPrices(gasPrices DecCoins) Context {
 	return c
 }
 
-func (c Context) WithConsensusParams(params *abci.ConsensusParams)  Context {
+func (c Context) WithConsensusParams(params *abci.ConsensusParams) Context {
 	c.consParams = params
 	return c
 }

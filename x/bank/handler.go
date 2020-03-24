@@ -27,7 +27,7 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 	}
 }
 
-// Handle MsgSend.
+// Handle MsgChangeParam.
 func handleMsgSend(ctx sdk.Ctx, k keeper.Keeper, msg types.MsgSend) sdk.Result {
 	if !k.GetSendEnabled(ctx) {
 		return types.ErrSendDisabled(k.Codespace()).Result()

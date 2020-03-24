@@ -11,12 +11,12 @@ import (
 
 // Const Constants
 const (
-	ModuleName                    = types.ModuleName
-	StoreKey                      = types.StoreKey
-	FeeCollectorName              = types.FeeCollectorName
-	QuerierRoute                  = types.QuerierRoute
-	DefaultParamspace             = types.DefaultParamspace
-	QueryAccount                  = types.QueryAccount
+	ModuleName        = types.ModuleName
+	StoreKey          = types.StoreKey
+	FeeCollectorName  = types.FeeCollectorName
+	QuerierRoute      = types.QuerierRoute
+	DefaultParamspace = types.DefaultParamspace
+	QueryAccount      = types.QueryAccount
 )
 
 var (

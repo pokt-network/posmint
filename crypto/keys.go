@@ -3,14 +3,17 @@ package crypto
 import (
 	"encoding/hex"
 	"errors"
+	"fmt"
+	"github.com/tendermint/tendermint/types"
+	"reflect"
 
+	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 )
 
 type PublicKey interface {
-	NewPublicKey([]byte) (PublicKey, error)
 	PubKey() crypto.PubKey
 	Bytes() []byte
 	RawBytes() []byte
@@ -36,6 +39,34 @@ type PrivateKey interface {
 	PrivKeyToPrivateKey(crypto.PrivKey) PrivateKey
 	GenPrivateKey() PrivateKey
 	Size() int
+}
+
+type PublicKeyMultiSig interface {
+	Address() crypto.Address
+	String() string
+	Bytes() []byte
+	Equals(other crypto.PubKey) bool
+	VerifyBytes(msg []byte, multiSignature []byte) bool
+	PubKey() crypto.PubKey
+	RawBytes() []byte
+	RawString() string
+	PubKeyToPublicKey(crypto.PubKey) PublicKey
+	Size() int
+	// new methods
+	NewMultiKey(keys ...PublicKey) (PublicKeyMultiSig, error)
+	Keys() []PublicKey
+}
+
+type MultiSig interface {
+	AddSignature(sig []byte, key PublicKey, keys []PublicKey) (MultiSig, error)
+	AddSignatureByIndex(sig []byte, index int) MultiSig
+	Marshal() []byte
+	Unmarshal([]byte) MultiSig
+	NewMultiSignature() MultiSig
+	String() string
+	NumOfSigs() int
+	Signatures() [][]byte
+	GetSignatureByIndex(i int) (sig []byte, found bool)
 }
 
 func NewPublicKey(hexString string) (PublicKey, error) {
@@ -102,4 +133,22 @@ func GenerateSecp256k1PrivKey() PrivateKey {
 
 func GenerateEd25519PrivKey() PrivateKey {
 	return Ed25519PrivateKey{}.GenPrivateKey()
+}
+
+// should prevent unknown keys from being in consensus
+func CheckConsensusPubKey(pubKey crypto.PubKey) (abci.PubKey, error) {
+	switch pk := pubKey.(type) {
+	case ed25519.PubKeyEd25519:
+		return abci.PubKey{
+			Type: types.ABCIPubKeyTypeEd25519,
+			Data: pk[:],
+		}, nil
+	case secp256k1.PubKeySecp256k1:
+		return abci.PubKey{
+			Type: types.ABCIPubKeyTypeSecp256k1,
+			Data: pk[:],
+		}, nil
+	default:
+		return abci.PubKey{}, errors.New(fmt.Sprintf("unknown pubkey type: %v %v", pubKey, reflect.TypeOf(pubKey)))
+	}
 }

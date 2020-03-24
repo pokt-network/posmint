@@ -8,7 +8,6 @@ const (
 	EventTypeBeginUnstake          = "begin_unstake"
 	EventTypeUnstake               = "unstake"
 	EventTypeProposerReward        = "proposer_reward"
-	EventTypeDAOAllocation         = "dao_allocation"
 	EventTypeSlash                 = "slash"
 	EventTypeLiveness              = "liveness"
 	AttributeKeyAddress            = "address"
