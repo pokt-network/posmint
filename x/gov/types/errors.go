@@ -15,8 +15,8 @@ const (
 	CodeSubspaceNotFound                     = 6
 	CodeUnrecognizedDAOAction                = 7
 	CodeZeroValueDAOAction                   = 8
-	CodeZeroHeightUpgrade = 9
-	CodeEmptyVersionUpgrade = 10
+	CodeZeroHeightUpgrade                    = 9
+	CodeEmptyVersionUpgrade                  = 10
 )
 
 func ErrZeroHeightUpgrade(codespace sdk.CodespaceType) sdk.Error {
