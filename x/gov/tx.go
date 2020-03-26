@@ -62,12 +62,11 @@ func newTx(cdc *codec.Codec, msg sdk.Msg, fromAddr sdk.Address, tmNode client.Cl
 	chainID := genDoc.Genesis.ChainID
 	cliCtx = util.NewCLIContext(tmNode, fromAddr, passphrase).WithCodec(cdc)
 	cliCtx.BroadcastMode = util.BroadcastSync
-	accGetter := auth.NewAccountRetriever(cliCtx)
-	err = accGetter.EnsureExists(fromAddr)
+	err = cliCtx.EnsureExists(fromAddr)
 	if err != nil {
 		panic(err)
 	}
-	account, err := accGetter.GetAccount(fromAddr)
+	account, err := cliCtx.GetAccount(fromAddr)
 	if err != nil {
 		panic(err)
 	}

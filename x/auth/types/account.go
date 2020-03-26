@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/pokt-network/posmint/crypto"
+	tmCrypto "github.com/tendermint/tendermint/crypto"
 	"time"
 
 	"gopkg.in/yaml.v2"
@@ -17,9 +18,6 @@ import (
 var _ exported.Account = (*BaseAccount)(nil)
 
 // BaseAccount - a base account structure.
-// This can be extended by embedding within in your AppAccount.
-// However one doesn't have to use BaseAccount as long as your struct
-// implements Account.
 type BaseAccount struct {
 	Address sdk.Address      `json:"address" yaml:"address"`
 	Coins   sdk.Coins        `json:"coins" yaml:"coins"`
@@ -31,7 +29,6 @@ type Accounts []exported.Account
 // NewBaseAccount creates a new BaseAccount object
 func NewBaseAccount(address sdk.Address, coins sdk.Coins,
 	pubKey crypto.PublicKey) *BaseAccount {
-
 	return &BaseAccount{
 		Address: address,
 		Coins:   coins,
@@ -42,22 +39,15 @@ func NewBaseAccount(address sdk.Address, coins sdk.Coins,
 // String implements fmt.Stringer
 func (acc BaseAccount) String() string {
 	var pubkey string
-
 	if acc.PubKey != nil {
 		pubkey = acc.PubKey.RawString()
 	}
-
 	return fmt.Sprintf(`Account:
   Address:       %s
   Pubkey:        %s
   Coins:         %s`,
 		acc.Address, pubkey, acc.Coins,
 	)
-}
-
-// ProtoBaseAccount - a prototype function for BaseAccount
-func ProtoBaseAccount() exported.Account {
-	return &BaseAccount{}
 }
 
 // NewBaseAccountWithAddress - returns a new base account with a given address
@@ -207,4 +197,105 @@ func (m MultiSigAccount) String() string {
   Coins:         %s`,
 		m.Address, m.PublicKey, m.Coins,
 	)
+}
+
+var _ exported.ModuleAccountI = (*ModuleAccount)(nil)
+
+// ModuleAccount defines an account for modules that holds coins on a pool
+type ModuleAccount struct {
+	*BaseAccount
+	Name        string   `json:"name" yaml:"name"`               // name of the module
+	Permissions []string `json:"permissions" yaml:"permissions"` // permissions of module account
+}
+
+// NewModuleAddress creates an Address from the hash of the module's name
+func NewModuleAddress(name string) sdk.Address {
+	return sdk.Address(tmCrypto.AddressHash([]byte(name)))
+}
+
+func NewEmptyModuleAccount(name string, permissions ...string) *ModuleAccount {
+	moduleAddress := NewModuleAddress(name)
+	baseAcc := NewBaseAccountWithAddress(moduleAddress)
+
+	if err := validatePermissions(permissions...); err != nil {
+		panic(err)
+	}
+
+	return &ModuleAccount{
+		BaseAccount: &baseAcc,
+		Name:        name,
+		Permissions: permissions,
+	}
+}
+
+// NewModuleAccount creates a new ModuleAccount instance
+func NewModuleAccount(ba *BaseAccount,
+	name string, permissions ...string) *ModuleAccount {
+
+	if err := validatePermissions(permissions...); err != nil {
+		panic(err)
+	}
+
+	return &ModuleAccount{
+		BaseAccount: ba,
+		Name:        name,
+		Permissions: permissions,
+	}
+}
+
+// HasPermission returns whether or not the module account has permission.
+func (ma ModuleAccount) HasPermission(permission string) bool {
+	for _, perm := range ma.Permissions {
+		if perm == permission {
+			return true
+		}
+	}
+	return false
+}
+
+// GetName returns the the name of the holder's module
+func (ma ModuleAccount) GetName() string {
+	return ma.Name
+}
+
+// GetPermissions returns permissions granted to the module account
+func (ma ModuleAccount) GetPermissions() []string {
+	return ma.Permissions
+}
+
+// SetPubKey - Implements Account
+func (ma ModuleAccount) SetPubKey(pubKey crypto.PublicKey) error {
+	return fmt.Errorf("not supported for module accounts")
+}
+
+// String follows stringer interface
+func (ma ModuleAccount) String() string {
+	b, err := yaml.Marshal(ma)
+	if err != nil {
+		panic(err)
+	}
+	return string(b)
+}
+
+// MarshalYAML returns the YAML representation of a ModuleAccount.
+func (ma ModuleAccount) MarshalYAML() (interface{}, error) {
+	bs, err := yaml.Marshal(struct {
+		Address     sdk.Address
+		Coins       sdk.Coins
+		PubKey      string
+		Name        string
+		Permissions []string
+	}{
+		Address:     ma.Address,
+		Coins:       ma.Coins,
+		PubKey:      "",
+		Name:        ma.Name,
+		Permissions: ma.Permissions,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return string(bs), nil
 }

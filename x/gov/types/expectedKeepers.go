@@ -2,20 +2,20 @@ package types
 
 import (
 	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/auth/exported"
 	posexported "github.com/pokt-network/posmint/x/pos/exported"
-	supplyexported "github.com/pokt-network/posmint/x/supply/exported"
 )
 
-// SupplyKeeper defines the expected supply Keeper (noalias)
-type SupplyKeeper interface {
+// AuthKeeper defines the expected supply Keeper (noalias)
+type AuthKeeper interface {
 	// get total supply of tokens
-	GetSupply(ctx sdk.Ctx) supplyexported.SupplyI
+	GetSupply(ctx sdk.Ctx) exported.SupplyI
 	// get the address of a module account
 	GetModuleAddress(name string) sdk.Address
 	// get the module account structure
-	GetModuleAccount(ctx sdk.Ctx, moduleName string) supplyexported.ModuleAccountI
+	GetModuleAccount(ctx sdk.Ctx, moduleName string) exported.ModuleAccountI
 	// set module account structure
-	SetModuleAccount(sdk.Ctx, supplyexported.ModuleAccountI)
+	SetModuleAccount(sdk.Ctx, exported.ModuleAccountI)
 	// send coins to/from module accounts
 	SendCoinsFromModuleToModule(ctx sdk.Ctx, senderModule, recipientModule string, amt sdk.Coins) sdk.Error
 	// send coins from module to validator

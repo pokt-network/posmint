@@ -10,24 +10,24 @@ import (
 
 // Keeper of the global paramstore
 type Keeper struct {
-	cdc          *codec.Codec
-	key          sdk.StoreKey
-	tkey         sdk.StoreKey
-	codespace    sdk.CodespaceType
-	paramstore   sdk.Subspace
-	SupplyKeeper types.SupplyKeeper
-	spaces       map[string]sdk.Subspace
+	cdc        *codec.Codec
+	key        sdk.StoreKey
+	tkey       sdk.StoreKey
+	codespace  sdk.CodespaceType
+	paramstore sdk.Subspace
+	AuthKeeper types.AuthKeeper
+	spaces     map[string]sdk.Subspace
 }
 
 // NewKeeper constructs a params keeper
-func NewKeeper(cdc *codec.Codec, key *sdk.KVStoreKey, tkey *sdk.TransientStoreKey, codespace sdk.CodespaceType, supplyKeeper types.SupplyKeeper, subspaces ...sdk.Subspace) (k Keeper) {
+func NewKeeper(cdc *codec.Codec, key *sdk.KVStoreKey, tkey *sdk.TransientStoreKey, codespace sdk.CodespaceType, authKeeper types.AuthKeeper, subspaces ...sdk.Subspace) (k Keeper) {
 	k = Keeper{
-		cdc:          cdc,
-		key:          key,
-		tkey:         tkey,
-		codespace:    codespace,
-		SupplyKeeper: supplyKeeper,
-		spaces:       make(map[string]sdk.Subspace),
+		cdc:        cdc,
+		key:        key,
+		tkey:       tkey,
+		codespace:  codespace,
+		AuthKeeper: authKeeper,
+		spaces:     make(map[string]sdk.Subspace),
 	}
 	k.paramstore = sdk.NewSubspace(types.ModuleName).WithKeyTable(types.ParamKeyTable())
 	k.paramstore.SetCodec(k.cdc)

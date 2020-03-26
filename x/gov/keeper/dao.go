@@ -3,8 +3,8 @@ package keeper
 import (
 	"fmt"
 	sdk "github.com/pokt-network/posmint/types"
+	exported2 "github.com/pokt-network/posmint/x/auth/exported"
 	"github.com/pokt-network/posmint/x/gov/types"
-	"github.com/pokt-network/posmint/x/supply/exported"
 )
 
 func (k Keeper) DAOTransferFrom(ctx sdk.Ctx, owner, to sdk.Address, amount sdk.Int) sdk.Result {
@@ -12,7 +12,7 @@ func (k Keeper) DAOTransferFrom(ctx sdk.Ctx, owner, to sdk.Address, amount sdk.I
 		return sdk.ErrUnauthorized(fmt.Sprintf("non dao owner is trying to transfer from the dao %s", owner.String())).Result()
 	}
 	coins := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, amount))
-	err := k.SupplyKeeper.SendCoinsFromModuleToAccount(ctx, types.DAOAccountName, to, coins)
+	err := k.AuthKeeper.SendCoinsFromModuleToAccount(ctx, types.DAOAccountName, to, coins)
 	if err != nil {
 		return err.Result()
 	}
@@ -33,7 +33,7 @@ func (k Keeper) DAOBurn(ctx sdk.Ctx, owner sdk.Address, amount sdk.Int) sdk.Resu
 		return sdk.ErrUnauthorized(fmt.Sprintf("non dao owner is trying to burn from the dao %s", owner.String())).Result()
 	}
 	coins := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, amount))
-	err := k.SupplyKeeper.BurnCoins(ctx, types.DAOAccountName, coins)
+	err := k.AuthKeeper.BurnCoins(ctx, types.DAOAccountName, coins)
 	if err != nil {
 		return err.Result()
 	}
@@ -54,6 +54,6 @@ func (k Keeper) GetDAOTokens(ctx sdk.Ctx) sdk.Int {
 }
 
 // GetStakedPool returns the staked tokens pool's module account
-func (k Keeper) GetDAOAccount(ctx sdk.Ctx) (stakedPool exported.ModuleAccountI) {
-	return k.SupplyKeeper.GetModuleAccount(ctx, types.DAOAccountName)
+func (k Keeper) GetDAOAccount(ctx sdk.Ctx) (stakedPool exported2.ModuleAccountI) {
+	return k.AuthKeeper.GetModuleAccount(ctx, types.DAOAccountName)
 }

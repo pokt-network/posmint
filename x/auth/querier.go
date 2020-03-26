@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"github.com/pokt-network/posmint/x/auth/keeper"
 
 	abci "github.com/tendermint/tendermint/abci/types"
 
@@ -11,7 +12,7 @@ import (
 )
 
 // NewQuerier creates a querier for auth REST endpoints
-func NewQuerier(keeper AccountKeeper) sdk.Querier {
+func NewQuerier(keeper keeper.Keeper) sdk.Querier {
 	return func(ctx sdk.Ctx, path []string, req abci.RequestQuery) ([]byte, sdk.Error) {
 		switch path[0] {
 		case types.QueryAccount:
@@ -22,9 +23,9 @@ func NewQuerier(keeper AccountKeeper) sdk.Querier {
 	}
 }
 
-func queryAccount(ctx sdk.Ctx, req abci.RequestQuery, keeper AccountKeeper) ([]byte, sdk.Error) {
+func queryAccount(ctx sdk.Ctx, req abci.RequestQuery, keeper keeper.Keeper) ([]byte, sdk.Error) {
 	var params types.QueryAccountParams
-	if err := keeper.cdc.UnmarshalJSON(req.Data, &params); err != nil {
+	if err := types.ModuleCdc.UnmarshalJSON(req.Data, &params); err != nil {
 		return nil, sdk.ErrInternal(fmt.Sprintf("failed to parse params: %s", err))
 	}
 
@@ -33,7 +34,7 @@ func queryAccount(ctx sdk.Ctx, req abci.RequestQuery, keeper AccountKeeper) ([]b
 		return nil, sdk.ErrUnknownAddress(fmt.Sprintf("account %s does not exist", params.Address))
 	}
 
-	bz, err := codec.MarshalJSONIndent(keeper.cdc, account)
+	bz, err := codec.MarshalJSONIndent(types.ModuleCdc, account)
 	if err != nil {
 		return nil, sdk.ErrInternal(sdk.AppendMsgToErr("could not marshal result to JSON", err.Error()))
 	}

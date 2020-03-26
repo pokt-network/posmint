@@ -94,8 +94,7 @@ func newTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, passphr
 	privkey, err := mintkey.UnarmorDecryptPrivKey(kp[0].PrivKeyArmor, passphrase)
 	cliCtx := util.NewCLIContext(tmNode, fromAddr, passphrase).WithCodec(cdc)
 	cliCtx.PrivateKey = privkey
-	accGetter := auth.NewAccountRetriever(cliCtx)
-	err = accGetter.EnsureExists(fromAddr)
+	err = cliCtx.EnsureExists(fromAddr)
 	if err != nil {
 		return auth.TxBuilder{}, cliCtx, err
 	}

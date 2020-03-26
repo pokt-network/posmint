@@ -22,7 +22,7 @@ func (k Keeper) InitGenesis(ctx sdk.Ctx, data types.GenesisState) []abci.Validat
 	if err != nil {
 		panic(fmt.Sprintf("unable to set dao tokens: %s", err.Error()))
 	}
-	k.SupplyKeeper.SetModuleAccount(ctx, dao)
+	k.AuthKeeper.SetModuleAccount(ctx, dao)
 	return []abci.ValidatorUpdate{}
 }
 

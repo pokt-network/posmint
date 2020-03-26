@@ -51,8 +51,7 @@ func CompleteAndBroadcastTxCLI(txBldr auth.TxBuilder, cliCtx CLIContext, msgs []
 // PrepareTxBuilder populates a TxBuilder in preparation for the build of a Tx.
 func PrepareTxBuilder(txBldr auth.TxBuilder, cliCtx CLIContext) (auth.TxBuilder, error) {
 	from := cliCtx.GetFromAddress()
-	accGetter := auth.NewAccountRetriever(cliCtx)
-	if err := accGetter.EnsureExists(from); err != nil {
+	if err := cliCtx.EnsureExists(from); err != nil {
 		return txBldr, err
 	}
 	return txBldr, nil

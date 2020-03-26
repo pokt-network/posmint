@@ -7,9 +7,8 @@ import (
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/types/module"
 	"github.com/pokt-network/posmint/x/auth"
-	"github.com/pokt-network/posmint/x/bank"
+	"github.com/pokt-network/posmint/x/auth/keeper"
 	govTypes "github.com/pokt-network/posmint/x/gov/types"
-	"github.com/pokt-network/posmint/x/supply"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
@@ -22,7 +21,6 @@ import (
 var (
 	ModuleBasics = module.NewBasicManager(
 		auth.AppModuleBasic{},
-		bank.AppModuleBasic{},
 	)
 )
 
@@ -30,9 +28,7 @@ var (
 // create a codec used only for testing
 func makeTestCodec() *codec.Codec {
 	var cdc = codec.New()
-	bank.RegisterCodec(cdc)
 	auth.RegisterCodec(cdc)
-	supply.RegisterCodec(cdc)
 	govTypes.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
@@ -52,11 +48,9 @@ func getRandomValidatorAddress() sdk.Address {
 // nolint: deadcode unused
 func createTestKeeperAndContext(t *testing.T, isCheckTx bool) (sdk.Context, Keeper) {
 	keyAcc := sdk.NewKVStoreKey(auth.StoreKey)
-	keySupply := sdk.NewKVStoreKey(supply.StoreKey)
 	db := dbm.NewMemDB()
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(keyAcc, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(keySupply, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(sdk.ParamsKey, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(sdk.ParamsTKey, sdk.StoreTypeTransient, db)
 	err := ms.LoadLatestVersion()
@@ -78,19 +72,14 @@ func createTestKeeperAndContext(t *testing.T, isCheckTx bool) (sdk.Context, Keep
 	}
 	modAccAddrs := make(map[string]bool)
 	for acc := range maccPerms {
-		modAccAddrs[supply.NewModuleAddress(acc).String()] = true
+		modAccAddrs[auth.NewModuleAddress(acc).String()] = true
 	}
 	akSubspace := sdk.NewSubspace(auth.DefaultParamspace)
-	bkSubspace := sdk.NewSubspace(bank.DefaultParamspace)
-	ak := auth.NewAccountKeeper(cdc, keyAcc, akSubspace, auth.ProtoBaseAccount)
-	bk := bank.NewBaseKeeper(ak, bkSubspace, bank.DefaultCodespace, modAccAddrs)
-	sk := supply.NewKeeper(cdc, keySupply, ak, bk, maccPerms)
-	sk.GetModuleAccount(ctx, "FAKE")
-	pk := NewKeeper(cdc, sdk.ParamsKey, sdk.ParamsTKey, govTypes.DefaultParamspace, sk, akSubspace, bkSubspace)
+	ak := keeper.NewKeeper(cdc, keyAcc, akSubspace, maccPerms)
+	ak.GetModuleAccount(ctx, "FAKE")
+	pk := NewKeeper(cdc, sdk.ParamsKey, sdk.ParamsTKey, govTypes.DefaultParamspace, ak, akSubspace)
 	moduleManager := module.NewManager(
 		auth.NewAppModule(ak),
-		bank.NewAppModule(bk, ak),
-		supply.NewAppModule(sk, ak),
 	)
 	genesisState := ModuleBasics.DefaultGenesis()
 	moduleManager.InitGenesis(ctx, genesisState)
@@ -108,10 +97,8 @@ var testACL govTypes.ACL
 func createTestACL() govTypes.ACL {
 	if testACL == nil {
 		acl := govTypes.BaseACL{M: make(map[string]sdk.Address)}
-		acl.SetOwner("bank/sendenabled", getRandomValidatorAddress())
 		acl.SetOwner("auth/MaxMemoCharacters", getRandomValidatorAddress())
 		acl.SetOwner("auth/TxSigLimit", getRandomValidatorAddress())
-		acl.SetOwner("auth/TxSizeCostPerByte", getRandomValidatorAddress())
 		acl.SetOwner("gov/daoOwner", getRandomValidatorAddress())
 		acl.SetOwner("gov/acl", getRandomValidatorAddress())
 		acl.SetOwner("gov/upgrade", getRandomValidatorAddress())
