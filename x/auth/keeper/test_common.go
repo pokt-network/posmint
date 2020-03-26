@@ -13,9 +13,7 @@ import (
 
 	"github.com/pokt-network/posmint/codec"
 	"github.com/pokt-network/posmint/store"
-	"github.com/pokt-network/posmint/x/auth"
-	"github.com/pokt-network/posmint/x/bank"
-	"github.com/pokt-network/posmint/x/supply/internal/types"
+	"github.com/pokt-network/posmint/x/auth/types"
 
 	sdk "github.com/pokt-network/posmint/types"
 )
@@ -31,9 +29,6 @@ var (
 // create a codec used only for testing
 func makeTestCodec() *codec.Codec {
 	var cdc = codec.New()
-
-	bank.RegisterCodec(cdc)
-	auth.RegisterCodec(cdc)
 	types.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
@@ -42,22 +37,17 @@ func makeTestCodec() *codec.Codec {
 }
 
 // nolint: deadcode unused
-func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64) (sdk.Context, auth.AccountKeeper, Keeper) {
-
-	keyAcc := sdk.NewKVStoreKey(auth.StoreKey)
+func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64) (sdk.Context, Keeper) {
+	keyAcc := sdk.NewKVStoreKey(types.StoreKey)
 	keyParams := sdk.ParamsKey
 	tkeyParams := sdk.ParamsTKey
-	keySupply := sdk.NewKVStoreKey(types.StoreKey)
-
 	db := dbm.NewMemDB()
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(keyAcc, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(keySupply, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keyParams, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(tkeyParams, sdk.StoreTypeTransient, db)
 	err := ms.LoadLatestVersion()
 	require.Nil(t, err)
-
 	ctx := sdk.NewContext(ms, abci.Header{ChainID: "supply-chain"}, isCheckTx, log.NewNopLogger())
 	ctx = ctx.WithConsensusParams(
 		&abci.ConsensusParams{
@@ -67,38 +57,30 @@ func createTestInput(t *testing.T, isCheckTx bool, initPower int64, nAccs int64)
 		},
 	)
 	cdc := makeTestCodec()
-
-	blacklistedAddrs := make(map[string]bool)
-	ak := auth.NewAccountKeeper(cdc, keyAcc, sdk.NewSubspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
-	bk := bank.NewBaseKeeper(ak, sdk.NewSubspace(bank.DefaultParamspace), bank.DefaultCodespace, blacklistedAddrs)
-
-	valTokens := sdk.TokensFromConsensusPower(initPower)
-
-	initialCoins := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, valTokens))
-	createTestAccs(ctx, int(nAccs), initialCoins, &ak)
-
 	maccPerms := map[string][]string{
 		holder:       nil,
-		types.Minter: []string{types.Minter},
-		types.Burner: []string{types.Burner},
-		multiPerm:    []string{types.Minter, types.Burner, types.Staking},
-		randomPerm:   []string{"random"},
+		types.Minter: {types.Minter},
+		types.Burner: {types.Burner},
+		multiPerm:    {types.Minter, types.Burner, types.Staking},
+		randomPerm:   {"random"},
 	}
-	keeper := NewKeeper(cdc, keySupply, ak, bk, maccPerms)
+	keeper := NewKeeper(cdc, keyAcc, sdk.NewSubspace(types.StoreKey), maccPerms)
+	valTokens := sdk.TokensFromConsensusPower(initPower)
+	initialCoins := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, valTokens))
+	createTestAccs(ctx, int(nAccs), initialCoins, &keeper)
 	totalSupply := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, valTokens.MulRaw(nAccs)))
 	keeper.SetSupply(ctx, types.NewSupply(totalSupply))
-
-	return ctx, ak, keeper
+	return ctx, keeper
 }
 
 // nolint: unparam deadcode unused
-func createTestAccs(ctx sdk.Ctx, numAccs int, initialCoins sdk.Coins, ak *auth.AccountKeeper) (accs []auth.Account) {
+func createTestAccs(ctx sdk.Ctx, numAccs int, initialCoins sdk.Coins, ak *Keeper) (accs types.Accounts) {
 	var err error
 	for i := 0; i < numAccs; i++ {
 		privKey := crypto.Secp256k1PrivateKey{}.GenPrivateKey()
 		pubKey := privKey.PubKey()
 		addr := sdk.Address(pubKey.Address())
-		acc := auth.NewBaseAccountWithAddress(addr)
+		acc := types.NewBaseAccountWithAddress(addr)
 		acc.Coins = initialCoins
 		acc.PubKey, err = crypto.PubKeyToPublicKey(pubKey)
 		if err != nil {

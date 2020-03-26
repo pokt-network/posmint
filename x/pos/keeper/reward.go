@@ -24,7 +24,7 @@ func (k Keeper) rewardFromFees(ctx sdk.Ctx, previousProposer sdk.Address) {
 	feeCollector := k.getFeePool(ctx)
 	feesCollected := feeCollector.GetCoins()
 	// transfer collected fees to the pos module account
-	err := k.supplyKeeper.SendCoinsFromModuleToModule(ctx, auth.FeeCollectorName, types.ModuleName, feesCollected)
+	err := k.authKeeper.SendCoinsFromModuleToModule(ctx, auth.FeeCollectorName, types.ModuleName, feesCollected)
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +35,7 @@ func (k Keeper) rewardFromFees(ctx sdk.Ctx, previousProposer sdk.Address) {
 	if proposerValidator != nil {
 		propRewardCoins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), totalReward))
 		// send to validator
-		if err := k.supplyKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName,
+		if err := k.authKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName,
 			sdk.Address(proposerValidator.GetAddress()), propRewardCoins); err != nil {
 			panic(err)
 		}
@@ -98,11 +98,11 @@ func (k Keeper) deleteValidatorAward(ctx sdk.Ctx, address sdk.Address) {
 // Mints sdk.Coins and sends them onto an address
 func (k Keeper) mint(ctx sdk.Ctx, amount sdk.Int, address sdk.Address) sdk.Result {
 	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), amount))
-	mintErr := k.supplyKeeper.MintCoins(ctx, types.StakedPoolName, coins.Add(coins))
+	mintErr := k.authKeeper.MintCoins(ctx, types.StakedPoolName, coins.Add(coins))
 	if mintErr != nil {
 		return mintErr.Result()
 	}
-	sendErr := k.supplyKeeper.SendCoinsFromModuleToAccount(ctx, types.StakedPoolName, sdk.Address(address), coins)
+	sendErr := k.authKeeper.SendCoinsFromModuleToAccount(ctx, types.StakedPoolName, sdk.Address(address), coins)
 	if sendErr != nil {
 		return sendErr.Result()
 	}

@@ -40,6 +40,7 @@ type Context struct {
 	minGasPrice   DecCoins
 	consParams    *abci.ConsensusParams
 	eventManager  *EventManager
+	appVersion    string
 }
 
 type Ctx interface {
@@ -84,6 +85,7 @@ type Ctx interface {
 	TransientStore(key StoreKey) KVStore
 	CacheContext() (cc Context, writeCache func())
 	IsZero() bool
+	AppVersion() string
 }
 
 // Proposed rename, not done to avoid API breakage
@@ -103,6 +105,7 @@ func (c Context) BlockGasMeter() GasMeter     { return c.blockGasMeter }
 func (c Context) IsCheckTx() bool             { return c.checkTx }
 func (c Context) MinGasPrices() DecCoins      { return c.minGasPrice }
 func (c Context) EventManager() *EventManager { return c.eventManager }
+func (c Context) AppVersion() string          { return c.appVersion }
 
 // clone the header before returning
 func (c Context) BlockHeader() abci.Header {
@@ -191,6 +194,11 @@ func (c Context) PrevCtx(height int64) (Context, error) {
 
 func (c Context) WithBlockStore(bs *store.BlockStore) Context {
 	c.blockstore = bs
+	return c
+}
+
+func (c Context) WithAppVersion(version string) Context {
+	c.appVersion = version
 	return c
 }
 

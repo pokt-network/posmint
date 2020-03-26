@@ -2,7 +2,7 @@ package types
 
 type Upgrade struct {
 	Height  int64  `json:"Height"`
-	Version string `json:'Version'`
+	Version string `json:"Version"`
 }
 
 func NewUpgrade(height int64, version string) Upgrade {

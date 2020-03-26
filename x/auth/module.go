@@ -2,6 +2,7 @@ package auth
 
 import (
 	"encoding/json"
+	"github.com/pokt-network/posmint/x/auth/keeper"
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/pokt-network/posmint/codec"
@@ -47,11 +48,11 @@ func (AppModuleBasic) ValidateGenesis(bz json.RawMessage) error {
 //___________________________
 type AppModule struct {
 	AppModuleBasic
-	accountKeeper AccountKeeper
+	accountKeeper keeper.Keeper
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(accountKeeper AccountKeeper) AppModule {
+func NewAppModule(accountKeeper keeper.Keeper) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		accountKeeper:  accountKeeper,
@@ -84,9 +85,9 @@ func (am AppModule) NewQuerierHandler() sdk.Querier {
 
 // InitGenesis module init-genesis
 func (am AppModule) InitGenesis(ctx sdk.Ctx, data json.RawMessage) []abci.ValidatorUpdate {
-	var genesisState GenesisState
+	var genesisState types.GenesisState
 	if data == nil {
-		genesisState = DefaultGenesisState()
+		genesisState = types.DefaultGenesisState()
 	} else {
 		ModuleCdc.MustUnmarshalJSON(data, &genesisState)
 	}

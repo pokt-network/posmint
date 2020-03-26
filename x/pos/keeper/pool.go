@@ -2,11 +2,11 @@ package keeper
 
 import (
 	"fmt"
+	exported2 "github.com/pokt-network/posmint/x/auth/exported"
 
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/auth"
 	"github.com/pokt-network/posmint/x/pos/types"
-	"github.com/pokt-network/posmint/x/supply/exported"
 )
 
 // StakedRatio the fraction of the staking tokens which are currently staked
@@ -33,18 +33,18 @@ func (k Keeper) GetUnstakedTokens(ctx sdk.Ctx) (unstakedTokens sdk.Int) {
 
 // TotalTokens staking tokens from the total supply
 func (k Keeper) TotalTokens(ctx sdk.Ctx) sdk.Int {
-	return k.supplyKeeper.GetSupply(ctx).GetTotal().AmountOf(k.StakeDenom(ctx))
+	return k.authKeeper.GetSupply(ctx).GetTotal().AmountOf(k.StakeDenom(ctx))
 }
 
 // GetStakedPool returns the staked tokens pool's module account
-func (k Keeper) GetStakedPool(ctx sdk.Ctx) (stakedPool exported.ModuleAccountI) {
-	return k.supplyKeeper.GetModuleAccount(ctx, types.StakedPoolName)
+func (k Keeper) GetStakedPool(ctx sdk.Ctx) (stakedPool exported2.ModuleAccountI) {
+	return k.authKeeper.GetModuleAccount(ctx, types.StakedPoolName)
 }
 
 // moves coins from the module account to the validator -> used in unstaking
 func (k Keeper) coinsFromStakedToUnstaked(ctx sdk.Ctx, validator types.Validator) {
 	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), validator.StakedTokens))
-	err := k.supplyKeeper.SendCoinsFromModuleToAccount(ctx, types.StakedPoolName, sdk.Address(validator.Address), coins)
+	err := k.authKeeper.SendCoinsFromModuleToAccount(ctx, types.StakedPoolName, sdk.Address(validator.Address), coins)
 	if err != nil {
 		panic(err)
 	}
@@ -53,7 +53,7 @@ func (k Keeper) coinsFromStakedToUnstaked(ctx sdk.Ctx, validator types.Validator
 // moves coins from the module account to validator -> used in staking
 func (k Keeper) coinsFromUnstakedToStaked(ctx sdk.Ctx, validator types.Validator, amount sdk.Int) {
 	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), amount))
-	err := k.supplyKeeper.SendCoinsFromAccountToModule(ctx, sdk.Address(validator.Address), types.StakedPoolName, coins)
+	err := k.authKeeper.SendCoinsFromAccountToModule(ctx, sdk.Address(validator.Address), types.StakedPoolName, coins)
 	if err != nil {
 		panic(err)
 	}
@@ -65,9 +65,9 @@ func (k Keeper) burnStakedTokens(ctx sdk.Ctx, amt sdk.Int) sdk.Error {
 		return sdk.ErrNegativeAmount(fmt.Sprintf("%d is not positive", amt.ToDec()))
 	}
 	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), amt))
-	return k.supplyKeeper.BurnCoins(ctx, types.StakedPoolName, coins)
+	return k.authKeeper.BurnCoins(ctx, types.StakedPoolName, coins)
 }
 
-func (k Keeper) getFeePool(ctx sdk.Ctx) (feePool exported.ModuleAccountI) {
-	return k.supplyKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
+func (k Keeper) getFeePool(ctx sdk.Ctx) (feePool exported2.ModuleAccountI) {
+	return k.authKeeper.GetModuleAccount(ctx, auth.FeeCollectorName)
 }

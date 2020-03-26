@@ -5,6 +5,7 @@ import (
 	"fmt"
 	posCrypto "github.com/pokt-network/posmint/crypto"
 	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/auth/keeper"
 	"github.com/pokt-network/posmint/x/auth/types"
 	"github.com/tendermint/tendermint/node"
 	"github.com/tendermint/tendermint/rpc/client"
@@ -12,9 +13,9 @@ import (
 )
 
 // NewAnteHandler returns an AnteHandler that checks signatures and deducts fees from the first signer.
-func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteHandler {
+func NewAnteHandler(ak keeper.Keeper, keeper keeper.Keeper) sdk.AnteHandler {
 	return func(ctx sdk.Ctx, tx sdk.Tx, txBz []byte, tmNode *node.Node, simulate bool) (newCtx sdk.Ctx, res sdk.Result, abort bool) {
-		if addr := supplyKeeper.GetModuleAddress(types.FeeCollectorName); addr == nil {
+		if addr := keeper.GetModuleAddress(types.FeeCollectorName); addr == nil {
 			panic(fmt.Sprintf("%s module account has not been set", types.FeeCollectorName))
 		}
 		// all transactions must be of type auth.StdTx
@@ -62,7 +63,7 @@ func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteH
 		}
 		// deduct the fees
 		if !stdTx.Fee.IsZero() {
-			res = DeductFees(supplyKeeper, ctx, signerAccs[0], stdTx.Fee)
+			res = DeductFees(keeper, ctx, signerAccs[0], stdTx.Fee)
 			if !res.IsOK() {
 				return newCtx, res, true
 			}
@@ -103,7 +104,7 @@ func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteH
 
 // GetSignerAcc returns an account for a given address that is expected to sign
 // a transaction.
-func GetSignerAcc(ctx sdk.Ctx, ak AccountKeeper, addr sdk.Address) (Account, sdk.Result) {
+func GetSignerAcc(ctx sdk.Ctx, ak keeper.Keeper, addr sdk.Address) (Account, sdk.Result) {
 	if acc := ak.GetAccount(ctx, addr); acc != nil {
 		return acc, sdk.Result{}
 	}
@@ -177,24 +178,15 @@ func ProcessPubKey(acc Account, sig StdSignature) (posCrypto.PublicKey, sdk.Resu
 			return nil, sdk.ErrInvalidPubKey(
 				fmt.Sprintf("PubKey does not match Signer address %s", acc.GetAddress())).Result()
 		}
-		//// set the public key because the account public key is nil
-		//key, err := posCrypto.PubKeyToPublicKey(pubKey)
-		//if err != nil {
-		//	return nil, sdk.ErrInternal("could not convert pubKey to Public Key").Result()
-		//}
-		//err = acc.SetPubKey(key)
-		//if err != nil {
-		//	return nil, sdk.ErrInternal("setting PubKey on signer's account").Result()
-		//}
 	}
 	return pubKey, sdk.Result{}
 }
 
 // DeductFees deducts fees from the given account.
 //
-// NOTE: We could use the CoinKeeper (in addition to the AccountKeeper, because
+// NOTE: We could use the CoinKeeper (in addition to the Keeper, because
 // the CoinKeeper doesn't give us accounts), but it seems easier to do this.
-func DeductFees(supplyKeeper types.SupplyKeeper, ctx sdk.Ctx, acc Account, fees sdk.Coins) sdk.Result {
+func DeductFees(keeper keeper.Keeper, ctx sdk.Ctx, acc Account, fees sdk.Coins) sdk.Result {
 	blockTime := ctx.BlockHeader().Time
 	coins := acc.GetCoins()
 
@@ -219,7 +211,7 @@ func DeductFees(supplyKeeper types.SupplyKeeper, ctx sdk.Ctx, acc Account, fees 
 		).Result()
 	}
 
-	err := supplyKeeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), types.FeeCollectorName, fees)
+	err := keeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), types.FeeCollectorName, fees)
 	if err != nil {
 		return err.Result()
 	}
@@ -237,7 +229,6 @@ func EnsureSufficientMempoolFees(ctx sdk.Ctx, stdFee sdk.Coins) sdk.Result {
 	minGasPrices := ctx.MinGasPrices()
 	if !minGasPrices.IsZero() {
 		requiredFees := make(sdk.Coins, len(minGasPrices))
-
 		if !stdFee.IsAnyGTE(requiredFees) {
 			return sdk.ErrInsufficientFee(
 				fmt.Sprintf(

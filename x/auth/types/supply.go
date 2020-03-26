@@ -2,11 +2,9 @@ package types
 
 import (
 	"fmt"
-
-	"gopkg.in/yaml.v2"
-
 	sdk "github.com/pokt-network/posmint/types"
-	"github.com/pokt-network/posmint/x/supply/exported"
+	"github.com/pokt-network/posmint/x/auth/exported"
+	"gopkg.in/yaml.v2"
 )
 
 // Implements Delegation interface

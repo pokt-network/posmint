@@ -6,6 +6,7 @@ package auth
 
 import (
 	"github.com/pokt-network/posmint/x/auth/exported"
+	"github.com/pokt-network/posmint/x/auth/keeper"
 	"github.com/pokt-network/posmint/x/auth/types"
 )
 
@@ -15,22 +16,23 @@ const (
 	StoreKey          = types.StoreKey
 	FeeCollectorName  = types.FeeCollectorName
 	QuerierRoute      = types.QuerierRoute
-	DefaultParamspace = types.DefaultParamspace
+	DefaultParamspace = types.DefaultCodespace
 	QueryAccount      = types.QueryAccount
+	Burner            = types.Burner
+	Staking           = types.Staking
+	Minter            = types.Minter
 )
 
 var (
-	ProtoBaseAccount          = types.ProtoBaseAccount
+	NewKeeper                 = keeper.NewKeeper
+	NewModuleAddress          = types.NewModuleAddress
 	NewBaseAccountWithAddress = types.NewBaseAccountWithAddress
 	RegisterCodec             = types.RegisterCodec
-	NewGenesisState           = types.NewGenesisState
-	DefaultGenesisState       = types.DefaultGenesisState
 	CountSubKeys              = types.CountSubKeys
 	StdSignBytes              = types.StdSignBytes
 	DefaultTxDecoder          = types.DefaultTxDecoder
 	DefaultTxEncoder          = types.DefaultTxEncoder
 	NewTxBuilder              = types.NewTxBuilder
-	NewAccountRetriever       = types.NewAccountRetriever
 	ModuleCdc                 = types.ModuleCdc
 )
 
@@ -38,7 +40,6 @@ var (
 type (
 	Account            = exported.Account
 	BaseAccount        = types.BaseAccount
-	GenesisState       = types.GenesisState
 	Params             = types.Params
 	QueryAccountParams = types.QueryAccountParams
 	StdTx              = types.StdTx
