@@ -197,3 +197,17 @@ func (ss StdSignature) MarshalYAML() (interface{}, error) {
 
 	return string(bz), err
 }
+
+func NewTestTx(ctx sdk.Ctx, msgs []sdk.Msg, privs []posCrypto.PrivateKey, entropy int64, fee sdk.Coins) sdk.Tx {
+	sigs := make([]StdSignature, len(privs))
+	for i, priv := range privs {
+		signBytes := StdSignBytes(ctx.ChainID(), entropy, fee, msgs, "")
+		sig, err := priv.Sign(signBytes)
+		if err != nil {
+			panic(err)
+		}
+		sigs[i] = StdSignature{PublicKey: priv.PublicKey(), Signature: sig}
+	}
+	tx := NewStdTx(msgs, fee, sigs, "", entropy)
+	return tx
+}

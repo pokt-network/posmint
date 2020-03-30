@@ -38,6 +38,8 @@ var (
 
 // Type exported types
 type (
+	GenesisState       = types.GenesisState
+	Keeper             = keeper.Keeper
 	Account            = exported.Account
 	BaseAccount        = types.BaseAccount
 	Params             = types.Params

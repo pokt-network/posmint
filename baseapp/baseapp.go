@@ -313,7 +313,7 @@ func (app *BaseApp) IsSealed() bool { return app.sealed }
 // It is called by InitChain() and Commit()
 func (app *BaseApp) setCheckState(header abci.Header) { // todo <- modified here
 	ms := app.cms
-	context := sdk.NewContext(ms, header, true, app.logger).WithMinGasPrices(app.minGasPrices)
+	context := sdk.NewContext(ms, header, true, app.logger).WithMinGasPrices(app.minGasPrices).WithAppVersion(app.appVersion)
 	if app.tmNode != nil {
 		context = context.WithBlockStore(app.tmNode.BlockStore())
 	}
@@ -329,7 +329,7 @@ func (app *BaseApp) setCheckState(header abci.Header) { // todo <- modified here
 // and deliverState is set nil on Commit().
 func (app *BaseApp) setDeliverState(header abci.Header) { // todo <- modified here
 	ms := app.cms
-	context := sdk.NewContext(ms, header, true, app.logger).WithMinGasPrices(app.minGasPrices)
+	context := sdk.NewContext(ms, header, true, app.logger).WithMinGasPrices(app.minGasPrices).WithAppVersion(app.appVersion)
 	if app.tmNode != nil {
 		context = context.WithBlockStore(app.tmNode.BlockStore())
 	}
@@ -622,7 +622,7 @@ func handleQueryCustom(app *BaseApp, path []string, req abci.RequestQuery) (res 
 	// cache wrap the commit-multistore for safety
 	ctx := sdk.NewContext(
 		newMS, app.checkState.ctx.BlockHeader(), true, app.logger,
-	).WithMinGasPrices(app.minGasPrices).WithBlockStore(app.checkState.ctx.BlockStore())
+	).WithMinGasPrices(app.minGasPrices).WithBlockStore(app.checkState.ctx.BlockStore()).WithAppVersion(app.appVersion)
 
 	// Passes the rest of the path as an argument to the querier.
 	//

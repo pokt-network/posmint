@@ -13,9 +13,9 @@ import (
 )
 
 // NewAnteHandler returns an AnteHandler that checks signatures and deducts fees from the first signer.
-func NewAnteHandler(ak keeper.Keeper, keeper keeper.Keeper) sdk.AnteHandler {
+func NewAnteHandler(ak keeper.Keeper) sdk.AnteHandler {
 	return func(ctx sdk.Ctx, tx sdk.Tx, txBz []byte, tmNode *node.Node, simulate bool) (newCtx sdk.Ctx, res sdk.Result, abort bool) {
-		if addr := keeper.GetModuleAddress(types.FeeCollectorName); addr == nil {
+		if addr := ak.GetModuleAddress(types.FeeCollectorName); addr == nil {
 			panic(fmt.Sprintf("%s module account has not been set", types.FeeCollectorName))
 		}
 		// all transactions must be of type auth.StdTx
@@ -63,7 +63,7 @@ func NewAnteHandler(ak keeper.Keeper, keeper keeper.Keeper) sdk.AnteHandler {
 		}
 		// deduct the fees
 		if !stdTx.Fee.IsZero() {
-			res = DeductFees(keeper, ctx, signerAccs[0], stdTx.Fee)
+			res = DeductFees(ak, ctx, signerAccs[0], stdTx.Fee)
 			if !res.IsOK() {
 				return newCtx, res, true
 			}

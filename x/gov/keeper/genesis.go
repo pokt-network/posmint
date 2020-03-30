@@ -18,11 +18,10 @@ func (k Keeper) InitGenesis(ctx sdk.Ctx, data types.GenesisState) []abci.Validat
 	if dao == nil {
 		panic(fmt.Sprintf("%s module account has not been set", types.DAOAccountName))
 	}
-	err := dao.SetCoins(sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, data.DAOTokens)))
+	err := k.AuthKeeper.MintCoins(ctx, types.DAOAccountName, sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, data.DAOTokens)))
 	if err != nil {
 		panic(fmt.Sprintf("unable to set dao tokens: %s", err.Error()))
 	}
-	k.AuthKeeper.SetModuleAccount(ctx, dao)
 	return []abci.ValidatorUpdate{}
 }
 
