@@ -13,12 +13,10 @@ import (
 
 var (
 	_ sdk.Tx = (*StdTx)(nil)
-
-	//maxGasWanted = uint64((1 << 63) - 1)
 )
 
-// StdTx is a standard way to wrap a Msg with Fee and Signatures.
-// NOTE: the first signature is the fee payer (Signatures must not be nil).
+// StdTx is a standard way to wrap a Msg with Fee and Sigs.
+// NOTE: the first signature is the fee payer (Sigs must not be nil).
 type StdTx struct {
 	Msgs       []sdk.Msg      `json:"msg" yaml:"msg"`
 	Fee        sdk.Coins      `json:"fee" yaml:"fee"`
@@ -144,7 +142,7 @@ func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msgs []sdk.Msg, 
 // StdSignature represents a sig
 type StdSignature struct {
 	posCrypto.PublicKey `json:"pub_key" yaml:"pub_key"` // optional
-	Signature           []byte `json:"signature" yaml:"signature"`
+	Signature           []byte                          `json:"signature" yaml:"signature"`
 }
 
 // DefaultTxDecoder logic for standard transaction decoding
@@ -198,4 +196,18 @@ func (ss StdSignature) MarshalYAML() (interface{}, error) {
 	}
 
 	return string(bz), err
+}
+
+func NewTestTx(ctx sdk.Ctx, msgs []sdk.Msg, privs []posCrypto.PrivateKey, entropy int64, fee sdk.Coins) sdk.Tx {
+	sigs := make([]StdSignature, len(privs))
+	for i, priv := range privs {
+		signBytes := StdSignBytes(ctx.ChainID(), entropy, fee, msgs, "")
+		sig, err := priv.Sign(signBytes)
+		if err != nil {
+			panic(err)
+		}
+		sigs[i] = StdSignature{PublicKey: priv.PublicKey(), Signature: sig}
+	}
+	tx := NewStdTx(msgs, fee, sigs, "", entropy)
+	return tx
 }

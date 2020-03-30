@@ -10,6 +10,10 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterInterface((*exported.Account)(nil), nil)
 	cdc.RegisterConcrete(&BaseAccount{}, "posmint/Account", nil)
 	cdc.RegisterConcrete(StdTx{}, "posmint/StdTx", nil)
+	cdc.RegisterInterface((*exported.ModuleAccountI)(nil), nil)
+	cdc.RegisterInterface((*exported.SupplyI)(nil), nil)
+	cdc.RegisterConcrete(&ModuleAccount{}, "posmint/ModuleAccount", nil)
+	cdc.RegisterConcrete(&Supply{}, "posmint/Supply", nil)
 }
 
 // module wide codec

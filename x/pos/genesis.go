@@ -14,7 +14,7 @@ import (
 // InitGenesis sets up the module based on the genesis state
 // First TM block is at height 1, so state updates applied from
 // genesis.json are in block 0.
-func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.SupplyKeeper, data types.GenesisState) (res []abci.ValidatorUpdate) {
+func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.AuthKeeper, data types.GenesisState) (res []abci.ValidatorUpdate) {
 	// zero out a staked tokens variable for traking the number of staked tokens
 	stakedTokens := sdk.ZeroInt()
 	// set the context
@@ -68,11 +68,6 @@ func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.SupplyKee
 	if stakedPool == nil {
 		panic(fmt.Sprintf("%s module account has not been set", types.StakedPoolName))
 	}
-	// check if the dao pool account exists
-	daoPool := keeper.GetDAOPool(ctx)
-	if daoPool == nil {
-		panic(fmt.Sprintf("%s module account has not been set", types.DAOPoolName))
-	}
 	// add coins if not provided on genesis (there's an option to provide the coins in genesis)
 	if stakedPool.GetCoins().IsZero() {
 		if err := stakedPool.SetCoins(stakedCoins); err != nil {
@@ -83,13 +78,6 @@ func InitGenesis(ctx sdk.Ctx, keeper keeper.Keeper, supplyKeeper types.SupplyKee
 		// if it is provided in the genesis file then ensure the two are equal
 		if !stakedPool.GetCoins().IsEqual(stakedCoins) {
 			panic(fmt.Sprintf("%s module account total does not equal the amount in each validator account", types.StakedPoolName))
-		}
-	}
-	// if the dao pool has zero tokens (not provided in genesis file)
-	if daoPool.GetCoins().IsZero() {
-		// ad the coins
-		if err := daoPool.SetCoins(sdk.NewCoins(sdk.NewCoin(keeper.StakeDenom(ctx), data.DAO.Tokens))); err != nil {
-			panic(err)
 		}
 	}
 	// don't need to run Tendermint updates if we exported
@@ -167,8 +155,6 @@ func ExportGenesis(ctx sdk.Ctx, keeper keeper.Keeper) types.GenesisState {
 
 		return false
 	})
-	daoTokens := keeper.GetDAOTokens(ctx)
-	daoPool := types.DAOPool{Tokens: daoTokens}
 	prevProposer := keeper.GetPreviousProposer(ctx)
 
 	return types.GenesisState{
@@ -177,7 +163,6 @@ func ExportGenesis(ctx sdk.Ctx, keeper keeper.Keeper) types.GenesisState {
 		PrevStateValidatorPowers: prevStateValidatorPowers,
 		Validators:               validators,
 		Exported:                 true,
-		DAO:                      daoPool,
 		SigningInfos:             signingInfos,
 		MissedBlocks:             missedBlocks,
 		PreviousProposer:         prevProposer,

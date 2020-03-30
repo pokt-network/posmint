@@ -24,42 +24,26 @@ func (k Keeper) rewardFromFees(ctx sdk.Ctx, previousProposer sdk.Address) {
 	feeCollector := k.getFeePool(ctx)
 	feesCollected := feeCollector.GetCoins()
 	// transfer collected fees to the pos module account
-	err := k.supplyKeeper.SendCoinsFromModuleToModule(ctx, auth.FeeCollectorName, types.ModuleName, feesCollected)
+	err := k.authKeeper.SendCoinsFromModuleToModule(ctx, auth.FeeCollectorName, types.ModuleName, feesCollected)
 	if err != nil {
 		panic(err)
 	}
 	// calculate the total reward by adding relays to the
 	totalReward := feesCollected.AmountOf(k.StakeDenom(ctx))
-	// calculate previous proposer reward
-	baseProposerRewardPercentage := k.getProposerRewardPercentage(ctx)
-	// divide up the reward from the proposer reward and the dao reward
-	proposerReward := baseProposerRewardPercentage.Mul(totalReward).Quo(sdk.NewInt(100))
-	daoReward := totalReward.Sub(proposerReward)
 	// get the validator structure
 	proposerValidator := k.Validator(ctx, previousProposer)
 	if proposerValidator != nil {
-		propRewardCoins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), proposerReward))
-		daoRewardCoins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), daoReward))
+		propRewardCoins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), totalReward))
 		// send to validator
-		if err := k.supplyKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName,
+		if err := k.authKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName,
 			sdk.Address(proposerValidator.GetAddress()), propRewardCoins); err != nil {
-			panic(err)
-		}
-		// send to rest dao
-		if err := k.supplyKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, types.DAOPoolName, daoRewardCoins); err != nil {
 			panic(err)
 		}
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
 				types.EventTypeProposerReward,
-				sdk.NewAttribute(sdk.AttributeKeyAmount, proposerReward.String()),
+				sdk.NewAttribute(sdk.AttributeKeyAmount, totalReward.String()),
 				sdk.NewAttribute(types.AttributeKeyValidator, proposerValidator.GetAddress().String()),
-			),
-		)
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				types.EventTypeDAOAllocation,
-				sdk.NewAttribute(sdk.AttributeKeyAmount, daoReward.String()),
 			),
 		)
 	} else {
@@ -114,11 +98,11 @@ func (k Keeper) deleteValidatorAward(ctx sdk.Ctx, address sdk.Address) {
 // Mints sdk.Coins and sends them onto an address
 func (k Keeper) mint(ctx sdk.Ctx, amount sdk.Int, address sdk.Address) sdk.Result {
 	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), amount))
-	mintErr := k.supplyKeeper.MintCoins(ctx, types.StakedPoolName, coins.Add(coins))
+	mintErr := k.authKeeper.MintCoins(ctx, types.StakedPoolName, coins.Add(coins))
 	if mintErr != nil {
 		return mintErr.Result()
 	}
-	sendErr := k.supplyKeeper.SendCoinsFromModuleToAccount(ctx, types.StakedPoolName, sdk.Address(address), coins)
+	sendErr := k.authKeeper.SendCoinsFromModuleToAccount(ctx, types.StakedPoolName, sdk.Address(address), coins)
 	if sendErr != nil {
 		return sendErr.Result()
 	}

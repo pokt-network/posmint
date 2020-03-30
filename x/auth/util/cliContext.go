@@ -3,6 +3,10 @@ package util
 import (
 	"errors"
 	"fmt"
+	"github.com/pokt-network/posmint/crypto"
+	"github.com/pokt-network/posmint/x/auth"
+	"github.com/pokt-network/posmint/x/auth/exported"
+	"github.com/pokt-network/posmint/x/auth/types"
 
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
@@ -19,6 +23,7 @@ type CLIContext struct { // TODO consider module passing clicontext instead of n
 	Passphrase    string
 	Height        int64
 	BroadcastMode BroadcastType
+	PrivateKey    crypto.PrivateKey
 }
 
 // NewCLIContext returns a new initialized CLIContext with parameters from the
@@ -226,4 +231,38 @@ func (ctx CLIContext) query(path string, key cmn.HexBytes) (res []byte, height i
 func (ctx CLIContext) queryStore(key cmn.HexBytes, storeName, endPath string) ([]byte, int64, error) {
 	path := fmt.Sprintf("/store/%s/%s", storeName, endPath)
 	return ctx.query(path, key)
+}
+
+// GetAccount queries for an account given an address and a block height. An
+// error is returned if the query or decoding fails.
+func (ctx CLIContext) GetAccount(addr sdk.Address) (exported.Account, error) {
+	account, _, err := ctx.GetAccountWithHeight(addr)
+	return account, err
+}
+
+// GetAccountWithHeight queries for an account given an address. Returns the
+// height of the query with the account. An error is returned if the query
+// or decoding fails.
+func (ctx CLIContext) GetAccountWithHeight(addr sdk.Address) (exported.Account, int64, error) {
+	bs, err := auth.ModuleCdc.MarshalJSON(types.NewQueryAccountParams(addr))
+	if err != nil {
+		return nil, 0, err
+	}
+	res, height, err := ctx.QueryWithData(fmt.Sprintf("custom/%s/%s", auth.QuerierRoute, auth.QueryAccount), bs)
+	if err != nil {
+		return nil, height, err
+	}
+	var account exported.Account
+	if err := auth.ModuleCdc.UnmarshalJSON(res, &account); err != nil {
+		return nil, height, err
+	}
+	return account, height, nil
+}
+
+// EnsureExists returns an error if no account exists for the given address else nil.
+func (ctx CLIContext) EnsureExists(addr sdk.Address) error {
+	if _, err := ctx.GetAccount(addr); err != nil {
+		return err
+	}
+	return nil
 }

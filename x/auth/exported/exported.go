@@ -8,10 +8,6 @@ import (
 )
 
 // Account is an interface used to store coins at a given address within state.
-// It presumes a notion of sequence numbers for replay protection,
-// a notion of account numbers for replay protection for previously pruned accounts,
-// and a pubkey for authentication purposes.
-//
 // Many complex conditions can be used in the concrete struct which implements Account.
 type Account interface {
 	GetAddress() sdk.Address
@@ -29,4 +25,26 @@ type Account interface {
 
 	// Ensure that account implements stringer
 	String() string
+}
+
+// ModuleAccountI defines an account interface for modules that hold tokens in an escrow
+type ModuleAccountI interface {
+	Account
+
+	GetName() string
+	GetPermissions() []string
+	HasPermission(string) bool
+}
+
+// SupplyI defines an inflationary supply interface for modules that handle
+// token supply.
+type SupplyI interface {
+	GetTotal() sdk.Coins
+	SetTotal(total sdk.Coins) SupplyI
+
+	Inflate(amount sdk.Coins) SupplyI
+	Deflate(amount sdk.Coins) SupplyI
+
+	String() string
+	ValidateBasic() error
 }

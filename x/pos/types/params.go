@@ -7,7 +7,6 @@ import (
 
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
-	"github.com/pokt-network/posmint/x/params"
 )
 
 // POS params default values
@@ -21,7 +20,7 @@ const (
 	DefaultDowntimeJailDuration               = 60 * 10 * time.Second
 )
 
-// nolint - Keys for parameter access
+// nolint - PublicKeys for parameter access
 var (
 	KeyUnstakingTime               = []byte("UnstakingTime")
 	KeyMaxValidators               = []byte("MaxValidators")
@@ -40,7 +39,7 @@ var (
 	DefaultSlashFractionDowntime   = sdk.NewDec(1).Quo(sdk.NewDec(100))
 )
 
-var _ params.ParamSet = (*Params)(nil)
+var _ sdk.ParamSet = (*Params)(nil)
 
 // Params defines the high level settings for pos module
 type Params struct {
@@ -59,8 +58,8 @@ type Params struct {
 }
 
 // Implements params.ParamSet
-func (p *Params) ParamSetPairs() params.ParamSetPairs {
-	return params.ParamSetPairs{
+func (p *Params) ParamSetPairs() sdk.ParamSetPairs {
+	return sdk.ParamSetPairs{
 		{Key: KeyUnstakingTime, Value: &p.UnstakingTime},
 		{Key: KeyMaxValidators, Value: &p.MaxValidators},
 		{Key: KeyStakeDenom, Value: &p.StakeDenom},

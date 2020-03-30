@@ -3,6 +3,7 @@ package types
 import (
 	"errors"
 	"fmt"
+	"github.com/pokt-network/posmint/crypto"
 	"github.com/tendermint/tendermint/libs/common"
 	"strings"
 
@@ -13,6 +14,7 @@ import (
 // TxBuilder implements a transaction context created in SDK modules.
 type TxBuilder struct {
 	txEncoder sdk.TxEncoder
+	txDecoder sdk.TxDecoder
 	keybase   crkeys.Keybase
 	chainID   string
 	memo      string
@@ -20,9 +22,10 @@ type TxBuilder struct {
 }
 
 // NewTxBuilder returns a new initialized TxBuilder.
-func NewTxBuilder(txEncoder sdk.TxEncoder, chainID, memo string, fees sdk.Coins) TxBuilder {
+func NewTxBuilder(txEncoder sdk.TxEncoder, txDecoder sdk.TxDecoder, chainID, memo string, fees sdk.Coins) TxBuilder {
 	return TxBuilder{
 		txEncoder: txEncoder,
+		txDecoder: txDecoder,
 		keybase:   nil,
 		chainID:   chainID,
 		memo:      memo,
@@ -32,6 +35,9 @@ func NewTxBuilder(txEncoder sdk.TxEncoder, chainID, memo string, fees sdk.Coins)
 
 // TxEncoder returns the transaction encoder
 func (bldr TxBuilder) TxEncoder() sdk.TxEncoder { return bldr.txEncoder }
+
+// TxEncoder returns the transaction encoder
+func (bldr TxBuilder) TxDecoder() sdk.TxDecoder { return bldr.txDecoder }
 
 // Keybase returns the keybase
 func (bldr TxBuilder) Keybase() crkeys.Keybase { return bldr.keybase }
@@ -81,8 +87,8 @@ func (bldr TxBuilder) WithMemo(memo string) TxBuilder {
 }
 
 // BuildAndSign builds a single message to be signed, and signs a transaction
-// with the built message given a address, passphrase, and a set of messages.
-func (bldr TxBuilder) BuildAndSign(address sdk.Address, passphrase string, msgs []sdk.Msg) ([]byte, error) {
+// with the built message given a address, private key, and a set of messages.
+func (bldr TxBuilder) BuildAndSign(address sdk.Address, privateKey crypto.PrivateKey, msgs []sdk.Msg) ([]byte, error) {
 	if bldr.keybase == nil {
 		return nil, errors.New(fmt.Sprintf("cant build and sign transaciton: the keybase is nil"))
 	}
@@ -91,13 +97,103 @@ func (bldr TxBuilder) BuildAndSign(address sdk.Address, passphrase string, msgs 
 	}
 	entropy := common.RandInt64()
 	bytesToSign := StdSignBytes(bldr.chainID, entropy, bldr.fees, msgs, bldr.memo)
-	sigBytes, pubkey, err := bldr.keybase.Sign(address, passphrase, bytesToSign)
+	sigBytes, err := privateKey.Sign(bytesToSign)
 	if err != nil {
 		return nil, err
 	}
 	sig := StdSignature{
-		PublicKey: pubkey,
 		Signature: sigBytes,
 	}
 	return bldr.txEncoder(NewStdTx(msgs, bldr.fees, []StdSignature{sig}, bldr.memo, entropy))
+}
+
+// BuildAndSignWithKeyBase builds a single message to be signed, and signs a transaction
+// with the built message given a address, passphrase, and a set of messages.
+func (bldr TxBuilder) BuildAndSignWithKeyBase(address sdk.Address, passphrase string, msgs []sdk.Msg) ([]byte, error) {
+	if bldr.keybase == nil {
+		return nil, errors.New(fmt.Sprintf("cant build and sign transaciton: the keybase is nil"))
+	}
+	if bldr.chainID == "" {
+		return nil, errors.New(fmt.Sprintf("cant build and sign transaciton: the chainID is empty"))
+	}
+	entropy := common.RandInt64()
+	bytesToSign := StdSignBytes(bldr.chainID, entropy, bldr.fees, msgs, bldr.memo)
+	sigBytes, _, err := bldr.keybase.Sign(address, passphrase, bytesToSign)
+	if err != nil {
+		return nil, err
+	}
+	sig := StdSignature{
+		Signature: sigBytes,
+	}
+	return bldr.txEncoder(NewStdTx(msgs, bldr.fees, []StdSignature{sig}, bldr.memo, entropy))
+}
+
+func (bldr TxBuilder) SignMultisigTransaction(address sdk.Address, keys []crypto.PublicKey, passphrase string, txBytes []byte) (signedTx []byte, err error) {
+	if bldr.keybase == nil {
+		return nil, errors.New(fmt.Sprintf("cant build and sign transaciton: the keybase is nil"))
+	}
+	if bldr.chainID == "" {
+		return nil, errors.New(fmt.Sprintf("cant build and sign transaciton: the chainID is empty"))
+	}
+	// decode the transaction
+	t, err := bldr.txDecoder(txBytes)
+	tx := t.(StdTx)
+	// get the sign bytes from the transaction
+	bytesToSign := StdSignBytes(bldr.chainID, tx.Entropy, tx.Fee, tx.Msgs, tx.Memo)
+	sigBytes, pubKey, err := bldr.keybase.Sign(address, passphrase, bytesToSign)
+	if err != nil {
+		return nil, err
+	}
+	// sign using multisignature sturcture
+	var ms = crypto.MultiSig(crypto.MultiSignature{})
+	if tx.Signatures == nil || len(tx.Signatures) == 0 || tx.Signatures[0].Signature == nil {
+		ms = ms.NewMultiSignature()
+	} else {
+		ms = ms.Unmarshal(tx.Signatures[0].Signature)
+	}
+	if keys != nil && len(keys) != 0 {
+		ms, err = ms.AddSignature(sigBytes, pubKey, keys)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		ms = ms.AddSignatureByIndex(sigBytes, len(ms.Signatures()))
+	}
+	sig := StdSignature{
+		PublicKey: tx.Signatures[0].PublicKey,
+		Signature: ms.Marshal(),
+	}
+	// replace the old multi-signature with the new multi-signature (containing the additional signature)
+	tx.Signatures[0] = sig
+	// encode using the standard encoder
+	return bldr.TxEncoder()(tx)
+}
+
+func (bldr TxBuilder) BuildAndSignMultisigTransaction(address sdk.Address, publicKey crypto.PublicKeyMultiSig, m sdk.Msg, passphrase string) (signedTx []byte, err error) {
+	if bldr.keybase == nil {
+		return nil, errors.New(fmt.Sprintf("cant build and sign transaciton: the keybase is nil"))
+	}
+	if bldr.chainID == "" {
+		return nil, errors.New(fmt.Sprintf("cant build and sign transaciton: the chainID is empty"))
+	}
+	// bulid the transaction from scratch
+	entropy := common.RandInt64()
+	fee := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(100000)))
+	signBz := StdSignBytes(bldr.chainID, entropy, fee, []sdk.Msg{m}, bldr.memo)
+	sigBytes, _, err := bldr.keybase.Sign(address, passphrase, signBz)
+	if err != nil {
+		return nil, err
+	}
+	// sign using multisignature structure
+	var ms = crypto.MultiSig(crypto.MultiSignature{})
+	ms = ms.NewMultiSignature()
+	ms = ms.AddSignatureByIndex(sigBytes, 0)
+	sig := StdSignature{
+		PublicKey: publicKey,
+		Signature: ms.Marshal(),
+	}
+	// create a new standard transaction object
+	tx := NewStdTx([]sdk.Msg{m}, fee, []StdSignature{sig}, "", entropy)
+	// encode it using the default encoder
+	return bldr.TxEncoder()(tx)
 }

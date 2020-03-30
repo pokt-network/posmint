@@ -3,6 +3,7 @@ package pos
 import (
 	"github.com/pokt-network/posmint/codec"
 	"github.com/pokt-network/posmint/crypto/keys"
+	"github.com/pokt-network/posmint/crypto/keys/mintkey"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/auth"
 	"github.com/pokt-network/posmint/x/auth/util"
@@ -89,14 +90,17 @@ func newTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, passphr
 	}
 	chainID := genDoc.Genesis.ChainID
 	fromAddr := kp[0].GetAddress()
+
+	privkey, err := mintkey.UnarmorDecryptPrivKey(kp[0].PrivKeyArmor, passphrase)
 	cliCtx := util.NewCLIContext(tmNode, fromAddr, passphrase).WithCodec(cdc)
-	accGetter := auth.NewAccountRetriever(cliCtx)
-	err = accGetter.EnsureExists(fromAddr)
+	cliCtx.PrivateKey = privkey
+	err = cliCtx.EnsureExists(fromAddr)
 	if err != nil {
 		return auth.TxBuilder{}, cliCtx, err
 	}
 	txBuilder := auth.NewTxBuilder(
 		auth.DefaultTxEncoder(cdc),
+		auth.DefaultTxDecoder(cdc),
 		chainID,
 		"",
 		sdk.NewCoins(sdk.NewCoin("upokt", sdk.NewInt(10)))).WithKeybase(keybase) // todo get stake denom

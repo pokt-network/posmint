@@ -5,17 +5,17 @@ import (
 	"fmt"
 	posCrypto "github.com/pokt-network/posmint/crypto"
 	sdk "github.com/pokt-network/posmint/types"
+	"github.com/pokt-network/posmint/x/auth/keeper"
 	"github.com/pokt-network/posmint/x/auth/types"
-	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/node"
 	"github.com/tendermint/tendermint/rpc/client"
 	tmTypes "github.com/tendermint/tendermint/types"
 )
 
 // NewAnteHandler returns an AnteHandler that checks signatures and deducts fees from the first signer.
-func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteHandler {
-	return func(ctx sdk.Ctx, tx sdk.Tx, txBz []byte, tmNode *node.Node, simulate bool, ) (newCtx sdk.Ctx, res sdk.Result, abort bool) {
-		if addr := supplyKeeper.GetModuleAddress(types.FeeCollectorName); addr == nil {
+func NewAnteHandler(ak keeper.Keeper) sdk.AnteHandler {
+	return func(ctx sdk.Ctx, tx sdk.Tx, txBz []byte, tmNode *node.Node, simulate bool) (newCtx sdk.Ctx, res sdk.Result, abort bool) {
+		if addr := ak.GetModuleAddress(types.FeeCollectorName); addr == nil {
 			panic(fmt.Sprintf("%s module account has not been set", types.FeeCollectorName))
 		}
 		// all transactions must be of type auth.StdTx
@@ -63,7 +63,7 @@ func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteH
 		}
 		// deduct the fees
 		if !stdTx.Fee.IsZero() {
-			res = DeductFees(supplyKeeper, ctx, signerAccs[0], stdTx.Fee)
+			res = DeductFees(ak, ctx, signerAccs[0], stdTx.Fee)
 			if !res.IsOK() {
 				return newCtx, res, true
 			}
@@ -71,7 +71,7 @@ func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteH
 			// reload the account as fees have been deducted
 			signerAccs[0] = ak.GetAccount(ctx, signerAccs[0].GetAddress())
 		}
-		// stdSigs contains the sequence number, account number, and signatures.
+		// stdSigs contains signatures.
 		// When simulating, this would just be a 0-length slice.
 		stdSigs := stdTx.GetSignatures()
 		for i := 0; i < len(stdSigs); i++ {
@@ -85,7 +85,6 @@ func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteH
 			// check signature, return account with incremented nonce
 			signBytes := GetSignBytes(ctx.ChainID(), stdTx)
 			signerAccs[i], res = processSig(signerAccs[i], stdSigs[i], signBytes, simulate)
-			// check for duplicate transaction not in cache todo added
 			// todo when editing tendermint, pass txIndexer so no http
 			c := client.NewHTTP(tmNode.Config().RPC.ListenAddress, "/websocket")
 			_, err := c.Tx(tmTypes.Tx(txBz).Hash(), false)
@@ -105,7 +104,7 @@ func NewAnteHandler(ak AccountKeeper, supplyKeeper types.SupplyKeeper) sdk.AnteH
 
 // GetSignerAcc returns an account for a given address that is expected to sign
 // a transaction.
-func GetSignerAcc(ctx sdk.Ctx, ak AccountKeeper, addr sdk.Address) (Account, sdk.Result) {
+func GetSignerAcc(ctx sdk.Ctx, ak keeper.Keeper, addr sdk.Address) (Account, sdk.Result) {
 	if acc := ak.GetAccount(ctx, addr); acc != nil {
 		return acc, sdk.Result{}
 	}
@@ -152,54 +151,42 @@ func processSig(acc Account, sig StdSignature, signBytes []byte, simulate bool) 
 	if !res.IsOK() {
 		return nil, res
 	}
-	key, err := posCrypto.PubKeyToPublicKey(pubKey)
-	if err != nil {
-		return nil, sdk.ErrInternal("could not convert pubKey to Public Key").Result()
+	pk, ok := pubKey.(posCrypto.PublicKeyMultiSig)
+	if ok {
+		if !simulate && !pk.VerifyBytes(signBytes, sig.Signature) {
+			return nil, sdk.ErrUnauthorized("signature verification failed; verify correct account sequence and chain-id").Result()
+		}
 	}
-	err = acc.SetPubKey(key)
-	if err != nil {
-		return nil, sdk.ErrInternal("setting PubKey on signer's account").Result()
-	}
-
 	if !simulate && !pubKey.VerifyBytes(signBytes, sig.Signature) {
 		return nil, sdk.ErrUnauthorized("signature verification failed; verify correct account sequence and chain-id").Result()
 	}
-
-	//if err := acc.SetSequence(acc.GetSequence() + 1); err != nil {
-	//	panic(err)
-	//}
-	// TODO removed
-
 	return acc, res
 }
 
 // ProcessPubKey verifies that the given account address matches that of the
 // StdSignature. In addition, it will set the public key of the account if it
 // has not been set.
-func ProcessPubKey(acc Account, sig StdSignature) (crypto.PubKey, sdk.Result) {
+func ProcessPubKey(acc Account, sig StdSignature) (posCrypto.PublicKey, sdk.Result) {
 	// If pubkey is not known for account, set it from the StdSignature.
 	pubKey := acc.GetPubKey()
-
 	if pubKey == nil {
 		pubKey = sig.PublicKey
 		if pubKey == nil {
 			return nil, sdk.ErrInvalidPubKey("PubKey not found").Result()
 		}
-
 		if !bytes.Equal(pubKey.Address(), acc.GetAddress()) {
 			return nil, sdk.ErrInvalidPubKey(
 				fmt.Sprintf("PubKey does not match Signer address %s", acc.GetAddress())).Result()
 		}
 	}
-
 	return pubKey, sdk.Result{}
 }
 
 // DeductFees deducts fees from the given account.
 //
-// NOTE: We could use the CoinKeeper (in addition to the AccountKeeper, because
+// NOTE: We could use the CoinKeeper (in addition to the Keeper, because
 // the CoinKeeper doesn't give us accounts), but it seems easier to do this.
-func DeductFees(supplyKeeper types.SupplyKeeper, ctx sdk.Ctx, acc Account, fees sdk.Coins) sdk.Result {
+func DeductFees(keeper keeper.Keeper, ctx sdk.Ctx, acc Account, fees sdk.Coins) sdk.Result {
 	blockTime := ctx.BlockHeader().Time
 	coins := acc.GetCoins()
 
@@ -224,7 +211,7 @@ func DeductFees(supplyKeeper types.SupplyKeeper, ctx sdk.Ctx, acc Account, fees 
 		).Result()
 	}
 
-	err := supplyKeeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), types.FeeCollectorName, fees)
+	err := keeper.SendCoinsFromAccountToModule(ctx, acc.GetAddress(), types.FeeCollectorName, fees)
 	if err != nil {
 		return err.Result()
 	}
@@ -242,7 +229,6 @@ func EnsureSufficientMempoolFees(ctx sdk.Ctx, stdFee sdk.Coins) sdk.Result {
 	minGasPrices := ctx.MinGasPrices()
 	if !minGasPrices.IsZero() {
 		requiredFees := make(sdk.Coins, len(minGasPrices))
-
 		if !stdFee.IsAnyGTE(requiredFees) {
 			return sdk.ErrInsufficientFee(
 				fmt.Sprintf(

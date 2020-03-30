@@ -6,11 +6,9 @@ import (
 
 	"github.com/pokt-network/posmint/store/dbadapter"
 	"github.com/pokt-network/posmint/store/gaskv"
-	"github.com/pokt-network/posmint/store/iavl"
 	"github.com/pokt-network/posmint/store/types"
 	"github.com/stretchr/testify/require"
 
-	tiavl "github.com/tendermint/iavl"
 	dbm "github.com/tendermint/tm-db"
 )
 
@@ -82,14 +80,6 @@ func testPrefixStore(t *testing.T, baseStore types.KVStore, prefix []byte) {
 		require.False(t, baseStore.Has(key))
 		require.Nil(t, baseStore.Get(key))
 	}
-}
-
-func TestIAVLStorePrefix(t *testing.T) {
-	db := dbm.NewMemDB()
-	tree := tiavl.NewMutableTree(db, cacheSize)
-	iavlStore := iavl.UnsafeNewStore(tree, numRecent, storeEvery)
-
-	testPrefixStore(t, iavlStore, []byte("test"))
 }
 
 func TestPrefixKVStoreNoNilSet(t *testing.T) {

@@ -4,7 +4,6 @@ import (
 	"time"
 
 	sdk "github.com/pokt-network/posmint/types"
-	"github.com/pokt-network/posmint/x/params"
 	"github.com/pokt-network/posmint/x/pos/types"
 )
 
@@ -14,8 +13,8 @@ const (
 )
 
 // ParamTable for staking module
-func ParamKeyTable() params.KeyTable {
-	return params.NewKeyTable().RegisterParamSet(&types.Params{})
+func ParamKeyTable() sdk.KeyTable {
+	return sdk.NewKeyTable().RegisterParamSet(&types.Params{})
 }
 
 // UnstakingTime

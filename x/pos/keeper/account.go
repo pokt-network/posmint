@@ -5,13 +5,13 @@ import (
 )
 
 func (k Keeper) GetBalance(ctx sdk.Ctx, addr sdk.Address) sdk.Int {
-	coins := k.coinKeeper.GetCoins(ctx, sdk.Address(addr))
+	coins := k.authKeeper.GetCoins(ctx, addr)
 	return coins.AmountOf(k.StakeDenom(ctx))
 }
 
 func (k Keeper) SendCoins(ctx sdk.Ctx, fromAddress sdk.Address, toAddress sdk.Address, amount sdk.Int) sdk.Error {
 	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), amount))
-	err := k.coinKeeper.SendCoins(ctx, sdk.Address(fromAddress), sdk.Address(toAddress), coins)
+	err := k.authKeeper.SendCoins(ctx, fromAddress, toAddress, coins)
 	if err != nil {
 		return err
 	}

@@ -11,7 +11,6 @@ type GenesisState struct {
 	PrevStateValidatorPowers []PrevStatePowerMapping         `json:"prevState_validator_powers" yaml:"prevState_validator_powers"`
 	Validators               Validators                      `json:"validators" yaml:"validators"`
 	Exported                 bool                            `json:"exported" yaml:"exported"`
-	DAO                      DAOPool                         `json:"dao" yaml:"dao"`
 	SigningInfos             map[string]ValidatorSigningInfo `json:"signing_infos" yaml:"signing_infos"`
 	MissedBlocks             map[string][]MissedBlock        `json:"missed_blocks" yaml:"missed_blocks"`
 	PreviousProposer         sdk.Address                     `json:"previous_proposer" yaml:"previous_proposer"`
@@ -23,7 +22,7 @@ type PrevStatePowerMapping struct {
 	Power   int64
 }
 
-func NewGenesisState(params Params, validators []Validator, dao DAOPool, previousProposer sdk.Address,
+func NewGenesisState(params Params, validators []Validator, previousProposer sdk.Address,
 	signingInfos map[string]ValidatorSigningInfo, missedBlocks map[string][]MissedBlock) GenesisState {
 	return GenesisState{
 		Params:           params,
@@ -31,7 +30,6 @@ func NewGenesisState(params Params, validators []Validator, dao DAOPool, previou
 		SigningInfos:     signingInfos,
 		PreviousProposer: previousProposer,
 		MissedBlocks:     missedBlocks,
-		DAO:              dao,
 	}
 }
 
@@ -47,6 +45,5 @@ func DefaultGenesisState() GenesisState {
 		Params:       DefaultParams(),
 		SigningInfos: make(map[string]ValidatorSigningInfo),
 		MissedBlocks: make(map[string][]MissedBlock),
-		DAO:          DAOPool(NewPool(sdk.ZeroInt())),
 	}
 }

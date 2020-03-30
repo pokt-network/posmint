@@ -14,7 +14,6 @@ func TestDefaultGenesisState(t *testing.T) {
 		Params:       DefaultParams(),
 		SigningInfos: make(map[string]ValidatorSigningInfo),
 		MissedBlocks: make(map[string][]MissedBlock),
-		DAO:          DAOPool(NewPool(types.ZeroInt())),
 	}},
 	}
 	for _, tt := range tests {
@@ -30,7 +29,6 @@ func TestNewGenesisState(t *testing.T) {
 	type args struct {
 		params           Params
 		validators       []Validator
-		dao              DAOPool
 		previousProposer types.Address
 		signingInfos     map[string]ValidatorSigningInfo
 		missedBlocks     map[string][]MissedBlock
@@ -45,14 +43,12 @@ func TestNewGenesisState(t *testing.T) {
 		{"Default Change State Test", args{
 			params:           DefaultParams(),
 			validators:       nil,
-			dao:              DAOPool(NewPool(types.ZeroInt())),
 			previousProposer: ca,
 			signingInfos:     make(map[string]ValidatorSigningInfo),
 			missedBlocks:     make(map[string][]MissedBlock)},
 			GenesisState{
 				Params:           DefaultParams(),
 				Validators:       nil,
-				DAO:              DAOPool(NewPool(types.ZeroInt())),
 				SigningInfos:     make(map[string]ValidatorSigningInfo),
 				MissedBlocks:     make(map[string][]MissedBlock),
 				PreviousProposer: ca,
@@ -60,7 +56,7 @@ func TestNewGenesisState(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewGenesisState(tt.args.params, tt.args.validators, tt.args.dao, tt.args.previousProposer, tt.args.signingInfos, tt.args.missedBlocks); !reflect.DeepEqual(got, tt.want) {
+			if got := NewGenesisState(tt.args.params, tt.args.validators, tt.args.previousProposer, tt.args.signingInfos, tt.args.missedBlocks); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewGenesisState() = %v, want %v", got, tt.want)
 			}
 		})

@@ -3,7 +3,7 @@ package keeper
 import (
 	"github.com/pokt-network/posmint/crypto"
 	"github.com/pokt-network/posmint/types/module"
-	"github.com/pokt-network/posmint/x/supply"
+	"github.com/pokt-network/posmint/x/auth/keeper"
 	"math/rand"
 	"testing"
 
@@ -17,8 +17,7 @@ import (
 	"github.com/pokt-network/posmint/codec"
 	"github.com/pokt-network/posmint/store"
 	"github.com/pokt-network/posmint/x/auth"
-	"github.com/pokt-network/posmint/x/bank"
-	"github.com/pokt-network/posmint/x/params"
+	"github.com/pokt-network/posmint/x/gov"
 	"github.com/pokt-network/posmint/x/pos/types"
 	//"github.com/pokt-network/posmint/x/supply/internal/types"
 
@@ -27,14 +26,9 @@ import (
 
 // nolint: deadcode unused
 var (
-	multiPerm    = "multiple permissions account"
-	randomPerm   = "random permission"
-	holder       = "holder"
 	ModuleBasics = module.NewBasicManager(
 		auth.AppModuleBasic{},
-		bank.AppModuleBasic{},
-		params.AppModuleBasic{},
-		supply.AppModuleBasic{},
+		gov.AppModuleBasic{},
 	)
 )
 
@@ -42,11 +36,8 @@ var (
 // create a codec used only for testing
 func makeTestCodec() *codec.Codec {
 	var cdc = codec.New()
-
-	bank.RegisterCodec(cdc)
 	auth.RegisterCodec(cdc)
-	supply.RegisterCodec(cdc)
-	params.RegisterCodec(cdc)
+	gov.RegisterCodec(cdc)
 	sdk.RegisterCodec(cdc)
 	codec.RegisterCrypto(cdc)
 
@@ -57,16 +48,14 @@ func makeTestCodec() *codec.Codec {
 func createTestInput(t *testing.T, isCheckTx bool) (sdk.Context, []auth.Account, Keeper) {
 	initPower := int64(100000000000)
 	nAccs := int64(4)
-
 	keyAcc := sdk.NewKVStoreKey(auth.StoreKey)
-	keyParams := sdk.NewKVStoreKey(params.StoreKey)
-	tkeyParams := sdk.NewTransientStoreKey(params.TStoreKey)
-	keySupply := sdk.NewKVStoreKey(supply.StoreKey)
-
+	keyPOS := sdk.NewKVStoreKey(types.ModuleName)
+	keyParams := sdk.ParamsKey
+	tkeyParams := sdk.ParamsTKey
 	db := dbm.NewMemDB()
 	ms := store.NewCommitMultiStore(db)
 	ms.MountStoreWithDB(keyAcc, sdk.StoreTypeIAVL, db)
-	ms.MountStoreWithDB(keySupply, sdk.StoreTypeIAVL, db)
+	ms.MountStoreWithDB(keyPOS, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(keyParams, sdk.StoreTypeIAVL, db)
 	ms.MountStoreWithDB(tkeyParams, sdk.StoreTypeTransient, db)
 	err := ms.LoadLatestVersion()
@@ -84,42 +73,31 @@ func createTestInput(t *testing.T, isCheckTx bool) (sdk.Context, []auth.Account,
 
 	maccPerms := map[string][]string{
 		auth.FeeCollectorName: nil,
-		types.StakedPoolName:  {supply.Burner, supply.Staking, supply.Minter},
-		types.DAOPoolName:     {supply.Burner, supply.Staking, supply.Minter},
+		types.StakedPoolName:  {auth.Burner, auth.Staking, auth.Minter},
 	}
 	modAccAddrs := make(map[string]bool)
 	for acc := range maccPerms {
-		modAccAddrs[supply.NewModuleAddress(acc).String()] = true
+		modAccAddrs[auth.NewModuleAddress(acc).String()] = true
 	}
 	valTokens := sdk.TokensFromConsensusPower(initPower)
-
-	pk := params.NewKeeper(cdc, keyParams, tkeyParams, params.DefaultCodespace)
-	ak := auth.NewAccountKeeper(cdc, keyAcc, pk.Subspace(auth.DefaultParamspace), auth.ProtoBaseAccount)
-	bk := bank.NewBaseKeeper(ak, pk.Subspace(bank.DefaultParamspace), bank.DefaultCodespace, modAccAddrs)
-	sk := supply.NewKeeper(cdc, keySupply, ak, bk, maccPerms)
-
+	akSubspace := sdk.NewSubspace(auth.DefaultParamspace)
+	posSubspace := sdk.NewSubspace(DefaultParamspace)
+	ak := auth.NewKeeper(cdc, keyAcc, akSubspace, maccPerms)
 	moduleManager := module.NewManager(
 		auth.NewAppModule(ak),
-		bank.NewAppModule(bk, ak),
-		supply.NewAppModule(sk, ak),
 	)
-
 	genesisState := ModuleBasics.DefaultGenesis()
 	moduleManager.InitGenesis(ctx, genesisState)
-
-	posSubSpace := pk.Subspace(DefaultParamspace)
 	initialCoins := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, valTokens))
 	accs := createTestAccs(ctx, int(nAccs), initialCoins, &ak)
-
-	keeper := NewKeeper(cdc, keySupply, bk, sk, posSubSpace, sdk.CodespaceType("pos"))
-
+	keeper := NewKeeper(cdc, keyPOS, ak, posSubspace, DefaultParamspace)
 	params := types.DefaultParams()
 	keeper.SetParams(ctx, params)
 	return ctx, accs, keeper
 }
 
 // nolint: unparam deadcode unused
-func createTestAccs(ctx sdk.Ctx, numAccs int, initialCoins sdk.Coins, ak *auth.AccountKeeper) (accs []auth.Account) {
+func createTestAccs(ctx sdk.Ctx, numAccs int, initialCoins sdk.Coins, ak *keeper.Keeper) (accs []auth.Account) {
 	var err error
 	for i := 0; i < numAccs; i++ {
 		privKey := crypto.Ed25519PrivateKey{}.GenPrivateKey()
@@ -139,7 +117,7 @@ func createTestAccs(ctx sdk.Ctx, numAccs int, initialCoins sdk.Coins, ak *auth.A
 
 func addMintedCoinsToModule(t *testing.T, ctx sdk.Ctx, k *Keeper, module string) {
 	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), sdk.NewInt(100000000000)))
-	mintErr := k.supplyKeeper.MintCoins(ctx, module, coins.Add(coins))
+	mintErr := k.authKeeper.MintCoins(ctx, module, coins.Add(coins))
 	if mintErr != nil {
 		t.Fail()
 	}
@@ -147,7 +125,7 @@ func addMintedCoinsToModule(t *testing.T, ctx sdk.Ctx, k *Keeper, module string)
 
 func sendFromModuleToAccount(t *testing.T, ctx sdk.Ctx, k *Keeper, module string, address sdk.Address, amount sdk.Int) {
 	coins := sdk.NewCoins(sdk.NewCoin(k.StakeDenom(ctx), amount))
-	err := k.supplyKeeper.SendCoinsFromModuleToAccount(ctx, module, sdk.Address(address), coins)
+	err := k.authKeeper.SendCoinsFromModuleToAccount(ctx, module, sdk.Address(address), coins)
 	if err != nil {
 		t.Fail()
 	}

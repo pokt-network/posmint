@@ -2,11 +2,11 @@ package pos
 
 import (
 	"fmt"
+	"github.com/pokt-network/posmint/crypto"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/pos/keeper"
 	"github.com/pokt-network/posmint/x/pos/types"
 	"github.com/tendermint/tendermint/libs/common"
-	tmtypes "github.com/tendermint/tendermint/types"
 )
 
 func NewHandler(k keeper.Keeper) sdk.Handler {
@@ -45,7 +45,10 @@ func stakeNewValidator(ctx sdk.Ctx, msg types.MsgStake, k keeper.Keeper) sdk.Res
 	}
 	// check the consensus params
 	if ctx.ConsensusParams() != nil {
-		tmPubKey := tmtypes.TM2PB.PubKey(msg.PubKey.PubKey())
+		tmPubKey, err := crypto.CheckConsensusPubKey(msg.PubKey.PubKey())
+		if err != nil {
+			return sdk.ErrInternal(err.Error()).Result()
+		}
 		if !common.StringInSlice(tmPubKey.Type, ctx.ConsensusParams().Validator.PubKeyTypes) {
 			return types.ErrValidatorPubKeyTypeNotSupported(k.Codespace(),
 				tmPubKey.Type,

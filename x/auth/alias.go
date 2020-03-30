@@ -6,39 +6,42 @@ package auth
 
 import (
 	"github.com/pokt-network/posmint/x/auth/exported"
+	"github.com/pokt-network/posmint/x/auth/keeper"
 	"github.com/pokt-network/posmint/x/auth/types"
 )
 
 // Const Constants
 const (
-	ModuleName                    = types.ModuleName
-	StoreKey                      = types.StoreKey
-	FeeCollectorName              = types.FeeCollectorName
-	QuerierRoute                  = types.QuerierRoute
-	DefaultParamspace             = types.DefaultParamspace
-	QueryAccount                  = types.QueryAccount
+	ModuleName        = types.ModuleName
+	StoreKey          = types.StoreKey
+	FeeCollectorName  = types.FeeCollectorName
+	QuerierRoute      = types.QuerierRoute
+	DefaultParamspace = types.DefaultCodespace
+	QueryAccount      = types.QueryAccount
+	Burner            = types.Burner
+	Staking           = types.Staking
+	Minter            = types.Minter
 )
 
 var (
-	ProtoBaseAccount          = types.ProtoBaseAccount
+	NewKeeper                 = keeper.NewKeeper
+	NewModuleAddress          = types.NewModuleAddress
 	NewBaseAccountWithAddress = types.NewBaseAccountWithAddress
 	RegisterCodec             = types.RegisterCodec
-	NewGenesisState           = types.NewGenesisState
-	DefaultGenesisState       = types.DefaultGenesisState
 	CountSubKeys              = types.CountSubKeys
 	StdSignBytes              = types.StdSignBytes
 	DefaultTxDecoder          = types.DefaultTxDecoder
 	DefaultTxEncoder          = types.DefaultTxEncoder
 	NewTxBuilder              = types.NewTxBuilder
-	NewAccountRetriever       = types.NewAccountRetriever
 	ModuleCdc                 = types.ModuleCdc
 )
 
 // Type exported types
 type (
+	GenesisState       = types.GenesisState
+	Keeper             = keeper.Keeper
 	Account            = exported.Account
 	BaseAccount        = types.BaseAccount
-	GenesisState       = types.GenesisState
 	Params             = types.Params
 	QueryAccountParams = types.QueryAccountParams
 	StdTx              = types.StdTx
