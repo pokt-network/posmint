@@ -62,8 +62,9 @@ func (p Params) Equal(p2 Params) bool {
 
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
+	acl := ACL(make([]ACLPair, 0))
 	return Params{
-		ACL:      &BaseACL{},
+		ACL:      acl,
 		DAOOwner: sdk.Address{},
 		Upgrade:  NewUpgrade(0, ""),
 	}
@@ -73,7 +74,7 @@ func DefaultParams() Params {
 func (p Params) String() string {
 	var sb strings.Builder
 	sb.WriteString("Params: \n")
-	sb.WriteString(fmt.Sprintf("ACLKey: %d\n", p.ACL))
+	sb.WriteString(fmt.Sprintf("ACLKey: %v\n", p.ACL))
 	sb.WriteString(fmt.Sprintf("DAOOwnerKey: %s\n", p.DAOOwner))
 	sb.WriteString(fmt.Sprintf("UpgradeKey: %v\n", p.Upgrade))
 	return sb.String()

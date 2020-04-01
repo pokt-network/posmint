@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/gov/types"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -13,10 +12,9 @@ func TestKeeper_VerifyACL(t *testing.T) {
 	posACLKey2 := `pos/bar`
 	addr := getRandomValidatorAddress()
 	addr2 := getRandomValidatorAddress()
-	acl := types.BaseACL{M: map[string]sdk.Address{
-		posACLKey:  addr,
-		posACLKey2: addr2,
-	}}
+	acl := types.ACL(make([]types.ACLPair, 0))
+	acl.SetOwner(posACLKey, addr)
+	acl.SetOwner(posACLKey2, addr2)
 	keeper.SetParams(ctx, types.Params{
 		ACL:      acl,
 		DAOOwner: addr,
