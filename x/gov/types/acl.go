@@ -6,14 +6,6 @@ import (
 	"strings"
 )
 
-type ACL interface {
-	Validate(adjacencyMap map[string]bool) error
-	GetOwner(permKey string) sdk.Address
-	SetOwner(permKey string, ownerValue sdk.Address)
-	GetAll() map[string]sdk.Address
-	String() string
-}
-
 const (
 	ACLKeySep = "/"
 )
@@ -29,58 +21,10 @@ func SplitACLKey(aclKey string) (subspaceName, paramName string) {
 	return
 }
 
-var _ ACL = BaseACL{}
+type ACL []ACLPair // cant use map cause of amino concrete marshal in tx
 
-type BaseACL struct {
-	M map[string]sdk.Address
-}
-
-func (b BaseACL) Validate(adjacencyMap map[string]bool) error {
-	for key, val := range b.M {
-		_, ok := adjacencyMap[key]
-		if !ok {
-			return ErrInvalidACL(ModuleName, fmt.Errorf("the key: %s is not a recognized parameter", key))
-		}
-		adjacencyMap[key] = true
-		if val == nil {
-			return ErrInvalidACL(ModuleName, fmt.Errorf("the address provided for: %s is nil", key))
-		}
-	}
-	var unOwnedParams []string
-	for key, val := range adjacencyMap {
-		if !val {
-			unOwnedParams = append(unOwnedParams, key)
-		}
-	}
-	if len(unOwnedParams) != 0 {
-		return ErrInvalidACL(ModuleName, fmt.Errorf("the following params have no owner: %v", unOwnedParams))
-	}
-	return nil
-}
-
-func (b BaseACL) GetOwner(permKey string) sdk.Address {
-	return b.M[permKey]
-}
-
-func (b BaseACL) SetOwner(permKey string, ownerValue sdk.Address) {
-	b.M[permKey] = ownerValue
-}
-
-func (b BaseACL) GetAll() map[string]sdk.Address {
-	return b.M
-}
-
-func (b BaseACL) String() string {
-	return fmt.Sprintf(`ACL:
-%v`, b.M)
-}
-
-var _ ACL = &NonMapACL{}
-
-type NonMapACL []ACLPair // cant use map cause of amino concrete marshal in tx
-
-func (b NonMapACL) Validate(adjacencyMap map[string]bool) error {
-	for _, aclPair := range b {
+func (a ACL) Validate(adjacencyMap map[string]bool) error {
+	for _, aclPair := range a {
 		key := aclPair.Key
 		val := aclPair.Addr
 		_, ok := adjacencyMap[key]
@@ -104,8 +48,8 @@ func (b NonMapACL) Validate(adjacencyMap map[string]bool) error {
 	return nil
 }
 
-func (b NonMapACL) GetOwner(permKey string) sdk.Address {
-	for _, aclPair := range b {
+func (a ACL) GetOwner(permKey string) sdk.Address {
+	for _, aclPair := range a {
 		if aclPair.Key == permKey {
 			return aclPair.Addr
 		}
@@ -113,32 +57,32 @@ func (b NonMapACL) GetOwner(permKey string) sdk.Address {
 	return nil
 }
 
-func (b *NonMapACL) SetOwner(permKey string, ownerValue sdk.Address) {
-	for i, aclPair := range *b {
+func (a *ACL) SetOwner(permKey string, ownerValue sdk.Address) {
+	for i, aclPair := range *a {
 		if aclPair.Key == permKey {
 			aclPair.Addr = ownerValue
-			(*b)[i] = aclPair
+			(*a)[i] = aclPair
 			return
 		}
 	}
-	temp := append(*b, ACLPair{
+	temp := append(*a, ACLPair{
 		Key:  permKey,
 		Addr: ownerValue,
 	})
-	*b = temp
+	*a = temp
 }
 
-func (b NonMapACL) GetAll() map[string]sdk.Address {
+func (a ACL) GetAll() map[string]sdk.Address {
 	m := make(map[string]sdk.Address)
-	for _, aclPair := range b {
+	for _, aclPair := range a {
 		m[aclPair.Key] = aclPair.Addr
 	}
 	return m
 }
 
-func (b NonMapACL) String() string {
+func (a ACL) String() string {
 	return fmt.Sprintf(`ACL:
-%v`, b.GetAll())
+%v`, a.GetAll())
 }
 
 type ACLPair struct {
