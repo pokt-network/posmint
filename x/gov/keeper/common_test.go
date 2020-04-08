@@ -106,3 +106,16 @@ func createTestACL() govTypes.ACL {
 	}
 	return testACL
 }
+
+// Checks wether or not a Events slice contains an event that equals the values of event
+func ContainsEvent(events sdk.Events, event abci.Event) bool {
+	stringEvents := sdk.StringifyEvents(events.ToABCIEvents())
+	stringEventStr := sdk.StringEvents{sdk.StringifyEvent(event)}.String()
+	for _, item := range stringEvents {
+		itemStr := sdk.StringEvents{item}.String()
+		if itemStr == stringEventStr {
+			return true
+		}
+	}
+	return false
+}
