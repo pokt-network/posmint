@@ -108,6 +108,17 @@ func TestEd25519PublicKeyCustomMarshalling(t *testing.T) {
 	require.EqualValues(t, pub, pub2)
 }
 
+func TestSecp256k1PublicKeyCustomMarshalling(t *testing.T) {
+
+	//Get a Random PubKey
+	pub := getRandomPubKeySecp(t)
+	var pub2 Secp256k1PublicKey
+	//Do Marshalling and Unmarshalling
+	checkJSONMarshalUnMarshal(t, pub, &pub2)
+	//Pub2 should have the same value if everything is ok.
+	require.EqualValues(t, pub, pub2)
+}
+
 func TestNilEncodings(t *testing.T) {
 
 	// Check nil Signature.
