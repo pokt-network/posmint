@@ -2,8 +2,10 @@ package crypto
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
+	"strings"
 )
 
 type (
@@ -75,6 +77,30 @@ func (pub Secp256k1PublicKey) Equals(other crypto.PubKey) bool {
 
 func (pub Secp256k1PublicKey) Size() int {
 	return Secp256k1PublicKeySize
+}
+
+func (pub Secp256k1PublicKey) MarshalJSON() ([]byte, error) {
+	return json.Marshal(pub.RawString())
+}
+
+func (pub *Secp256k1PublicKey) UnmarshalJSON(data []byte) error {
+	hexstring := strings.Trim(string(data[:]), "\"")
+
+	bytes, err := hex.DecodeString(hexstring)
+	if err != nil {
+		return err
+	}
+	pk, err := NewPublicKeyBz(bytes)
+	if err != nil {
+		return err
+	}
+	err = cdc.UnmarshalBinaryBare(pk.Bytes(), pub)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (priv Secp256k1PrivateKey) RawBytes() []byte {
