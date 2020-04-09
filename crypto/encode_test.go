@@ -1,6 +1,7 @@
 package crypto
 
 import (
+	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"testing"
 
@@ -40,6 +41,15 @@ func checkAminoJSON(t *testing.T, src interface{}, dst interface{}, isNil bool) 
 	}
 	// Unmarshal.
 	err = cdc.UnmarshalJSON(js, dst)
+	require.Nil(t, err, "%+v", err)
+}
+
+func checkJSONMarshalUnMarshal(t *testing.T, src interface{}, dst interface{}) {
+	// Marshal to JSON bytes.
+	jbytes, err := json.Marshal(src)
+	require.Nil(t, err, "%+v", err)
+	// Unmarshal.
+	err = json.Unmarshal(jbytes, dst)
 	require.Nil(t, err, "%+v", err)
 }
 
@@ -85,6 +95,28 @@ func TestKeyEncodings(t *testing.T) {
 		checkAminoJSON(t, pubKey, &pub3, false) // TODO also check Prefix bytes.
 		require.EqualValues(t, pubKey, pub3)
 	}
+}
+
+func TestEd25519PublicKeyCustomMarshalling(t *testing.T) {
+
+	//Get a Random PubKey
+	pub := getRandomPubKey(t)
+	var pub2 Ed25519PublicKey
+	//Do Marshalling and Unmarshalling
+	checkJSONMarshalUnMarshal(t, pub, &pub2)
+	//Pub2 should have the same value if everything is ok.
+	require.EqualValues(t, pub, pub2)
+}
+
+func TestSecp256k1PublicKeyCustomMarshalling(t *testing.T) {
+
+	//Get a Random PubKey
+	pub := getRandomPubKeySecp(t)
+	var pub2 Secp256k1PublicKey
+	//Do Marshalling and Unmarshalling
+	checkJSONMarshalUnMarshal(t, pub, &pub2)
+	//Pub2 should have the same value if everything is ok.
+	require.EqualValues(t, pub, pub2)
 }
 
 func TestNilEncodings(t *testing.T) {

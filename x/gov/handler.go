@@ -27,9 +27,9 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 func handleMsgChangeParam(ctx sdk.Ctx, msg types.MsgChangeParam, k keeper.Keeper) sdk.Result {
 	// if modifying acl, convert into map ACL for efficiency
 	if msg.ParamKey == types.NewACLKey(ModuleName, string(types.ACLKey)) {
-		acl, ok := msg.ParamVal.(types.NonMapACL)
+		acl, ok := msg.ParamVal.(types.ACL)
 		if ok {
-			msg.ParamVal = types.BaseACL{M: acl.GetAll()}
+			msg.ParamVal = acl
 		}
 	}
 	return k.ModifyParam(ctx, msg.ParamKey, msg.ParamVal, msg.FromAddress)

@@ -3,8 +3,10 @@ package crypto
 import (
 	ed255192 "crypto/ed25519"
 	"encoding/hex"
+	"encoding/json"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/ed25519"
+	"strings"
 )
 
 type (
@@ -76,6 +78,30 @@ func (pub Ed25519PublicKey) Equals(other crypto.PubKey) bool {
 
 func (pub Ed25519PublicKey) Size() int {
 	return Ed25519PubKeySize
+}
+
+func (pub Ed25519PublicKey) MarshalJSON() ([]byte, error) {
+	return json.Marshal(pub.RawString())
+}
+
+func (pub *Ed25519PublicKey) UnmarshalJSON(data []byte) error {
+	hexstring := strings.Trim(string(data[:]), "\"")
+
+	bytes, err := hex.DecodeString(hexstring)
+	if err != nil {
+		return err
+	}
+	pk, err := NewPublicKeyBz(bytes)
+	if err != nil {
+		return err
+	}
+	err = cdc.UnmarshalBinaryBare(pk.Bytes(), pub)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (priv Ed25519PrivateKey) RawBytes() []byte {

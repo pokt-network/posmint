@@ -74,6 +74,11 @@ func (k Keeper) ModifyParam(ctx sdk.Ctx, aclKey string, paramValue interface{}, 
 			sdk.NewAttribute(sdk.AttributeKeyAction, fmt.Sprintf("modified: %s to: %v", aclKey, paramValue)),
 			sdk.NewAttribute(sdk.AttributeKeySender, owner.String()),
 		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeySender, owner.String()),
+		),
 	})
 	// if upgrade, emit separate upgrade event
 	if aclKey == types.NewACLKey(types.ModuleName, string(types.UpgradeKey)) {
@@ -85,7 +90,7 @@ func (k Keeper) ModifyParam(ctx sdk.Ctx, aclKey string, paramValue interface{}, 
 		ctx.EventManager().EmitEvent(sdk.NewEvent(
 			types.EventUpgrade,
 			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-			sdk.NewAttribute(sdk.AttributeKeyAction, fmt.Sprintf("UPGRADE CONFRIMED: %s at height %v", u.UpgradeVersion(), u.UpgradeHeight())),
+			sdk.NewAttribute(sdk.AttributeKeyAction, fmt.Sprintf("UPGRADE CONFIRMED: %s at height %v", u.UpgradeVersion(), u.UpgradeHeight())),
 			sdk.NewAttribute(sdk.AttributeKeySender, owner.String()),
 		))
 	}

@@ -10,6 +10,7 @@ import (
 func ExportGenesis(ctx sdk.Ctx, ak keeper.Keeper) types.GenesisState {
 	params := ak.GetParams(ctx)
 	accounts := ak.GetAllAccounts(ctx)
+
 	return types.NewGenesisState(params, accounts)
 }
 

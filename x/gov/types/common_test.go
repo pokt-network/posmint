@@ -40,7 +40,7 @@ var testACL ACL
 
 func createTestACL() ACL {
 	if testACL == nil {
-		acl := BaseACL{M: make(map[string]sdk.Address)}
+		acl := ACL(make([]ACLPair, 0))
 		acl.SetOwner("auth/MaxMemoCharacters", getRandomValidatorAddress())
 		acl.SetOwner("auth/TxSigLimit", getRandomValidatorAddress())
 		acl.SetOwner("gov/daoOwner", getRandomValidatorAddress())

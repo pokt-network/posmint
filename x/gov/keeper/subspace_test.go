@@ -4,6 +4,7 @@ import (
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/gov/types"
 	"github.com/stretchr/testify/assert"
+	abci "github.com/tendermint/tendermint/abci/types"
 	"testing"
 )
 
@@ -18,4 +19,19 @@ func TestModifyParam(t *testing.T) {
 	var b sdk.Address
 	s.Get(ctx, []byte("daoOwner"), &b)
 	assert.Equal(t, addr, b)
+	// Test "message.sender" event emission
+	assert.Equal(
+		t,
+		true,
+		ContainsEvent(
+			res.Events,
+			abci.Event(
+				sdk.NewEvent(
+					sdk.EventTypeMessage,
+					sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+					sdk.NewAttribute(sdk.AttributeKeySender, k.GetACL(ctx).GetOwner(aclKey).String()),
+				),
+			),
+		),
+	)
 }

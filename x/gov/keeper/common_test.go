@@ -96,7 +96,7 @@ var testACL govTypes.ACL
 
 func createTestACL() govTypes.ACL {
 	if testACL == nil {
-		acl := govTypes.BaseACL{M: make(map[string]sdk.Address)}
+		acl := govTypes.ACL(make([]govTypes.ACLPair, 0))
 		acl.SetOwner("auth/MaxMemoCharacters", getRandomValidatorAddress())
 		acl.SetOwner("auth/TxSigLimit", getRandomValidatorAddress())
 		acl.SetOwner("gov/daoOwner", getRandomValidatorAddress())
@@ -105,4 +105,17 @@ func createTestACL() govTypes.ACL {
 		testACL = acl
 	}
 	return testACL
+}
+
+// Checks wether or not a Events slice contains an event that equals the values of event
+func ContainsEvent(events sdk.Events, event abci.Event) bool {
+	stringEvents := sdk.StringifyEvents(events.ToABCIEvents())
+	stringEventStr := sdk.StringEvents{sdk.StringifyEvent(event)}.String()
+	for _, item := range stringEvents {
+		itemStr := sdk.StringEvents{item}.String()
+		if itemStr == stringEventStr {
+			return true
+		}
+	}
+	return false
 }

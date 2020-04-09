@@ -45,6 +45,11 @@ func (k Keeper) DAOBurn(ctx sdk.Ctx, owner sdk.Address, amount sdk.Int) sdk.Resu
 			sdk.NewAttribute(sdk.AttributeKeyAmount, amount.String()),
 			sdk.NewAttribute(sdk.AttributeKeySender, owner.String()),
 		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeySender, owner.String()),
+		),
 	})
 	return sdk.Result{Events: ctx.EventManager().Events()}
 }

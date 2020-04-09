@@ -27,13 +27,6 @@ func (k Keeper) GetParams(ctx sdk.Ctx) types.Params {
 
 // set the params
 func (k Keeper) SetParams(ctx sdk.Ctx, params types.Params) {
-	if params.ACL != nil {
-		// if non map acl turn into map acl for efficiency
-		acl, ok := params.ACL.(*types.NonMapACL)
-		if ok {
-			params.ACL = types.BaseACL{M: acl.GetAll()}
-		}
-	}
 	k.paramstore.SetParamSet(ctx, &params)
 }
 
