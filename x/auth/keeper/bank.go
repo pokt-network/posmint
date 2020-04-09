@@ -75,7 +75,7 @@ func (k Keeper) MintCoins(ctx sdk.Ctx, moduleName string, amt sdk.Coins) sdk.Err
 	k.SetSupply(ctx, supply)
 
 	logger := k.Logger(ctx)
-	logger.Info(fmt.Sprintf("minted %s from %s module account", amt.String(), moduleName))
+	logger.Debug(fmt.Sprintf("minted %s from %s module account", amt.String(), moduleName))
 
 	return nil
 }
