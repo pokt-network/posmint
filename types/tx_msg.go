@@ -26,6 +26,9 @@ type Msg interface {
 	// CONTRACT: All signatures must be present to be valid.
 	// CONTRACT: Returns addrs in some deterministic order.
 	GetSigners() []Address
+
+	// Returns an Int for the Msg
+	GetFee() Int
 }
 
 //__________________________________________________________
@@ -63,9 +66,18 @@ func NewTestMsg(addrs ...Address) *TestMsg {
 	}
 }
 
+var (
+	testFeeMap = map[string]int64{
+		"TestMsg": 1,
+	}
+)
+
 //nolint
 func (msg *TestMsg) Route() string { return "TestMsg" }
 func (msg *TestMsg) Type() string  { return "Test message" }
+func (msg *TestMsg) GetFee() Int {
+	return NewInt(testFeeMap[msg.Type()])
+}
 func (msg *TestMsg) GetSignBytes() []byte {
 	bz, err := json.Marshal(msg.signers)
 	if err != nil {

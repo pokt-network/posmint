@@ -20,7 +20,7 @@ type MsgStake struct {
 	Value  sdk.Int          `json:"value" yaml:"value"`
 }
 
-// Return address(es) that must sign over msg.GetSignBytes()
+// GetSigners return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgStake) GetSigners() []sdk.Address {
 	addrs := []sdk.Address{sdk.Address(msg.PubKey.Address())}
 	return addrs
@@ -32,7 +32,7 @@ func (msg MsgStake) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-// quick validity check
+// ValidateBasic quick validity check
 func (msg MsgStake) ValidateBasic() sdk.Error {
 
 	if msg.PubKey == nil || msg.PubKey.RawString() == "" {
@@ -44,9 +44,16 @@ func (msg MsgStake) ValidateBasic() sdk.Error {
 	return nil
 }
 
-//nolint
+// Route provides router key for msg
 func (msg MsgStake) Route() string { return RouterKey }
-func (msg MsgStake) Type() string  { return "stake_validator" }
+
+// Type provides msg name
+func (msg MsgStake) Type() string { return "stake_validator" }
+
+// GetFee get fee for msg
+func (msg MsgStake) GetFee() sdk.Int {
+	return sdk.NewInt(PosFeeMap[msg.Type()])
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 // MsgBeginUnstake - struct for unstaking transaciton
@@ -54,15 +61,18 @@ type MsgBeginUnstake struct {
 	Address sdk.Address `json:"validator_address" yaml:"validator_address"`
 }
 
+// GetSigners return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgBeginUnstake) GetSigners() []sdk.Address {
 	return []sdk.Address{sdk.Address(msg.Address)}
 }
 
+// GetSignBytes returns the message bytes to sign over.
 func (msg MsgBeginUnstake) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
+// ValidateBasic quick validity check
 func (msg MsgBeginUnstake) ValidateBasic() sdk.Error {
 	if msg.Address.Empty() {
 		return ErrNilValidatorAddr(DefaultCodespace)
@@ -70,9 +80,16 @@ func (msg MsgBeginUnstake) ValidateBasic() sdk.Error {
 	return nil
 }
 
-//nolint
+// Route provides router key for msg
 func (msg MsgBeginUnstake) Route() string { return RouterKey }
-func (msg MsgBeginUnstake) Type() string  { return "begin_unstaking_validator" }
+
+// Type provides msg name
+func (msg MsgBeginUnstake) Type() string { return "begin_unstaking_validator" }
+
+// GetFee get fee for msg
+func (msg MsgBeginUnstake) GetFee() sdk.Int {
+	return sdk.NewInt(PosFeeMap[msg.Type()])
+}
 
 //----------------------------------------------------------------------------------------------------------------------
 // MsgUnjail - struct for unjailing jailed validator
@@ -80,18 +97,29 @@ type MsgUnjail struct {
 	ValidatorAddr sdk.Address `json:"address" yaml:"address"` // address of the validator operator
 }
 
-//nolint
+// Route provides router key for msg
 func (msg MsgUnjail) Route() string { return RouterKey }
-func (msg MsgUnjail) Type() string  { return "unjail" }
+
+// Type provides msg name
+func (msg MsgUnjail) Type() string { return "unjail" }
+
+// GetFee get fee for msg
+func (msg MsgUnjail) GetFee() sdk.Int {
+	return sdk.NewInt(PosFeeMap[msg.Type()])
+}
+
+// GetSigners return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgUnjail) GetSigners() []sdk.Address {
 	return []sdk.Address{sdk.Address(msg.ValidatorAddr)}
 }
 
+// GetSignBytes returns the message bytes to sign over.
 func (msg MsgUnjail) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
+// ValidateBasic quick validity check
 func (msg MsgUnjail) ValidateBasic() sdk.Error {
 	if msg.ValidatorAddr.Empty() {
 		return ErrBadValidatorAddr(DefaultCodespace)
@@ -100,25 +128,37 @@ func (msg MsgUnjail) ValidateBasic() sdk.Error {
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-// MsgChangeParam structure for sending coins
+
+// MsgSend structure for sending coins
 type MsgSend struct {
 	FromAddress sdk.Address
 	ToAddress   sdk.Address
 	Amount      sdk.Int
 }
 
-//nolint
+// Route provides router key for msg
 func (msg MsgSend) Route() string { return RouterKey }
-func (msg MsgSend) Type() string  { return "send" }
+
+// Type provides msg name
+func (msg MsgSend) Type() string { return "send" }
+
+// GetFee get fee for msg
+func (msg MsgSend) GetFee() sdk.Int {
+	return sdk.NewInt(PosFeeMap[msg.Type()])
+}
+
+// GetSigners return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgSend) GetSigners() []sdk.Address {
 	return []sdk.Address{sdk.Address(msg.FromAddress)}
 }
 
+// GetSignBytes returns the message bytes to sign over.
 func (msg MsgSend) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
+// ValidateBasic quick validity check
 func (msg MsgSend) ValidateBasic() sdk.Error {
 	if msg.FromAddress.Empty() {
 		return ErrBadValidatorAddr(DefaultCodespace)
