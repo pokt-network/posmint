@@ -24,18 +24,29 @@ type MsgChangeParam struct {
 	ParamVal    interface{} `json:"param_value"`
 }
 
-//nolint
+// Route provides router key for msg
 func (msg MsgChangeParam) Route() string { return RouterKey }
-func (msg MsgChangeParam) Type() string  { return MsgChangeParamName }
+
+// Type provides msg name
+func (msg MsgChangeParam) Type() string { return MsgChangeParamName }
+
+// GetFee get fee for msg
+func (msg MsgChangeParam) GetFee() sdk.Int {
+	return sdk.NewInt(GovFeeMap[msg.Type()])
+}
+
+// GetSigners return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgChangeParam) GetSigners() []sdk.Address {
 	return []sdk.Address{msg.FromAddress}
 }
 
+// GetSignBytes returns the message bytes to sign over.
 func (msg MsgChangeParam) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
+// ValidateBasic quick validity check
 func (msg MsgChangeParam) ValidateBasic() sdk.Error {
 	if msg.FromAddress == nil {
 		return sdk.ErrInvalidAddress("nil address")
@@ -50,7 +61,8 @@ func (msg MsgChangeParam) ValidateBasic() sdk.Error {
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-// MsgChangeParam structure for changing governance parameters
+
+// MsgDAOTransfer structure for changing governance parameters
 type MsgDAOTransfer struct {
 	FromAddress sdk.Address `json:"from_address"`
 	ToAddress   sdk.Address `json:"to_address"`
@@ -58,18 +70,29 @@ type MsgDAOTransfer struct {
 	Action      string      `json:"action"`
 }
 
-//nolint
+// Route provides router key for msg
 func (msg MsgDAOTransfer) Route() string { return RouterKey }
-func (msg MsgDAOTransfer) Type() string  { return MsgDAOTransferName }
+
+// Type provides msg name
+func (msg MsgDAOTransfer) Type() string { return MsgDAOTransferName }
+
+// GetFee get fee for msg
+func (msg MsgDAOTransfer) GetFee() sdk.Int {
+	return sdk.NewInt(GovFeeMap[msg.Type()])
+}
+
+// GetSigners return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgDAOTransfer) GetSigners() []sdk.Address {
 	return []sdk.Address{msg.FromAddress}
 }
 
+// GetSignBytes returns the message bytes to sign over.
 func (msg MsgDAOTransfer) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
+// ValidateBasic quick validity check
 func (msg MsgDAOTransfer) ValidateBasic() sdk.Error {
 	if msg.FromAddress == nil {
 		return sdk.ErrInvalidAddress("nil from address")
@@ -88,24 +111,36 @@ func (msg MsgDAOTransfer) ValidateBasic() sdk.Error {
 }
 
 //----------------------------------------------------------------------------------------------------------------------
+
 // MsgUpgrade structure for changing governance parameters
 type MsgUpgrade struct {
 	Address sdk.Address `json:"address"`
 	Upgrade Upgrade     `json:"upgrade"`
 }
 
-//nolint
+// Route provides router key for msg
 func (msg MsgUpgrade) Route() string { return RouterKey }
-func (msg MsgUpgrade) Type() string  { return MsgUpgradeName }
+
+// Type provides msg name
+func (msg MsgUpgrade) Type() string { return MsgUpgradeName }
+
+// GetFee get fee for msg
+func (msg MsgUpgrade) GetFee() sdk.Int {
+	return sdk.NewInt(GovFeeMap[msg.Type()])
+}
+
+// GetSigners return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgUpgrade) GetSigners() []sdk.Address {
 	return []sdk.Address{msg.Address}
 }
 
+// GetSignBytes returns the message bytes to sign over.
 func (msg MsgUpgrade) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
+// ValidateBasic quick validity check
 func (msg MsgUpgrade) ValidateBasic() sdk.Error {
 	if msg.Address == nil {
 		return sdk.ErrInvalidAddress("nil from address")
