@@ -79,6 +79,7 @@ func (msg MsgDAOTransfer) Type() string { return MsgDAOTransferName }
 // GetFee get fee for msg
 func (msg MsgDAOTransfer) GetFee() sdk.Int {
 	return sdk.NewInt(GovFeeMap[msg.Type()])
+<<<<<<< HEAD
 }
 
 // GetSigner return address(es) that must sign over msg.GetSignBytes()
@@ -86,6 +87,15 @@ func (msg MsgDAOTransfer) GetSigner() sdk.Address {
 	return msg.FromAddress
 }
 
+=======
+}
+
+// GetSigners return address(es) that must sign over msg.GetSignBytes()
+func (msg MsgDAOTransfer) GetSigners() []sdk.Address {
+	return []sdk.Address{msg.FromAddress}
+}
+
+>>>>>>> add getMsg method to Msg interface
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgDAOTransfer) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
@@ -129,9 +139,15 @@ func (msg MsgUpgrade) GetFee() sdk.Int {
 	return sdk.NewInt(GovFeeMap[msg.Type()])
 }
 
+<<<<<<< HEAD
 // GetSigner return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgUpgrade) GetSigner() sdk.Address {
 	return msg.Address
+=======
+// GetSigners return address(es) that must sign over msg.GetSignBytes()
+func (msg MsgUpgrade) GetSigners() []sdk.Address {
+	return []sdk.Address{msg.Address}
+>>>>>>> add getMsg method to Msg interface
 }
 
 // GetSignBytes returns the message bytes to sign over.
