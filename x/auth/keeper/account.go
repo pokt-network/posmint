@@ -97,6 +97,17 @@ func (k Keeper) GetAccount(ctx sdk.Ctx, addr sdk.Address) exported.Account {
 func (k Keeper) GetAllAccounts(ctx sdk.Ctx) []exported.Account {
 	var accounts []exported.Account
 	appendAccount := func(acc exported.Account) (stop bool) {
+		accounts = append(accounts, acc)
+		return false
+	}
+	k.IterateAccounts(ctx, appendAccount)
+	return accounts
+}
+
+// GetAllAccounts returns all accounts in the accountKeeper.
+func (k Keeper) GetAllAccountsExport(ctx sdk.Ctx) []exported.Account {
+	var accounts []exported.Account
+	appendAccount := func(acc exported.Account) (stop bool) {
 		//not get empty coins accounts
 		if !acc.GetCoins().Empty() {
 			//sanity check here
