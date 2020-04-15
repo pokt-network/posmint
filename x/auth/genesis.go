@@ -9,7 +9,7 @@ import (
 // ExportGenesis returns a GenesisState for a given context and keeper
 func ExportGenesis(ctx sdk.Ctx, ak keeper.Keeper) types.GenesisState {
 	params := ak.GetParams(ctx)
-	accounts := ak.GetAllAccounts(ctx)
+	accounts := ak.GetAllAccountsExport(ctx)
 
 	return types.NewGenesisState(params, accounts)
 }
