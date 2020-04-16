@@ -14,3 +14,5 @@ require (
 	github.com/tendermint/tm-db v0.2.0
 	gopkg.in/yaml.v2 v2.2.4
 )
+
+replace github.com/tendermint/tendermint => github.com/pokt-network/tendermint v0.32.10
