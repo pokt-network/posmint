@@ -2,6 +2,7 @@ package gov
 
 import (
 	"fmt"
+
 	"github.com/pokt-network/posmint/codec"
 	"github.com/pokt-network/posmint/crypto"
 	"github.com/pokt-network/posmint/crypto/keys"
@@ -59,13 +60,13 @@ func newTx(cdc *codec.Codec, msg sdk.Msg, fromAddr sdk.Address, tmNode client.Cl
 	if err != nil {
 		panic(err)
 	}
+	// Retrieve chain ID
 	chainID := genDoc.Genesis.ChainID
+
 	cliCtx = util.NewCLIContext(tmNode, fromAddr, passphrase).WithCodec(cdc)
 	cliCtx.BroadcastMode = util.BroadcastSync
-	err = cliCtx.EnsureExists(fromAddr)
-	if err != nil {
-		panic(err)
-	}
+
+	// retrieve private key from keypair
 	account, err := cliCtx.GetAccount(fromAddr)
 	if err != nil {
 		panic(err)
