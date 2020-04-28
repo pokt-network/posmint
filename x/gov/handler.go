@@ -2,6 +2,7 @@ package gov
 
 import (
 	"fmt"
+
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/gov/keeper"
 	"github.com/pokt-network/posmint/x/gov/types"
@@ -45,8 +46,9 @@ func handleMsgDaoTransfer(ctx sdk.Ctx, msg types.MsgDAOTransfer, k keeper.Keeper
 		return k.DAOTransferFrom(ctx, msg.FromAddress, msg.ToAddress, msg.Amount)
 	case types.DAOBurn:
 		return k.DAOBurn(ctx, msg.FromAddress, msg.Amount)
+	default:
+		return sdk.Result{}
 	}
-	return sdk.Result{}
 }
 
 func handleMsgUpgrade(ctx sdk.Ctx, msg types.MsgUpgrade, k keeper.Keeper) sdk.Result {

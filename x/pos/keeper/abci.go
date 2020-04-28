@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/pos/types"
 	abci "github.com/tendermint/tendermint/abci/types"
