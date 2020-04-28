@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/gov/types"
 )
@@ -62,7 +63,8 @@ func (k Keeper) ModifyParam(ctx sdk.Ctx, aclKey string, paramValue interface{}, 
 	subspaceName, paramKey := types.SplitACLKey(aclKey)
 	space, ok := k.spaces[subspaceName]
 	if !ok {
-		panic(types.ErrSubspaceNotFound(types.ModuleName, subspaceName))
+		ctx.Logger().Error(fmt.Sprintf("unable to find subspace: %s in ACL", subspaceName))
+		return sdk.Result{Events: ctx.EventManager().Events()}
 	}
 	space.Set(ctx, []byte(paramKey), paramValue)
 	k.spaces[subspaceName] = space
