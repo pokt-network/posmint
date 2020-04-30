@@ -83,8 +83,9 @@ func NewPublicKeyBz(b []byte) (PublicKey, error) {
 		return Ed25519PublicKey{}.NewPublicKey(b)
 	case Secp256k1PublicKeySize:
 		return Secp256k1PublicKey{}.NewPublicKey(b)
+	default:
+		return nil, errors.New("unsupported public key type")
 	}
-	return nil, errors.New("unsupported public key type")
 }
 
 func PubKeyToPublicKey(key crypto.PubKey) (PublicKey, error) {
@@ -108,8 +109,9 @@ func NewPrivateKeyBz(b []byte) (PrivateKey, error) {
 		return Ed25519PrivateKey{}.PrivateKeyFromBytes(b)
 	case Secp256k1PrivateKeySize:
 		return Secp256k1PrivateKey{}.PrivateKeyFromBytes(b)
+	default:
+		return nil, errors.New("unsupported private key type")
 	}
-	return nil, errors.New("unsupported private key type")
 }
 
 func PrivKeyToPrivateKey(key crypto.PrivKey) (PrivateKey, error) {
