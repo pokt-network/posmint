@@ -2,6 +2,7 @@ package pos
 
 import (
 	"fmt"
+
 	"github.com/pokt-network/posmint/crypto"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/pos/keeper"
@@ -9,6 +10,7 @@ import (
 	"github.com/tendermint/tendermint/libs/common"
 )
 
+// NewHandler returns a msg router to handler operations
 func NewHandler(k keeper.Keeper) sdk.Handler {
 	return func(ctx sdk.Ctx, msg sdk.Msg) sdk.Result {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
@@ -33,9 +35,8 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 func handleStake(ctx sdk.Ctx, msg types.MsgStake, k keeper.Keeper) sdk.Result {
 	if _, found := k.GetValidator(ctx, sdk.Address(msg.PubKey.Address())); found {
 		return stakeRegisteredValidator(ctx, msg, k)
-	} else {
-		return stakeNewValidator(ctx, msg, k)
 	}
+	return stakeNewValidator(ctx, msg, k)
 }
 
 func stakeNewValidator(ctx sdk.Ctx, msg types.MsgStake, k keeper.Keeper) sdk.Result {

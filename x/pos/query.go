@@ -3,6 +3,7 @@ package pos
 import (
 	"encoding/hex"
 	"fmt"
+
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/auth/util"
@@ -11,6 +12,7 @@ import (
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 )
 
+// QueryAccountBalance Retrieves balance for address at height
 func QueryAccountBalance(cdc *codec.Codec, tmNode rpcclient.Client, addr sdk.Address, height int64) (sdk.Int, error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
 	params := types.QueryAccountBalanceParams{Address: addr}
@@ -27,6 +29,7 @@ func QueryAccountBalance(cdc *codec.Codec, tmNode rpcclient.Client, addr sdk.Add
 	return balance, nil
 }
 
+// QueryValidator Retrieve validator with address at height
 func QueryValidator(cdc *codec.Codec, tmNode rpcclient.Client, addr sdk.Address, height int64) (types.Validator, error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
 	res, _, err := cliCtx.QueryStore(types.KeyForValByAllVals(addr), types.StoreKey)
@@ -39,6 +42,7 @@ func QueryValidator(cdc *codec.Codec, tmNode rpcclient.Client, addr sdk.Address,
 	return types.MustUnmarshalValidator(cdc, res), nil
 }
 
+// QueryValidators Retrieve a list of validators at height
 func QueryValidators(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (types.Validators, error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
 	resKVs, _, err := cliCtx.QuerySubspace(types.AllValidatorsKey, types.StoreKey)
@@ -52,6 +56,7 @@ func QueryValidators(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (t
 	return validators, nil
 }
 
+// QueryStakedValidators Retrieve a list of staked validators at height
 func QueryStakedValidators(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (types.Validators, error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
 	resKVs, _, err := cliCtx.QuerySubspace(types.StakedValidatorsKey, types.StoreKey)
@@ -65,6 +70,7 @@ func QueryStakedValidators(cdc *codec.Codec, tmNode rpcclient.Client, height int
 	return validators, nil
 }
 
+// QueryUnstakedValidators Retrieve a list of unstaked validators at height
 func QueryUnstakedValidators(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (types.Validators, error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
 	resKVs, _, err := cliCtx.QuerySubspace(types.UnstakedValidatorsKey, types.StoreKey)
@@ -78,6 +84,7 @@ func QueryUnstakedValidators(cdc *codec.Codec, tmNode rpcclient.Client, height i
 	return validators, nil
 }
 
+// QueryUnstakingValidators Retrieve a list of unstaking validators at height
 func QueryUnstakingValidators(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (types.Validators, error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
 	resKVs, _, err := cliCtx.QuerySubspace(types.UnstakingValidatorsKey, types.StoreKey)
@@ -91,6 +98,7 @@ func QueryUnstakingValidators(cdc *codec.Codec, tmNode rpcclient.Client, height 
 	return validators, nil
 }
 
+// QuerySigningInfo Retrieve Signing info for Valdiator
 func QuerySigningInfo(cdc *codec.Codec, tmNode rpcclient.Client, height int64, address sdk.Address) (types.ValidatorSigningInfo, error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
 	key := types.GetValidatorSigningInfoKey(address)
@@ -106,6 +114,7 @@ func QuerySigningInfo(cdc *codec.Codec, tmNode rpcclient.Client, height int64, a
 	return types.ValidatorSigningInfo{}, nil
 }
 
+// QuerySupply Retrieve total amount of coins (unstaked & staked) in ciruclation
 func QuerySupply(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (stakedCoins sdk.Int, unstakedCoins sdk.Int, err error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
 	stakedPoolBytes, _, err := cliCtx.QueryWithData(fmt.Sprintf("custom/%s/stakedPool", types.StoreKey), nil)
@@ -127,6 +136,7 @@ func QuerySupply(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (stake
 	return stakedPool.Tokens, unstakedPool.Tokens, nil
 }
 
+// QueryPOSParams Retrieve params
 func QueryPOSParams(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (types.Params, error) {
 	cliCtx := util.NewCLIContext(tmNode, nil, "").WithCodec(cdc).WithHeight(height)
 	route := fmt.Sprintf("custom/%s/%s", types.StoreKey, types.QueryParameters)
@@ -139,6 +149,7 @@ func QueryPOSParams(cdc *codec.Codec, tmNode rpcclient.Client, height int64) (ty
 	return params, nil
 }
 
+// QueryTransaction Retrieve transaction using hash
 func QueryTransaction(tmNode rpcclient.Client, hash string) (*ctypes.ResultTx, error) {
 	res, err := hex.DecodeString(hash)
 	if err != nil {
@@ -151,6 +162,7 @@ func QueryTransaction(tmNode rpcclient.Client, hash string) (*ctypes.ResultTx, e
 	return tx, nil
 }
 
+// QueryBlock Retrieve Block at height
 func QueryBlock(tmNode rpcclient.Client, height *int64) ([]byte, error) {
 	res, err := (tmNode).Block(height)
 	if err != nil {
@@ -160,7 +172,7 @@ func QueryBlock(tmNode rpcclient.Client, height *int64) ([]byte, error) {
 	return codec.Cdc.MarshalJSONIndent(res, "", "  ")
 }
 
-// get the current blockchain height
+// QueryChainHeight get the current blockchain height
 func QueryChainHeight(tmNode rpcclient.Client) (int64, error) {
 	client := (tmNode)
 	status, err := client.Status()
@@ -172,6 +184,7 @@ func QueryChainHeight(tmNode rpcclient.Client) (int64, error) {
 	return height, nil
 }
 
+// QueryNodeStatus Retreive Validator Status
 func QueryNodeStatus(tmNode rpcclient.Client) (*ctypes.ResultStatus, error) {
 	res, err := (tmNode).Status()
 	if err != nil {

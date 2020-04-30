@@ -3,8 +3,9 @@ package types
 import (
 	"bytes"
 	"fmt"
-	sdk "github.com/pokt-network/posmint/types"
 	"strings"
+
+	sdk "github.com/pokt-network/posmint/types"
 )
 
 // Default parameter values
@@ -37,8 +38,8 @@ func ParamKeyTable() sdk.KeyTable {
 // nolint
 func (p *Params) ParamSetPairs() sdk.ParamSetPairs {
 	return sdk.ParamSetPairs{
-		{KeyMaxMemoCharacters, &p.MaxMemoCharacters},
-		{KeyTxSigLimit, &p.TxSigLimit},
+		{Key: KeyMaxMemoCharacters, Value: &p.MaxMemoCharacters},
+		{Key: KeyTxSigLimit, Value: &p.TxSigLimit},
 	}
 }
 

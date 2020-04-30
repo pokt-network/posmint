@@ -2,6 +2,7 @@ package pos
 
 import (
 	"encoding/json"
+
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/types/module"
@@ -112,7 +113,7 @@ func (am AppModule) ExportGenesis(ctx sdk.Ctx) json.RawMessage {
 	return types.ModuleCdc.MustMarshalJSON(gs)
 }
 
-// module begin-block
+// BeginBlock module begin-block
 func (am AppModule) BeginBlock(ctx sdk.Ctx, req abci.RequestBeginBlock) {
 	keeper.BeginBlocker(ctx, req, am.keeper)
 }

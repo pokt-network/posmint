@@ -1,10 +1,11 @@
 package keeper
 
 import (
+	"testing"
+
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/auth/types"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 const initialPower = int64(100)
@@ -73,7 +74,7 @@ func TestMintCoins(t *testing.T) {
 
 	require.Error(t, keeper.MintCoins(ctx, "", initCoins), "no module account")
 	require.Error(t, keeper.MintCoins(ctx, types.Burner, initCoins), "invalid permission")
-	require.Error(t, keeper.MintCoins(ctx, types.Minter, sdk.Coins{sdk.Coin{"denom", sdk.NewInt(-10)}}), "insufficient coins") //nolint
+	require.Error(t, keeper.MintCoins(ctx, types.Minter, sdk.Coins{sdk.Coin{Denom: "denom", Amount: sdk.NewInt(-10)}}), "insufficient coins") //nolint
 
 	require.Error(t, keeper.MintCoins(ctx, randomPerm, initCoins))
 

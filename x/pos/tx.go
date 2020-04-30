@@ -11,6 +11,7 @@ import (
 	"github.com/tendermint/tendermint/rpc/client"
 )
 
+// StakeTx Place stake for address
 func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, amount sdk.Int, kp keys.KeyPair, passphrase string) (*sdk.TxResponse, error) {
 	txBuilder, cliCtx, err := newTx(cdc, tmNode, keybase, passphrase)
 	if err != nil {
@@ -27,6 +28,7 @@ func StakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, amoun
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
 }
 
+// UnstakeTx Remove stake for address
 func UnstakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
 	txBuilder, cliCtx, err := newTx(cdc, tmNode, keybase, passphrase)
 	if err != nil {
@@ -40,6 +42,7 @@ func UnstakeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, add
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
 }
 
+// UnjailTx Remove address from jail
 func UnjailTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, address sdk.Address, passphrase string) (*sdk.TxResponse, error) {
 	txBuilder, cliCtx, err := newTx(cdc, tmNode, keybase, passphrase)
 	if err != nil {
@@ -53,6 +56,7 @@ func UnjailTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, addr
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
 }
 
+// Send Broadcast Tx through the network
 func Send(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, fromAddr, toAddr sdk.Address, passphrase string, amount sdk.Int) (*sdk.TxResponse, error) {
 	txBuilder, cliCtx, err := newTx(cdc, tmNode, keybase, passphrase)
 	if err != nil {
@@ -70,6 +74,7 @@ func Send(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, fromAddr
 	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
 }
 
+// RawTx Broadcast raw Tx bytes through the network
 func RawTx(cdc *codec.Codec, tmNode client.Client, fromAddr sdk.Address, txBytes []byte) (sdk.TxResponse, error) {
 	return util.CLIContext{
 		Codec:         cdc,

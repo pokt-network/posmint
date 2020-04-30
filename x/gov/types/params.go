@@ -3,8 +3,9 @@ package types
 import (
 	"bytes"
 	"fmt"
-	sdk "github.com/pokt-network/posmint/types"
 	"strings"
+
+	sdk "github.com/pokt-network/posmint/types"
 )
 
 // DefaultCodespace defines the default auth module parameter subspace
@@ -47,9 +48,9 @@ func ParamKeyTable() sdk.KeyTable {
 // nolint
 func (p *Params) ParamSetPairs() sdk.ParamSetPairs {
 	return sdk.ParamSetPairs{
-		{ACLKey, &p.ACL},
-		{DAOOwnerKey, &p.DAOOwner},
-		{UpgradeKey, &p.Upgrade},
+		{Key: ACLKey, Value: &p.ACL},
+		{Key: DAOOwnerKey, Value: &p.DAOOwner},
+		{Key: UpgradeKey, Value: &p.Upgrade},
 	}
 }
 
