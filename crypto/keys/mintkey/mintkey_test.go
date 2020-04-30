@@ -19,6 +19,16 @@ func TestArmorUnarmorPrivKey(t *testing.T) {
 	require.True(t, priv.Equals(decrypted))
 }
 
+func TestArmorUnarmorPrivKeySecp(t *testing.T) {
+	priv := crypto.Secp256k1PrivateKey{}.GenPrivateKey()
+	armor := mintkey.EncryptArmorPrivKey(priv, "passphrase")
+	_, err := mintkey.UnarmorDecryptPrivKey(armor, "wrongpassphrase")
+	require.Error(t, err)
+	decrypted, err := mintkey.UnarmorDecryptPrivKey(armor, "passphrase")
+	require.NoError(t, err)
+	require.True(t, priv.Equals(decrypted))
+}
+
 func TestArmorUnarmorPubKey(t *testing.T) {
 	// Select the encryption and storage for your cryptostore
 	cstore := keys.NewInMemory()
