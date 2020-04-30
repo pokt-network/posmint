@@ -104,6 +104,15 @@ func (pub *Ed25519PublicKey) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+func (Ed25519PrivateKey) PrivateKeyFromBytes(b []byte) (PrivateKey, error) {
+	var bz [Ed25519PrivKeySize]byte
+	copy(bz[:], b)
+	pri := ed25519.PrivKeyEd25519(bz)
+	pk := Ed25519PrivateKey(pri)
+
+	return pk, nil
+}
+
 func (priv Ed25519PrivateKey) RawBytes() []byte {
 	pkBytes := [Ed25519PrivKeySize]byte(priv)
 	return pkBytes[:]

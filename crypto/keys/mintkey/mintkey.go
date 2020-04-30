@@ -108,7 +108,7 @@ func encryptPrivKey(privKey posCrypto.PrivateKey, passphrase string) (saltBytes 
 		cmn.Exit("Error generating bcrypt key from passphrase: " + err.Error())
 	}
 	key = crypto.Sha256(key) // get 32 bytes
-	privKeyBytes := privKey.Bytes()
+	privKeyBytes := privKey.RawBytes()
 	return saltBytes, xsalsa20symmetric.EncryptSymmetric(privKeyBytes, key)
 }
 
@@ -148,7 +148,7 @@ func decryptPrivKey(saltBytes []byte, encBytes []byte, passphrase string) (privK
 	} else if err != nil {
 		return
 	}
-	pk, err := posCrypto.PrivKeyFromBytes(privKeyBytes)
+	pk, err := posCrypto.NewPrivateKeyBz(privKeyBytes)
 	if err != nil {
 		return
 	}

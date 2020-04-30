@@ -102,6 +102,14 @@ func (pub *Secp256k1PublicKey) UnmarshalJSON(data []byte) error {
 
 	return nil
 }
+func (Secp256k1PrivateKey) PrivateKeyFromBytes(b []byte) (PrivateKey, error) {
+	var bz [Secp256k1PrivateKeySize]byte
+	copy(bz[:], b)
+	pri := secp256k1.PrivKeySecp256k1(bz)
+	pk := Secp256k1PrivateKey(pri)
+
+	return pk, nil
+}
 
 func (priv Secp256k1PrivateKey) RawBytes() []byte {
 	pkBytes := [Secp256k1PrivateKeySize]byte(priv)
