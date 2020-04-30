@@ -230,6 +230,10 @@ func (m *Manager) InitGenesis(ctx sdk.Ctx, genesisData map[string]json.RawMessag
 			moduleValUpdates = m.Modules[moduleName].InitGenesis(ctx, nil)
 			continue
 		}
+		err := m.Modules[moduleName].ValidateGenesis(genesisData[moduleName])
+		if err != nil {
+			panic(err)
+		}
 		moduleValUpdates = m.Modules[moduleName].InitGenesis(ctx, genesisData[moduleName])
 
 		// use these validator updates if provided, the module manager assumes
