@@ -152,7 +152,6 @@ func UnarmorDecryptPrivKey(armorStr string, passphrase string) (posCrypto.Privat
 	err := json.Unmarshal([]byte(armorStr), &armoredJson)
 	if err != nil {
 		//if the unmarshal fails that could mean the armor in the keybase could be in the old format.
-		fmt.Println(err)
 		//[RBM]
 		fmt.Println("Checking if Pre RC 0.3.0 armored")
 		//check the pre RC 0.3.0 unarmor
@@ -215,7 +214,7 @@ func decryptPrivKey(saltBytes []byte, encBytes []byte, passphrase string) (privK
 	privKeyBytes, err := DecryptAESGCM(key, encBytes)
 	if err != nil {
 		fmt.Println("Checking if Pre RC 0.3.0 encrypted")
-		//RBM
+		//[RBM]
 		//Compatibility with pre RC 0.3.0 keys encrypted using salsa20
 		privKeyBytes, err = xsalsa20symmetric.DecryptSymmetric(encBytes, key)
 		if err != nil {
@@ -266,7 +265,7 @@ func DecryptAESGCM(key []byte, enBytes []byte) ([]byte, error) {
 	nonce := key[:12]
 	result, err := gcm.Open(nil, nonce, enBytes, nil)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("Can't Decrypt Using AES : %s", err)
 		return nil, err
 	}
 	return result, nil
