@@ -31,7 +31,6 @@ func CompleteAndBroadcastTxCLI(txBldr auth.TxBuilder, cliCtx CLIContext, msgs []
 
 		return &tx, nil
 	} else {
-
 		txBytes, err := txBldr.BuildAndSignWithKeyBase(cliCtx.FromAddress, cliCtx.Passphrase, msgs)
 		if err != nil {
 			return nil, err
