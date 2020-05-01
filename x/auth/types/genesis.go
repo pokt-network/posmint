@@ -29,7 +29,7 @@ func DefaultGenesisState() GenesisState {
 // error for any failed validation criteria.
 func ValidateGenesis(data GenesisState) error {
 	for _, account := range data.Accounts {
-	 if account.GetPubKey().PubKey() == nil {
+		if account.GetPubKey().PubKey() == nil {
 			return fmt.Errorf("PubKey should never be nil")
 		}
 	}
