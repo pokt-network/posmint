@@ -29,7 +29,7 @@ type Keybase interface {
 	ImportPrivKey(armor, decryptPassphrase, encryptPassphrase string) (KeyPair, error)
 
 	// ExportPrivKeyArmor using Armored private key string. Decrypts armor with decryptPassphrase, and encrypts result armor using the encryptPassphrase
-	ExportPrivKeyEncryptedArmor(address types.Address, decryptPassphrase, encryptPassphrase string) (armor string, err error)
+	ExportPrivKeyEncryptedArmor(address types.Address, decryptPassphrase, encryptPassphrase, hint string) (armor string, err error)
 
 	// ImportPrivateKeyObject using the raw unencrypted privateKey string and encrypts it to disk using encryptPassphrase
 	ImportPrivateKeyObject(privateKey [64]byte, encryptPassphrase string) (KeyPair, error)

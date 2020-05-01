@@ -135,7 +135,7 @@ func TestArmoredExportImport(t *testing.T) {
 	require.NoError(t, err)
 
 	// Export the account armored
-	armoredKey, err := cstore.ExportPrivKeyEncryptedArmor(kp.GetAddress(), passphrase, passphrase)
+	armoredKey, err := cstore.ExportPrivKeyEncryptedArmor(kp.GetAddress(), passphrase, passphrase, "")
 	require.NoError(t, err)
 	require.NotEmpty(t, armoredKey)
 

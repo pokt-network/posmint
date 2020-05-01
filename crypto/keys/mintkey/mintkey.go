@@ -1,22 +1,26 @@
 package mintkey
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	posCrypto "github.com/pokt-network/posmint/crypto"
+	"github.com/tendermint/crypto/bcrypt"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/armor"
 	"github.com/tendermint/tendermint/crypto/xsalsa20symmetric"
-
 	cmn "github.com/tendermint/tendermint/libs/common"
-
-	"github.com/tendermint/crypto/bcrypt"
+	"strconv"
 )
 
 const (
 	blockTypePrivKey = "TENDERMINT PRIVATE KEY"
 	blockTypeKeyInfo = "TENDERMINT KEY INFO"
 	blockTypePubKey  = "TENDERMINT PUBLIC KEY"
+	defaultKDF       = "bcrypt"
 )
 
 // Make bcrypt security parameter var, so it can be changed within the lcd test
@@ -86,20 +90,43 @@ func unarmorBytes(armorStr, blockType string) (bz []byte, err error) {
 
 //-----------------------------------------------------------------
 // encrypt/decrypt with armor
+type ArmoredJson struct {
+	Kdf        string `json:"kdf" yaml:"kdf"`
+	Salt       string `json:"salt" yaml:"salt"`
+	SecParam   string `json:"secparam" yaml:"secparam"`
+	Hint       string `json:"hint" yaml:"hint"`
+	Ciphertext string `json:"ciphertext" yaml:"ciphertext"`
+}
+
+func NewArmoredJson(kdf, salt, hint, ciphertext string) ArmoredJson {
+	return ArmoredJson{
+		Kdf:        kdf,
+		Salt:       salt,
+		SecParam:   strconv.Itoa(BcryptSecurityParameter),
+		Hint:       hint,
+		Ciphertext: ciphertext,
+	}
+}
 
 // Encrypt and armor the private key.
-func EncryptArmorPrivKey(privKey posCrypto.PrivateKey, passphrase string) string {
+func EncryptArmorPrivKey(privKey posCrypto.PrivateKey, passphrase, hint string) (string, error) {
+	//first  encrypt the key
 	saltBytes, encBytes := encryptPrivKey(privKey, passphrase)
-	header := map[string]string{
-		"kdf":  "bcrypt",
-		"salt": fmt.Sprintf("%X", saltBytes),
+	//"armor" the encrypted key encoding it in base64
+	armorStr := base64.StdEncoding.EncodeToString(encBytes)
+	//create the ArmoredJson with the parameters to be able to decrypt it later.
+	armoredJson := NewArmoredJson(defaultKDF, fmt.Sprintf("%X", saltBytes), hint, armorStr)
+	//marshalling to json
+	js, err := json.Marshal(armoredJson)
+	if err != nil {
+		return "", err
 	}
-	armorStr := armor.EncodeArmor(blockTypePrivKey, header, encBytes)
-	return armorStr
+	//return the json string
+	return string(js), nil
 }
 
 // encrypt the given privKey with the passphrase using a randomly
-// generated salt and the xsalsa20 cipher. returns the salt and the
+// generated salt and the AES-256 GCM cipher. returns the salt and the
 // encrypted priv key.
 func encryptPrivKey(privKey posCrypto.PrivateKey, passphrase string) (saltBytes []byte, encBytes []byte) {
 	saltBytes = crypto.CRandBytes(16)
@@ -109,11 +136,53 @@ func encryptPrivKey(privKey posCrypto.PrivateKey, passphrase string) (saltBytes 
 	}
 	key = crypto.Sha256(key) // get 32 bytes
 	privKeyBytes := privKey.RawBytes()
-	return saltBytes, xsalsa20symmetric.EncryptSymmetric(privKeyBytes, key)
+	//encrypt using AES
+	encBytes, err = EncryptAESGCM(key, privKeyBytes)
+	if err != nil {
+		cmn.Exit("Error encrypting bytes: " + err.Error())
+	}
+	return saltBytes, encBytes
 }
 
 // Unarmor and decrypt the private key.
 func UnarmorDecryptPrivKey(armorStr string, passphrase string) (posCrypto.PrivateKey, error) {
+	var privKey posCrypto.PrivateKey
+	armoredJson := ArmoredJson{}
+	//trying to unmarshal to ArmoredJson Struct
+	err := json.Unmarshal([]byte(armorStr), &armoredJson)
+	if err != nil {
+		//if the unmarshal fails that could mean the armor in the keybase could be in the old format.
+		fmt.Println(err)
+		//[RBM]
+		fmt.Println("Checking if Pre RC 0.3.0 armored")
+		//check the pre RC 0.3.0 unarmor
+		return compatibilityUnarmor(armorStr, passphrase)
+	}
+	// check the ArmoredJson for the correct parameters on kdf and salt
+	if armoredJson.Kdf != "bcrypt" {
+		return privKey, fmt.Errorf("Unrecognized KDF type: %v", armoredJson.Kdf)
+	}
+	if armoredJson.Salt == "" {
+		return privKey, fmt.Errorf("Missing salt bytes")
+	}
+	//decoding the salt
+	saltBytes, err := hex.DecodeString(armoredJson.Salt)
+	if err != nil {
+		return privKey, fmt.Errorf("Error decoding salt: %v", err.Error())
+	}
+	//decoding the "armored" ciphertext stored in base64
+	encBytes, err := base64.StdEncoding.DecodeString(armoredJson.Ciphertext)
+	if err != nil {
+		return privKey, fmt.Errorf("Error decoding ciphertext: %v", err.Error())
+	}
+	//decrypt the actual privkey with the parameters
+	privKey, err = decryptPrivKey(saltBytes, encBytes, passphrase)
+	return privKey, err
+}
+
+//compatibilityUnarmor - used to unarmor pre RC 0.3.0 keys in keybase or exported, this was the old UnarmorDecryptPrivKey
+//[RBM]
+func compatibilityUnarmor(armorStr string, passphrase string) (posCrypto.PrivateKey, error) {
 	var privKey posCrypto.PrivateKey
 	blockType, header, encBytes, err := armor.DecodeArmor(armorStr)
 	if err != nil {
@@ -142,15 +211,63 @@ func decryptPrivKey(saltBytes []byte, encBytes []byte, passphrase string) (privK
 		cmn.Exit("Error generating bcrypt key from passphrase: " + err.Error())
 	}
 	key = crypto.Sha256(key) // Get 32 bytes
-	privKeyBytes, err := xsalsa20symmetric.DecryptSymmetric(encBytes, key)
-	if err != nil && err.Error() == "Ciphertext decryption failed" {
-		return
-	} else if err != nil {
-		return
+	//decrypt using AES
+	privKeyBytes, err := DecryptAESGCM(key, encBytes)
+	if err != nil {
+		fmt.Println("Checking if Pre RC 0.3.0 encrypted")
+		//RBM
+		//Compatibility with pre RC 0.3.0 keys encrypted using salsa20
+		privKeyBytes, err = xsalsa20symmetric.DecryptSymmetric(encBytes, key)
+		if err != nil {
+			return
+		}
 	}
 	pk, err := posCrypto.NewPrivateKeyBz(privKeyBytes)
 	if err != nil {
-		return
+		fmt.Println("Checking if Pre RC 0.3.0 Key")
+		//[RBM]
+		//Compatibility with pre RC 0.3.0 keys using amino bytes
+		pk, err2 := posCrypto.PrivKeyFromBytes(privKeyBytes)
+		if err2 != nil {
+			return
+		}
+		return pk, err2
 	}
 	return pk, err
+}
+
+func EncryptAESGCM(key []byte, src []byte) ([]byte, error) {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	nonce := key[:12]
+	out := gcm.Seal(nil, nonce, src, nil)
+	return out, nil
+}
+
+func DecryptAESGCM(key []byte, enBytes []byte) ([]byte, error) {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	nonce := key[:12]
+	result, err := gcm.Open(nil, nonce, enBytes, nil)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return result, nil
 }

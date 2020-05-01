@@ -116,7 +116,10 @@ func (kb dbKeybase) Update(address types.Address, oldpass string, newpass string
 		return err
 	}
 
-	kb.writeLocalKeyPair(privKey, newpass)
+	_, err = kb.writeLocalKeyPair(privKey, newpass, "")
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -150,7 +153,10 @@ func (kb dbKeybase) Sign(address types.Address, passphrase string, msg []byte) (
 // Create a new KeyPair and encrypt it to disk using encryptPassphrase
 func (kb dbKeybase) Create(encryptPassphrase string) (KeyPair, error) {
 	privKey := crypto.PrivateKey(crypto.Ed25519PrivateKey{}).GenPrivateKey()
-	kp := kb.writeLocalKeyPair(privKey, encryptPassphrase)
+	kp, err := kb.writeLocalKeyPair(privKey, encryptPassphrase, "")
+	if err != nil {
+		return kp, err
+	}
 	return kp, nil
 }
 
@@ -169,17 +175,17 @@ func (kb dbKeybase) ImportPrivKey(armor, decryptPassphrase, encryptPassphrase st
 	if _, err := kb.Get(Address); err == nil {
 		return KeyPair{}, errors.New("Cannot overwrite key with address: " + Address.String())
 	}
-	return kb.writeLocalKeyPair(privKey, encryptPassphrase), nil
+	return kb.writeLocalKeyPair(privKey, encryptPassphrase, "")
 }
 
 // ExportPrivKeyEncryptedArmor finds the KeyPair by the address, decrypts the armor private key,
 // and returns an encrypted armored private key string
-func (kb dbKeybase) ExportPrivKeyEncryptedArmor(address types.Address, decryptPassphrase, encryptPassphrase string) (armor string, err error) {
+func (kb dbKeybase) ExportPrivKeyEncryptedArmor(address types.Address, decryptPassphrase, encryptPassphrase, hint string) (armor string, err error) {
 	priv, err := kb.ExportPrivateKeyObject(address, decryptPassphrase)
 	if err != nil {
 		return "", err
 	}
-	return mintkey.EncryptArmorPrivKey(priv, encryptPassphrase), nil
+	return mintkey.EncryptArmorPrivKey(priv, encryptPassphrase, hint)
 }
 
 // ImportPrivateKeyObject using the raw unencrypted privateKey string and encrypts it to disk using encryptPassphrase
@@ -192,7 +198,7 @@ func (kb dbKeybase) ImportPrivateKeyObject(privateKey [64]byte, encryptPassphras
 	if _, err := kb.Get(Address); err == nil {
 		return KeyPair{}, errors.New("Cannot overwrite key with address: " + Address.String())
 	}
-	return kb.writeLocalKeyPair(ed25519PK, encryptPassphrase), nil
+	return kb.writeLocalKeyPair(ed25519PK, encryptPassphrase, "")
 }
 
 // ExportPrivateKeyObject exports raw PrivKey object.
@@ -220,14 +226,19 @@ func (kb dbKeybase) CloseDB() {
 }
 
 // Private interface
-func (kb dbKeybase) writeLocalKeyPair(priv crypto.PrivateKey, passphrase string) KeyPair {
+func (kb dbKeybase) writeLocalKeyPair(priv crypto.PrivateKey, passphrase, hint string) (KeyPair, error) {
 	// encrypt private key using passphrase
-	privArmor := mintkey.EncryptArmorPrivKey(priv, passphrase)
+	privArmor, err := mintkey.EncryptArmorPrivKey(priv, passphrase, hint)
+	if err != nil || privArmor == "" {
+		fmt.Println(err)
+		return KeyPair{}, err
+	}
 	// make Info
 	pub := priv.PublicKey()
 	localKeyPair := NewKeyPair(pub, privArmor)
 	kb.writeKeyPair(localKeyPair)
-	return localKeyPair
+
+	return localKeyPair, nil
 }
 
 func (kb dbKeybase) writeKeyPair(kp KeyPair) {
