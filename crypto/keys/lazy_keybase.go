@@ -120,14 +120,14 @@ func (lkb lazyKeybase) ImportPrivKey(armor, decryptPassphrase, encryptPassphrase
 	return newDbKeybase(db).ImportPrivKey(armor, decryptPassphrase, encryptPassphrase)
 }
 
-func (lkb lazyKeybase) ExportPrivKeyEncryptedArmor(address types.Address, decryptPassphrase, encryptPassphrase string) (armor string, err error) {
+func (lkb lazyKeybase) ExportPrivKeyEncryptedArmor(address types.Address, decryptPassphrase, encryptPassphrase, hint string) (armor string, err error) {
 	db, err := sdk.NewLevelDB(lkb.name, lkb.dir)
 	if err != nil {
 		return "", err
 	}
 	defer db.Close()
 
-	return newDbKeybase(db).ExportPrivKeyEncryptedArmor(address, decryptPassphrase, encryptPassphrase)
+	return newDbKeybase(db).ExportPrivKeyEncryptedArmor(address, decryptPassphrase, encryptPassphrase, hint)
 }
 
 func (lkb lazyKeybase) ImportPrivateKeyObject(privateKey [64]byte, encryptPassphrase string) (KeyPair, error) {
