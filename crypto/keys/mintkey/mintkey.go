@@ -265,7 +265,7 @@ func DecryptAESGCM(key []byte, enBytes []byte) ([]byte, error) {
 	nonce := key[:12]
 	result, err := gcm.Open(nil, nonce, enBytes, nil)
 	if err != nil {
-		fmt.Printf("Can't Decrypt Using AES : %s", err)
+		fmt.Printf("Can't Decrypt Using AES : %s \n", err)
 		return nil, err
 	}
 	return result, nil
