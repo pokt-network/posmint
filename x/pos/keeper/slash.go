@@ -193,54 +193,60 @@ func (k Keeper) handleValidatorSignature(ctx sdk.Ctx, addr crypto.Address, power
 	logger := k.Logger(ctx)
 	height := ctx.BlockHeight()
 	address := sdk.Address(addr)
-	pubkey, err := k.getPubKeyRelation(ctx, addr)
-	if err != nil {
+	val, found := k.GetValidator(ctx, address)
+	if !found {
 		panic(fmt.Errorf("Validator consensus-address %s not found", address))
 	}
-	// fetch signing info
-	signInfo, found := k.GetValidatorSigningInfo(ctx, address)
-	if !found {
-		panic(fmt.Errorf("Expected signing info for validator %s but not found", address))
-	}
-	// this is a relative index, so it counts blocks the validator *should* have signed
-	// will use the 0-value default signing info if not present, except for start height
-	index := signInfo.IndexOffset % k.SignedBlocksWindow(ctx)
-	signInfo.IndexOffset++
-	// Update signed block bit array & counter
-	// This counter just tracks the sum of the bit array
-	// That way we avoid needing to read/write the whole array each time
-	previous := k.getMissedBlockArray(ctx, address, index)
-	missed := !signed
-	switch {
-	case !previous && missed:
-		// Array value has changed from not missed to missed, increment counter
-		k.SetMissedBlockArray(ctx, address, index, true)
-		signInfo.MissedBlocksCounter++
-	case previous && !missed:
-		// Array value has changed from missed to not missed, decrement counter
-		k.SetMissedBlockArray(ctx, address, index, false)
-		signInfo.MissedBlocksCounter--
-	default:
-		// Array value at this index has not changed, no need to update counter
-	}
-	if missed {
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				types.EventTypeLiveness,
-				sdk.NewAttribute(types.AttributeKeyAddress, address.String()),
-				sdk.NewAttribute(types.AttributeKeyMissedBlocks, fmt.Sprintf("%d", signInfo.MissedBlocksCounter)),
-				sdk.NewAttribute(types.AttributeKeyHeight, fmt.Sprintf("%d", height)),
-			),
-		)
-		logger.Info(
-			fmt.Sprintf("Absent validator %s (%s) at height %d, %d missed, threshold %d", address, pubkey, height, signInfo.MissedBlocksCounter, k.MinSignedPerWindow(ctx)))
-	}
-	minHeight := signInfo.StartHeight + k.SignedBlocksWindow(ctx)
-	maxMissed := k.SignedBlocksWindow(ctx) - k.MinSignedPerWindow(ctx)
-	// if we are past the minimum height and the validator has missed too many blocks, punish them
-	if height > minHeight && signInfo.MissedBlocksCounter > maxMissed {
-		validator := k.Validator(ctx, address)
-		if validator != nil && !validator.IsJailed() {
+	//check if validator is not already jailed
+	if !val.IsJailed() {
+		pubkey := val.PublicKey
+
+		// fetch signing info
+		signInfo, found := k.GetValidatorSigningInfo(ctx, address)
+		if !found {
+			panic(fmt.Errorf("Expected signing info for validator %s but not found", address))
+		}
+		// this is a relative index, so it counts blocks the validator *should* have signed
+		// will use the 0-value default signing info if not present, except for start height
+		index := signInfo.IndexOffset % k.SignedBlocksWindow(ctx)
+		signInfo.IndexOffset++
+		// Update signed block bit array & counter
+		// This counter just tracks the sum of the bit array
+		// That way we avoid needing to read/write the whole array each time
+		previous := k.getMissedBlockArray(ctx, address, index)
+		missed := !signed
+		switch {
+		case !previous && missed:
+			// Array value has changed from not missed to missed, increment counter
+			k.SetMissedBlockArray(ctx, address, index, true)
+			signInfo.MissedBlocksCounter++
+		case previous && !missed:
+			// Array value has changed from missed to not missed, decrement counter
+			k.SetMissedBlockArray(ctx, address, index, false)
+			signInfo.MissedBlocksCounter--
+		default:
+			// Array value at this index has not changed, no need to update counter
+		}
+
+		if missed {
+			ctx.EventManager().EmitEvent(
+				sdk.NewEvent(
+					types.EventTypeLiveness,
+					sdk.NewAttribute(types.AttributeKeyAddress, address.String()),
+					sdk.NewAttribute(types.AttributeKeyMissedBlocks, fmt.Sprintf("%d", signInfo.MissedBlocksCounter)),
+					sdk.NewAttribute(types.AttributeKeyHeight, fmt.Sprintf("%d", height)),
+				),
+			)
+			//show log on first missing block sign after successful sign,
+			//if missed again this should not pop up and clutter the logs
+			logger.Info(
+				fmt.Sprintf("Absent validator %s (%s) at height %d, %d missed, threshold %d", address, pubkey, height, signInfo.MissedBlocksCounter, k.MinSignedPerWindow(ctx)))
+		}
+		minHeight := signInfo.StartHeight + k.SignedBlocksWindow(ctx)
+		maxMissed := k.SignedBlocksWindow(ctx) - k.MinSignedPerWindow(ctx)
+		// if we are past the minimum height and the validator has missed too many blocks, punish them
+		if height > minHeight && signInfo.MissedBlocksCounter > maxMissed {
+
 			// Downtime confirmed: slash and jail the validator
 			logger.Info(fmt.Sprintf("Validator %s past min height of %d and below signed blocks threshold of %d",
 				address, minHeight, k.MinSignedPerWindow(ctx)))
@@ -265,15 +271,11 @@ func (k Keeper) handleValidatorSignature(ctx sdk.Ctx, addr crypto.Address, power
 			signInfo.MissedBlocksCounter = 0
 			signInfo.IndexOffset = 0
 			k.clearMissedArray(ctx, address)
-		} else {
-			// Validator was (a) not found or (b) already jailed, don't slash
-			logger.Info(
-				fmt.Sprintf("Validator %s would have been slashed for downtime, but was either not found in store or already jailed", address),
-			)
+
 		}
+		// Set the updated signing info
+		k.SetValidatorSigningInfo(ctx, address, signInfo)
 	}
-	// Set the updated signing info
-	k.SetValidatorSigningInfo(ctx, address, signInfo)
 }
 
 func (k Keeper) AddPubKeyRelation(ctx sdk.Ctx, pubkey posCrypto.PublicKey) {
