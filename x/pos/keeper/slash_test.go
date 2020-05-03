@@ -250,9 +250,11 @@ func TestHandleValidatorSignature(t *testing.T) {
 					assert.Equal(t, test.expected.message, err, "does not contain error ")
 				}()
 				if test.expected.pubKeyRelation {
+					keeper.SetValidator(context, test.args.validator)
 					keeper.setAddrPubkeyRelation(context, cryptoAddr, test.args.validator.GetPublicKey())
 				}
 				if test.expected.signedInfo {
+					keeper.SetValidator(context, test.args.validator)
 					keeper.handleValidatorSignature(context, cryptoAddr, test.args.power, test.args.signed)
 				}
 				keeper.handleValidatorSignature(context, cryptoAddr, test.args.power, test.args.signed)
@@ -266,6 +268,7 @@ func TestHandleValidatorSignature(t *testing.T) {
 					context.WithBlockHeight(101)
 					signingInfo.MissedBlocksCounter = test.args.maxMissed
 				}
+				keeper.SetValidator(context, test.args.validator)
 				keeper.setAddrPubkeyRelation(context, cryptoAddr, test.args.validator.GetPublicKey())
 				keeper.SetValidatorSigningInfo(context, sdk.Address(cryptoAddr), signingInfo)
 				keeper.handleValidatorSignature(context, cryptoAddr, test.args.power, test.args.signed)
