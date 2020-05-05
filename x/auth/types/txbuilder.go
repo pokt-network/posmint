@@ -103,6 +103,7 @@ func (bldr TxBuilder) BuildAndSign(address sdk.Address, privateKey crypto.Privat
 	}
 	sig := StdSignature{
 		Signature: sigBytes,
+		PublicKey: privateKey.PublicKey(),
 	}
 	return bldr.txEncoder(NewStdTx(msgs, bldr.fees, []StdSignature{sig}, bldr.memo, entropy))
 }
@@ -118,12 +119,13 @@ func (bldr TxBuilder) BuildAndSignWithKeyBase(address sdk.Address, passphrase st
 	}
 	entropy := common.RandInt64()
 	bytesToSign := StdSignBytes(bldr.chainID, entropy, bldr.fees, msgs, bldr.memo)
-	sigBytes, _, err := bldr.keybase.Sign(address, passphrase, bytesToSign)
+	sigBytes, pk, err := bldr.keybase.Sign(address, passphrase, bytesToSign)
 	if err != nil {
 		return nil, err
 	}
 	sig := StdSignature{
 		Signature: sigBytes,
+		PublicKey: pk,
 	}
 	return bldr.txEncoder(NewStdTx(msgs, bldr.fees, []StdSignature{sig}, bldr.memo, entropy))
 }

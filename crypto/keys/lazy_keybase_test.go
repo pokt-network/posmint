@@ -196,7 +196,7 @@ func Test_lazyKeybase_ExportPrivKeyEncryptedArmor(t *testing.T) {
 			}
 			wkp, err := lkb.Create("ENCRYPTIONPASSPHRASE")
 
-			gotArmor, err := lkb.ExportPrivKeyEncryptedArmor(wkp.GetAddress(), tt.args.decryptPassphrase, tt.args.encryptPassphrase)
+			gotArmor, err := lkb.ExportPrivKeyEncryptedArmor(wkp.GetAddress(), tt.args.decryptPassphrase, tt.args.encryptPassphrase, "")
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ExportPrivKeyEncryptedArmor() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -400,7 +400,7 @@ func Test_lazyKeybase_ImportPrivKey(t *testing.T) {
 
 			wkp, err := lkb.Create("ENCRYPTIONPASSPHRASE")
 
-			armor, err := lkb.ExportPrivKeyEncryptedArmor(wkp.GetAddress(), tt.args.decryptPassphrase, tt.args.encryptPassphrase)
+			armor, err := lkb.ExportPrivKeyEncryptedArmor(wkp.GetAddress(), tt.args.decryptPassphrase, tt.args.encryptPassphrase, "")
 
 			lkb.Delete(wkp.GetAddress(), "ENCRYPTIONPASSPHRASE")
 

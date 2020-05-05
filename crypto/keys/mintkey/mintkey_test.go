@@ -11,7 +11,17 @@ import (
 
 func TestArmorUnarmorPrivKey(t *testing.T) {
 	priv := crypto.Ed25519PrivateKey{}.GenPrivateKey()
-	armor := mintkey.EncryptArmorPrivKey(priv, "passphrase")
+	armor, _ := mintkey.EncryptArmorPrivKey(priv, "passphrase", "")
+	_, err := mintkey.UnarmorDecryptPrivKey(armor, "wrongpassphrase")
+	require.Error(t, err)
+	decrypted, err := mintkey.UnarmorDecryptPrivKey(armor, "passphrase")
+	require.NoError(t, err)
+	require.True(t, priv.Equals(decrypted))
+}
+
+func TestArmorUnarmorPrivKeySecp(t *testing.T) {
+	priv := crypto.Secp256k1PrivateKey{}.GenPrivateKey()
+	armor, _ := mintkey.EncryptArmorPrivKey(priv, "passphrase", "")
 	_, err := mintkey.UnarmorDecryptPrivKey(armor, "wrongpassphrase")
 	require.Error(t, err)
 	decrypted, err := mintkey.UnarmorDecryptPrivKey(armor, "passphrase")
