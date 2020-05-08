@@ -81,6 +81,7 @@ func ValidateTransaction(ctx sdk.Ctx, k Keeper, stdTx StdTx, params Params, tmNo
 		if !simulate && !pk.VerifyBytes(signBytes, stdTx.Signature.Signature) {
 			return sdk.ErrUnauthorized("signature verification failed for the transaction")
 		}
+		return nil
 	}
 	// validate the signature depth
 	ok = ValidateSignatureDepth(params.TxSigLimit, p)
