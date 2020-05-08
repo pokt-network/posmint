@@ -6,7 +6,6 @@ import (
 
 // Transactions messages must fulfill the Msg
 type Msg interface {
-
 	// Return the message type.
 	// Must be alphanumeric or empty.
 	Route() string
@@ -25,7 +24,7 @@ type Msg interface {
 	// Signers returns the addrs of signers that must sign.
 	// CONTRACT: All signatures must be present to be valid.
 	// CONTRACT: Returns addrs in some deterministic order.
-	GetSigners() []Address
+	GetSigner() Address
 
 	// Returns an Int for the Msg
 	GetFee() Int
@@ -36,7 +35,7 @@ type Msg interface {
 // Transactions objects must fulfill the Tx
 type Tx interface {
 	// Gets the all the transaction's messages.
-	GetMsgs() []Msg
+	GetMsg() Msg
 
 	// ValidateBasic does a simple and lightweight validation check that doesn't
 	// require access to any other information.
@@ -57,12 +56,12 @@ var _ Msg = (*TestMsg)(nil)
 
 // msg type for testing
 type TestMsg struct {
-	signers []Address
+	signers Address
 }
 
-func NewTestMsg(addrs ...Address) *TestMsg {
+func NewTestMsg(addr Address) *TestMsg {
 	return &TestMsg{
-		signers: addrs,
+		signers: addr,
 	}
 }
 
@@ -86,6 +85,6 @@ func (msg *TestMsg) GetSignBytes() []byte {
 	return MustSortJSON(bz)
 }
 func (msg *TestMsg) ValidateBasic() Error { return nil }
-func (msg *TestMsg) GetSigners() []Address {
+func (msg *TestMsg) GetSigner() Address {
 	return msg.signers
 }

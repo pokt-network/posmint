@@ -750,19 +750,15 @@ func (app *BaseApp) DeliverTx(req abci.RequestDeliverTx) (res abci.ResponseDeliv
 }
 
 // validateBasicTxMsgs executes basic validator calls for messages.
-func validateBasicTxMsgs(msgs []sdk.Msg) sdk.Error {
-	if msgs == nil || len(msgs) == 0 {
-		return sdk.ErrUnknownRequest("Tx.GetMsgs() must return at least one message in list")
+func validateBasicTxMsgs(msg sdk.Msg) sdk.Error {
+	if msg == nil {
+		return sdk.ErrUnknownRequest("Tx.GetMsg() must return at least one message")
 	}
-
-	for _, msg := range msgs {
-		// Validate the Msg.
-		err := msg.ValidateBasic()
-		if err != nil {
-			return err
-		}
+	// Validate the Msg.
+	err := msg.ValidateBasic()
+	if err != nil {
+		return err
 	}
-
 	return nil
 }
 
@@ -780,63 +776,51 @@ func (app *BaseApp) getContextForTx(mode runTxMode, txBytes []byte) (ctx sdk.Ctx
 	return
 }
 
-// runMsgs iterates through all the messages and executes them.
+// runMsg iterates through all the messages and executes them.
 // nolint: gocyclo
-func (app *BaseApp) runMsgs(ctx sdk.Ctx, msgs []sdk.Msg, mode runTxMode) (result sdk.Result) {
-	msgLogs := make(sdk.ABCIMessageLogs, 0, len(msgs))
+func (app *BaseApp) runMsg(ctx sdk.Ctx, msg sdk.Msg, mode runTxMode) (result sdk.Result) {
+	msgLogs := make(sdk.ABCIMessageLogs, 0, 1)
 
 	var (
 		data      []byte
 		code      sdk.CodeType
 		codespace sdk.CodespaceType
 	)
-
 	events := sdk.EmptyEvents()
-
 	// NOTE: GasWanted is determined by ante handler and GasUsed by the GasMeter.
-	for i, msg := range msgs {
-		// match message route
-		msgRoute := msg.Route()
-		handler := app.router.Route(msgRoute)
-		if handler == nil {
-			return sdk.ErrUnknownRequest("unrecognized Msg type: " + msgRoute).Result()
-		}
-
-		var msgResult sdk.Result
-
-		// skip actual execution for CheckTx mode
-		if mode != runTxModeCheck {
-			msgResult = handler(ctx, msg)
-		}
-
-		// Each message result's Data must be length prefixed in order to separate
-		// each result.
-		data = append(data, msgResult.Data...)
-
-		// append events from the message's execution and a message action event
-		events = events.AppendEvent(sdk.NewEvent(sdk.EventTypeMessage, sdk.NewAttribute(sdk.AttributeKeyAction, msg.Type())))
-		events = events.AppendEvents(msgResult.Events)
-
-		// stop execution and return on first failed message
-		if !msgResult.IsOK() {
-			msgLogs = append(msgLogs, sdk.NewABCIMessageLog(uint16(i), false, msgResult.Log, events))
-
-			code = msgResult.Code
-			codespace = msgResult.Codespace
-			break
-		}
-
-		msgLogs = append(msgLogs, sdk.NewABCIMessageLog(uint16(i), true, msgResult.Log, events))
+	// match message route
+	msgRoute := msg.Route()
+	handler := app.router.Route(msgRoute)
+	if handler == nil {
+		return sdk.ErrUnknownRequest("unrecognized Msg type: " + msgRoute).Result()
 	}
+	var msgResult sdk.Result
+	// skip actual execution for CheckTx mode
+	if mode != runTxModeCheck {
+		msgResult = handler(ctx, msg)
+	}
+	// Each message result's Data must be length prefixed in order to separate
+	// each result.
+	data = append(data, msgResult.Data...)
+	// append events from the message's execution and a message action event
+	events = events.AppendEvent(sdk.NewEvent(sdk.EventTypeMessage, sdk.NewAttribute(sdk.AttributeKeyAction, msg.Type())))
+	events = events.AppendEvents(msgResult.Events)
+	// stop execution and return on first failed message
+	if !msgResult.IsOK() {
+		msgLogs = append(msgLogs, sdk.NewABCIMessageLog(uint16(0), false, msgResult.Log, events))
+
+		code = msgResult.Code
+		codespace = msgResult.Codespace
+	}
+	msgLogs = append(msgLogs, sdk.NewABCIMessageLog(uint16(0), true, msgResult.Log, events))
 
 	result = sdk.Result{
 		Code:      code,
 		Codespace: codespace,
 		Data:      data,
 		Log:       strings.TrimSpace(msgLogs.String()),
-		//GasUsed:   ctx.GasMeter().GasConsumed(),
-		GasUsed: 0,
-		Events:  events,
+		GasUsed:   0,
+		Events:    events,
 	}
 
 	return result
@@ -949,7 +933,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 		}
 	}()
 
-	var msgs = tx.GetMsgs()
+	var msgs = tx.GetMsg()
 	if err := validateBasicTxMsgs(msgs); err != nil {
 		return err.Result()
 	}
@@ -993,7 +977,7 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 	// Create a new context based off of the existing context with a cache wrapped
 	// multi-store in case message processing fails.
 	runMsgCtx, newMS := app.txContext(ctx, txBytes) // todo edit here!!!
-	result = app.runMsgs(runMsgCtx, msgs, mode)
+	result = app.runMsg(runMsgCtx, msgs, mode)
 	result.GasWanted = gasWanted
 
 	// Safety check: don't write the cache state unless we're in DeliverTx.
