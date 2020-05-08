@@ -357,9 +357,9 @@ package baseapp
 //	require.Equal(t, value, res.Value)
 //}
 //
-//// Simple tx with a list of Msgs.
+//// Simple tx with a list of Msg.
 //type txTest struct {
-//	Msgs       []sdk.Msg
+//	Msg       []sdk.Msg
 //	Counter    int64
 //	FailOnAnte bool
 //}
@@ -369,13 +369,13 @@ package baseapp
 //}
 //
 //func (tx *txTest) setFailOnHandler(fail bool) {
-//	for i, msg := range tx.Msgs {
-//		tx.Msgs[i] = msgCounter{msg.(msgCounter).Counter, fail}
+//	for i, msg := range tx.Msg {
+//		tx.Msg[i] = msgCounter{msg.(msgCounter).Counter, fail}
 //	}
 //}
 //
 //// Implements Tx
-//func (tx txTest) GetMsgs() []sdk.Msg       { return tx.Msgs }
+//func (tx txTest) GetMsg() []sdk.Msg       { return tx.Msg }
 //func (tx txTest) ValidateBasic() sdk.Error { return nil }
 //
 //const (
@@ -394,7 +394,7 @@ package baseapp
 //func (msg msgCounter) Route() string             { return routeMsgCounter }
 //func (msg msgCounter) Type() string              { return "counter1" }
 //func (msg msgCounter) GetSignBytes() []byte      { return nil }
-//func (msg msgCounter) GetSigners() []sdk.Address { return nil }
+//func (msg msgCounter) GetSigner() []sdk.Address { return nil }
 //func (msg msgCounter) ValidateBasic() sdk.Error {
 //	if msg.Counter >= 0 {
 //		return nil
@@ -433,7 +433,7 @@ package baseapp
 //func (msg msgCounter2) Route() string             { return routeMsgCounter2 }
 //func (msg msgCounter2) Type() string              { return "counter2" }
 //func (msg msgCounter2) GetSignBytes() []byte      { return nil }
-//func (msg msgCounter2) GetSigners() []sdk.Address { return nil }
+//func (msg msgCounter2) GetSigner() []sdk.Address { return nil }
 //func (msg msgCounter2) ValidateBasic() sdk.Error {
 //	if msg.Counter >= 0 {
 //		return nil
@@ -653,8 +653,8 @@ package baseapp
 //	// replace the second message with a msgCounter2
 //
 //	tx = newTxCounter(1, 3)
-//	tx.Msgs = append(tx.Msgs, msgCounter2{0})
-//	tx.Msgs = append(tx.Msgs, msgCounter2{1})
+//	tx.Msg = append(tx.Msg, msgCounter2{0})
+//	tx.Msg = append(tx.Msg, msgCounter2{1})
 //	txBytes, err = codec.MarshalBinaryLengthPrefixed(tx)
 //	require.NoError(t, err)
 //	res = app.DeliverTx(abci.RequestDeliverTx{Tx: txBytes})
@@ -814,7 +814,7 @@ package baseapp
 //	// Transaction with an unregistered message
 //	{
 //		tx := newTxCounter(0, 0)
-//		tx.Msgs = append(tx.Msgs, msgNoDecode{})
+//		tx.Msg = append(tx.Msg, msgNoDecode{})
 //
 //		// new codec so we can encode the tx, but we shouldn't be able to decode
 //		newCdc := codec.New()

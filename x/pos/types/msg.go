@@ -20,9 +20,9 @@ type MsgStake struct {
 	Value  sdk.Int          `json:"value" yaml:"value"`
 }
 
-// GetSigners return address(es) that must sign over msg.GetSignBytes()
-func (msg MsgStake) GetSigners() []sdk.Address {
-	addrs := []sdk.Address{sdk.Address(msg.PubKey.Address())}
+// GetSigner return address(es) that must sign over msg.GetSignBytes()
+func (msg MsgStake) GetSigner() sdk.Address {
+	addrs := sdk.Address(msg.PubKey.Address())
 	return addrs
 }
 
@@ -61,9 +61,9 @@ type MsgBeginUnstake struct {
 	Address sdk.Address `json:"validator_address" yaml:"validator_address"`
 }
 
-// GetSigners return address(es) that must sign over msg.GetSignBytes()
-func (msg MsgBeginUnstake) GetSigners() []sdk.Address {
-	return []sdk.Address{sdk.Address(msg.Address)}
+// GetSigner return address(es) that must sign over msg.GetSignBytes()
+func (msg MsgBeginUnstake) GetSigner() sdk.Address {
+	return msg.Address
 }
 
 // GetSignBytes returns the message bytes to sign over.
@@ -108,9 +108,9 @@ func (msg MsgUnjail) GetFee() sdk.Int {
 	return sdk.NewInt(PosFeeMap[msg.Type()])
 }
 
-// GetSigners return address(es) that must sign over msg.GetSignBytes()
-func (msg MsgUnjail) GetSigners() []sdk.Address {
-	return []sdk.Address{sdk.Address(msg.ValidatorAddr)}
+// GetSigner return address(es) that must sign over msg.GetSignBytes()
+func (msg MsgUnjail) GetSigner() sdk.Address {
+	return msg.ValidatorAddr
 }
 
 // GetSignBytes returns the message bytes to sign over.
@@ -147,9 +147,9 @@ func (msg MsgSend) GetFee() sdk.Int {
 	return sdk.NewInt(PosFeeMap[msg.Type()])
 }
 
-// GetSigners return address(es) that must sign over msg.GetSignBytes()
-func (msg MsgSend) GetSigners() []sdk.Address {
-	return []sdk.Address{sdk.Address(msg.FromAddress)}
+// GetSigner return address(es) that must sign over msg.GetSignBytes()
+func (msg MsgSend) GetSigner() sdk.Address {
+	return msg.FromAddress
 }
 
 // GetSignBytes returns the message bytes to sign over.

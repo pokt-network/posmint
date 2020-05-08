@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed HexAddressPubKey to use actual bytes and not amino encoded bytes.[#69]
 - Refactor Test (Redundant Values in func after Address type) [#67]
 - Refactor Hooks (Redundant Values in func after Address type) [#67]
+- Refactored stdtx to have one message and one signature [#186]
 
 ### Removed
 - Clean Remaining Bech32 [#65]

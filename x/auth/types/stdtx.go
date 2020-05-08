@@ -18,40 +18,36 @@ var (
 // StdTx is a standard way to wrap a Msg with Fee and Sigs.
 // NOTE: the first signature is the fee payer (Sigs must not be nil).
 type StdTx struct {
-	Msgs       []sdk.Msg      `json:"msg" yaml:"msg"`
-	Fee        sdk.Coins      `json:"fee" yaml:"fee"`
-	Signatures []StdSignature `json:"signatures" yaml:"signatures"`
-	Memo       string         `json:"memo" yaml:"memo"`
-	Entropy    int64          `json:"entropy" yaml:"entropy"`
+	Msg       sdk.Msg      `json:"msg" yaml:"msg"`
+	Fee       sdk.Coins    `json:"fee" yaml:"fee"`
+	Signature StdSignature `json:"signatures" yaml:"signatures"`
+	Memo      string       `json:"memo" yaml:"memo"`
+	Entropy   int64        `json:"entropy" yaml:"entropy"`
 }
 
-func NewStdTx(msgs []sdk.Msg, fee sdk.Coins, sigs []StdSignature, memo string, entropy int64) StdTx {
+func NewStdTx(msgs sdk.Msg, fee sdk.Coins, sigs StdSignature, memo string, entropy int64) StdTx {
 	return StdTx{
-		Msgs:       msgs,
-		Fee:        fee,
-		Signatures: sigs,
-		Memo:       memo,
-		Entropy:    entropy,
+		Msg:       msgs,
+		Fee:       fee,
+		Signature: sigs,
+		Memo:      memo,
+		Entropy:   entropy,
 	}
 }
 
-// GetMsgs returns the all the transaction's messages.
-func (tx StdTx) GetMsgs() []sdk.Msg { return tx.Msgs }
+// GetMsg returns the all the transaction's messages.
+func (tx StdTx) GetMsg() sdk.Msg { return tx.Msg }
 
 // ValidateBasic does a simple and lightweight validation check that doesn't
 // require access to any other information.
 func (tx StdTx) ValidateBasic() sdk.Error {
-	stdSigs := tx.GetSignatures()
+	stdSigs := tx.GetSignature()
 	if tx.Fee.IsValid() == false {
 		return sdk.ErrInsufficientFee(fmt.Sprintf("invalid fee %s amount provided", tx.Fee.String()))
 	}
-	if len(stdSigs) == 0 {
-		return sdk.ErrNoSignatures("no signers")
+	if len(stdSigs.Signature) == 0 {
+		return sdk.ErrUnauthorized("empty signature")
 	}
-	if len(stdSigs) != len(tx.GetSigners()) {
-		return sdk.ErrUnauthorized("wrong number of signers")
-	}
-
 	return nil
 }
 
@@ -70,37 +66,27 @@ func CountSubKeys(pub crypto.PubKey) int {
 	return numKeys
 }
 
-// GetSigners returns the addresses that must sign the transaction.
+// GetSigner returns the addresses that must sign the transaction.
 // Addresses are returned in a deterministic order.
-// They are accumulated from the GetSigners method for each Msg
-// in the order they appear in tx.GetMsgs().
+// They are accumulated from the GetSigner method for each Msg
+// in the order they appear in tx.GetMsg().
 // Duplicate addresses will be omitted.
-func (tx StdTx) GetSigners() []sdk.Address {
-	seen := map[string]bool{}
-	var signers []sdk.Address
-	for _, msg := range tx.GetMsgs() {
-		for _, addr := range msg.GetSigners() {
-			if !seen[addr.String()] {
-				signers = append(signers, addr)
-				seen[addr.String()] = true
-			}
-		}
-	}
-	return signers
+func (tx StdTx) GetSigner() sdk.Address {
+	return tx.GetMsg().GetSigner()
 }
 
 // GetMemo returns the memo
 func (tx StdTx) GetMemo() string { return tx.Memo }
 
-// GetSignatures returns the signature of signers who signed the Msg.
-// GetSignatures returns the signature of signers who signed the Msg.
+// GetSignature returns the signature of signers who signed the Msg.
+// GetSignature returns the signature of signers who signed the Msg.
 // CONTRACT: Length returned is same as length of
 // pubkeys returned from MsgKeySigners, and the order
 // matches.
 // CONTRACT: If the signature is missing (ie the Msg is
 // invalid), then the corresponding signature is
 // .Empty().
-func (tx StdTx) GetSignatures() []StdSignature { return tx.Signatures }
+func (tx StdTx) GetSignature() StdSignature { return tx.Signature }
 
 // StdSignDoc is replay-prevention structure.
 // It includes the result of msg.GetSignBytes(),
@@ -108,19 +94,16 @@ func (tx StdTx) GetSignatures() []StdSignature { return tx.Signatures }
 // and the Entropy numbers for each signature (prevent
 // inchain replay and enforce tx ordering per account).
 type StdSignDoc struct {
-	ChainID string            `json:"chain_id" yaml:"chain_id"`
-	Fee     json.RawMessage   `json:"fee" yaml:"fee"`
-	Memo    string            `json:"memo" yaml:"memo"`
-	Msgs    []json.RawMessage `json:"msgs" yaml:"msgs"`
-	Entropy int64             `json:"entropy" yaml:"entropy"`
+	ChainID string          `json:"chain_id" yaml:"chain_id"`
+	Fee     json.RawMessage `json:"fee" yaml:"fee"`
+	Memo    string          `json:"memo" yaml:"memo"`
+	Msg     json.RawMessage `json:"msgs" yaml:"msgs"`
+	Entropy int64           `json:"entropy" yaml:"entropy"`
 }
 
 // StdSignBytes returns the bytes to sign for a transaction.
-func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msgs []sdk.Msg, memo string) []byte {
-	var msgsBytes []json.RawMessage
-	for _, msg := range msgs {
-		msgsBytes = append(msgsBytes, json.RawMessage(msg.GetSignBytes()))
-	}
+func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.Msg, memo string) []byte {
+	msgsBytes := msg.GetSignBytes()
 	var feeBytes json.RawMessage
 	feeBytes, err := fee.MarshalJSON()
 	if err != nil {
@@ -128,9 +111,9 @@ func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msgs []sdk.Msg, 
 	}
 	bz, err := ModuleCdc.MarshalJSON(StdSignDoc{
 		ChainID: chainID,
-		Fee:     json.RawMessage(feeBytes),
+		Fee:     feeBytes,
 		Memo:    memo,
-		Msgs:    msgsBytes,
+		Msg:     msgsBytes,
 		Entropy: entropy,
 	})
 	if err != nil {
@@ -141,7 +124,7 @@ func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msgs []sdk.Msg, 
 
 // StdSignature represents a sig
 type StdSignature struct {
-	posCrypto.PublicKey `json:"pub_key" yaml:"pub_key"` // optional
+	posCrypto.PublicKey `json:"pub_key" yaml:"pub_key"` // technically optional if the public key is in the world state
 	Signature           []byte                          `json:"signature" yaml:"signature"`
 }
 
@@ -149,18 +132,15 @@ type StdSignature struct {
 func DefaultTxDecoder(cdc *codec.Codec) sdk.TxDecoder {
 	return func(txBytes []byte) (sdk.Tx, sdk.Error) {
 		var tx = StdTx{}
-
 		if len(txBytes) == 0 {
 			return nil, sdk.ErrTxDecode("txBytes are empty")
 		}
-
 		// StdTx.Msg is an interface. The concrete types
 		// are registered by MakeTxCodec
 		err := cdc.UnmarshalBinaryLengthPrefixed(txBytes, &tx)
 		if err != nil {
 			return nil, sdk.ErrTxDecode("error decoding transaction").TraceSDK(err.Error())
 		}
-
 		return tx, nil
 	}
 }
@@ -179,11 +159,9 @@ func (ss StdSignature) MarshalYAML() (interface{}, error) {
 		pubkey string
 		err    error
 	)
-
 	if ss.PublicKey != nil {
 		pubkey = ss.PublicKey.RawString()
 	}
-
 	bz, err = yaml.Marshal(struct {
 		PubKey    string
 		Signature string
@@ -194,20 +172,16 @@ func (ss StdSignature) MarshalYAML() (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return string(bz), err
 }
 
-func NewTestTx(ctx sdk.Ctx, msgs []sdk.Msg, privs []posCrypto.PrivateKey, entropy int64, fee sdk.Coins) sdk.Tx {
-	sigs := make([]StdSignature, len(privs))
-	for i, priv := range privs {
-		signBytes := StdSignBytes(ctx.ChainID(), entropy, fee, msgs, "")
-		sig, err := priv.Sign(signBytes)
-		if err != nil {
-			panic(err)
-		}
-		sigs[i] = StdSignature{PublicKey: priv.PublicKey(), Signature: sig}
+func NewTestTx(ctx sdk.Ctx, msgs sdk.Msg, priv posCrypto.PrivateKey, entropy int64, fee sdk.Coins) sdk.Tx {
+	signBytes := StdSignBytes(ctx.ChainID(), entropy, fee, msgs, "")
+	sig, err := priv.Sign(signBytes)
+	if err != nil {
+		panic(err)
 	}
-	tx := NewStdTx(msgs, fee, sigs, "", entropy)
+	s := StdSignature{PublicKey: priv.PublicKey(), Signature: sig}
+	tx := NewStdTx(msgs, fee, s, "", entropy)
 	return tx
 }

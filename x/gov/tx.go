@@ -23,7 +23,7 @@ func ChangeParamsTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase
 	if err != nil {
 		return nil, err
 	}
-	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
 }
 
 func DAOTransferTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, fromAddress, toAddress sdk.Address, amount sdk.Int, action, passphrase string) (*sdk.TxResponse, error) {
@@ -38,7 +38,7 @@ func DAOTransferTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase,
 	if err != nil {
 		return nil, err
 	}
-	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
 }
 
 func UpgradeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, fromAddress sdk.Address, upgrade types.Upgrade, passphrase string) (*sdk.TxResponse, error) {
@@ -51,7 +51,7 @@ func UpgradeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, fro
 	if err != nil {
 		return nil, err
 	}
-	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, []sdk.Msg{msg})
+	return util.CompleteAndBroadcastTxCLI(txBuilder, cliCtx, msg)
 }
 
 func newTx(cdc *codec.Codec, msg sdk.Msg, fromAddr sdk.Address, tmNode client.Client, keybase keys.Keybase, passphrase string) (txBuilder auth.TxBuilder, cliCtx util.CLIContext) {
