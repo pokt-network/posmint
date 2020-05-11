@@ -218,7 +218,12 @@ func NewEmptyModuleAccount(name string, permissions ...string) *ModuleAccount {
 	baseAcc := NewBaseAccountWithAddress(moduleAddress)
 
 	if err := validatePermissions(permissions...); err != nil {
-		panic(err)
+		fmt.Println(fmt.Errorf("invalid permissions for module account %s with permissions %v\n leaving permissionless", name, permissions))
+		return &ModuleAccount{
+			BaseAccount: &baseAcc,
+			Name:        name,
+			Permissions: []string{},
+		}
 	}
 
 	return &ModuleAccount{
@@ -229,11 +234,14 @@ func NewEmptyModuleAccount(name string, permissions ...string) *ModuleAccount {
 }
 
 // NewModuleAccount creates a new ModuleAccount instance
-func NewModuleAccount(ba *BaseAccount,
-	name string, permissions ...string) *ModuleAccount {
-
+func NewModuleAccount(ba *BaseAccount, name string, permissions ...string) *ModuleAccount {
 	if err := validatePermissions(permissions...); err != nil {
-		panic(err)
+		fmt.Println(fmt.Errorf("invalid permissions for module account %s with permissions %v\n leaving permissionless", name, permissions))
+		return &ModuleAccount{
+			BaseAccount: ba,
+			Name:        name,
+			Permissions: []string{},
+		}
 	}
 
 	return &ModuleAccount{
@@ -272,7 +280,8 @@ func (ma ModuleAccount) SetPubKey(pubKey crypto.PublicKey) error {
 func (ma ModuleAccount) String() string {
 	b, err := yaml.Marshal(ma)
 	if err != nil {
-		panic(err)
+		fmt.Println("couldn't convert module account to yaml string: " + err.Error())
+		return ""
 	}
 	return string(b)
 }

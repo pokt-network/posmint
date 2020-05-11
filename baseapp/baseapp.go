@@ -183,7 +183,8 @@ func (app *BaseApp) MountStores(keys ...sdk.StoreKey) {
 		case *sdk.TransientStoreKey:
 			app.MountStore(key, sdk.StoreTypeTransient)
 		default:
-			panic("Unrecognized store key type " + reflect.TypeOf(key).Name())
+			fmt.Println("Unrecognized store key type " + reflect.TypeOf(key).Name())
+			os.Exit(1)
 		}
 	}
 }
@@ -263,7 +264,8 @@ func (app *BaseApp) initFromMainStore(baseKey *sdk.KVStoreKey) error {
 
 	// memoize baseKey
 	if app.baseKey != nil {
-		panic("app.baseKey expected to be nil; duplicate init?")
+		return fmt.Errorf("app.baseKey expected to be nil; possible duplicate init")
+
 	}
 	app.baseKey = baseKey
 
@@ -277,7 +279,7 @@ func (app *BaseApp) initFromMainStore(baseKey *sdk.KVStoreKey) error {
 
 		err := proto.Unmarshal(consensusParamsBz, consensusParams)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		app.setConsensusParams(consensusParams)
@@ -304,11 +306,6 @@ func (app *BaseApp) setHaltTime(haltTime uint64) {
 
 // Router returns the router of the BaseApp.
 func (app *BaseApp) Router() sdk.Router {
-	if app.sealed {
-		// We cannot return a router when the app is sealed because we can't have
-		// any routes modified which would cause unexpected routing behavior.
-		panic("Router() on sealed BaseApp")
-	}
 	return app.router
 }
 
@@ -361,7 +358,8 @@ func (app *BaseApp) setConsensusParams(consensusParams *abci.ConsensusParams) {
 func (app *BaseApp) storeConsensusParams(consensusParams *abci.ConsensusParams) {
 	consensusParamsBz, err := proto.Marshal(consensusParams)
 	if err != nil {
-		panic(err)
+		fmt.Println("error marshalling consensus params in storeConsensusParams err:" + err.Error())
+		return
 	}
 	mainStore := app.cms.GetKVStore(app.baseKey)
 	mainStore.Set(mainConsensusParamsKey, consensusParamsBz)
@@ -378,8 +376,8 @@ func (app *BaseApp) getMaximumBlockGas() uint64 {
 	maxGas := app.consensusParams.Block.MaxGas
 	switch {
 	case maxGas < -1:
-		panic(fmt.Sprintf("invalid maximum block gas: %d", maxGas))
-
+		fmt.Println(fmt.Errorf("invalid maximum block gas: %d", maxGas))
+		return 0
 	case maxGas == -1:
 		return 0
 
@@ -436,15 +434,17 @@ func (app *BaseApp) InitChain(req abci.RequestInitChain) (res abci.ResponseInitC
 	// sanity check
 	if len(req.Validators) > 0 {
 		if len(req.Validators) != len(res.Validators) {
-			panic(fmt.Errorf(
+			fmt.Println(fmt.Errorf(
 				"len(RequestInitChain.Validators) != len(validators) (%d != %d)",
 				len(req.Validators), len(res.Validators)))
+			os.Exit(1)
 		}
 		sort.Sort(abci.ValidatorUpdates(req.Validators))
 		sort.Sort(abci.ValidatorUpdates(res.Validators))
 		for i, val := range res.Validators {
 			if !val.Equal(req.Validators[i]) {
-				panic(fmt.Errorf("validators[%d] != req.Validators[%d] ", i, i))
+				fmt.Println(fmt.Errorf("validators[%d] != req.Validators[%d] ", i, i))
+				os.Exit(1)
 			}
 		}
 	}
@@ -680,9 +680,9 @@ func (app *BaseApp) BeginBlock(req abci.RequestBeginBlock) (res abci.ResponseBeg
 	}
 
 	if err := app.validateHeight(req); err != nil {
-		panic(err)
+		fmt.Println(fmt.Errorf("unable to validate height for req: %v err: %s", req, err))
+		os.Exit(1)
 	}
-
 	// Initialize the DeliverTx state. If this is the first block, it should
 	// already be initialized in InitChain. Otherwise app.deliverState will be
 	// nil, since it is reset on Commit.
@@ -941,7 +941,8 @@ func (app *BaseApp) runTx(mode runTxMode, txBytes []byte, tx sdk.Tx) (result sdk
 			)
 
 			if ctx.BlockGasMeter().GasConsumed() < startingGas {
-				panic(sdk.ErrorGasOverflow{Descriptor: "tx gas summation"})
+				fmt.Println(sdk.ErrorGasOverflow{Descriptor: "tx gas summation"}) // todo remove w/ gas
+				os.Exit(1)
 			}
 		}
 	}()

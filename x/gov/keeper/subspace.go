@@ -4,16 +4,19 @@ import (
 	"fmt"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/gov/types"
+	"os"
 )
 
 // Allocate subspace used for keepers
 func (k Keeper) Subspace(s string) sdk.Subspace {
 	_, ok := k.spaces[s]
 	if ok {
-		panic("subspace already occupied")
+		fmt.Println(fmt.Errorf("subspace %s already occupied", s))
+		os.Exit(1)
 	}
 	if s == "" {
-		panic("cannot use empty string for subspace")
+		fmt.Println(fmt.Errorf("cannot use empty stirng for subspace"))
+		os.Exit(1)
 	}
 	space := sdk.NewSubspace(s)
 	space.SetCodec(k.cdc)
@@ -25,10 +28,12 @@ func (k Keeper) AddSubspaces(subspaces ...sdk.Subspace) {
 	for _, space := range subspaces {
 		_, ok := k.spaces[space.Name()]
 		if ok {
-			panic("space already occupied")
+			fmt.Println(fmt.Errorf("subspace %s already occupied", space.Name()))
+			os.Exit(1)
 		}
 		if space.Name() == "" {
-			panic("cannot use empty string for space")
+			fmt.Println(fmt.Errorf("cannot use empty stirng for subspace"))
+			os.Exit(1)
 		}
 		space.SetCodec(k.cdc)
 		k.spaces[space.Name()] = space
@@ -62,7 +67,8 @@ func (k Keeper) ModifyParam(ctx sdk.Ctx, aclKey string, paramValue interface{}, 
 	subspaceName, paramKey := types.SplitACLKey(aclKey)
 	space, ok := k.spaces[subspaceName]
 	if !ok {
-		panic(types.ErrSubspaceNotFound(types.ModuleName, subspaceName))
+		k.Logger(ctx).Error(types.ErrSubspaceNotFound(types.ModuleName, subspaceName).Error())
+		os.Exit(1)
 	}
 	space.Set(ctx, []byte(paramKey), paramValue)
 	k.spaces[subspaceName] = space

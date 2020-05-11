@@ -2,6 +2,7 @@ package baseapp
 
 import (
 	"fmt"
+	"os"
 
 	sdk "github.com/pokt-network/posmint/types"
 )
@@ -25,10 +26,12 @@ func NewQueryRouter() *queryRouter { // nolint: golint
 // if a duplicate route is given. The route must be alphanumeric.
 func (qrt *queryRouter) AddRoute(path string, q sdk.Querier) sdk.QueryRouter {
 	if !isAlphaNumeric(path) {
-		panic("route expressions can only contain alphanumeric characters")
+		fmt.Println("route expressions can only contain alphanumeric characters")
+		os.Exit(1)
 	}
 	if qrt.routes[path] != nil {
-		panic(fmt.Sprintf("route %s has already been initialized", path))
+		fmt.Println(fmt.Errorf("route %s has already been initialized", path))
+		os.Exit(1)
 	}
 
 	qrt.routes[path] = q

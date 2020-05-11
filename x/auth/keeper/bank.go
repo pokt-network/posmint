@@ -194,9 +194,12 @@ func (k Keeper) SetCoins(ctx sdk.Ctx, addr sdk.Address, amt sdk.Coins) sdk.Error
 
 	acc := k.GetAccount(ctx, addr)
 	if acc == nil {
-		acc = k.NewAccountWithAddress(ctx, addr)
+		var err error
+		acc, err = k.NewAccountWithAddress(ctx, addr)
+		if err != nil {
+			return sdk.ErrInternal(err.Error())
+		}
 	}
-
 	err := acc.SetCoins(amt)
 	if err != nil {
 		return sdk.ErrInternal(err.Error())

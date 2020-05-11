@@ -1,7 +1,9 @@
 package keeper
 
 import (
+	"fmt"
 	"github.com/pokt-network/posmint/crypto"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -84,7 +86,8 @@ func createTestAccs(ctx sdk.Ctx, numAccs int, initialCoins sdk.Coins, ak *Keeper
 		acc.Coins = initialCoins
 		acc.PubKey, err = crypto.PubKeyToPublicKey(pubKey)
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
+			os.Exit(1)
 		}
 		ak.SetAccount(ctx, &acc)
 	}

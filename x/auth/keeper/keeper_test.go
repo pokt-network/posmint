@@ -45,7 +45,7 @@ func TestKeeper(t *testing.T) {
 
 	addr := sdk.Address([]byte("addr1"))
 	addr2 := sdk.Address([]byte("addr2"))
-	acc := input.Keeper.NewAccountWithAddress(ctx, addr)
+	acc, _ := input.Keeper.NewAccountWithAddress(ctx, addr)
 
 	// Test GetCoins/SetCoins
 	input.Keeper.SetAccount(ctx, acc)
@@ -101,7 +101,7 @@ func TestSendKeeper(t *testing.T) {
 	sendKeeper := input.Keeper
 	addr := sdk.Address([]byte("addr1"))
 	addr2 := sdk.Address([]byte("addr2"))
-	acc := input.Keeper.NewAccountWithAddress(ctx, addr)
+	acc, _ := input.Keeper.NewAccountWithAddress(ctx, addr)
 
 	// Test GetCoins/SetCoins
 	input.Keeper.SetAccount(ctx, acc)
@@ -147,7 +147,7 @@ func TestViewKeeper(t *testing.T) {
 	viewKeeper := input.Keeper
 
 	addr := sdk.Address([]byte("addr1"))
-	acc := input.Keeper.NewAccountWithAddress(ctx, addr)
+	acc, _ := input.Keeper.NewAccountWithAddress(ctx, addr)
 
 	// Test GetCoins/SetCoins
 	input.Keeper.SetAccount(ctx, acc)

@@ -2,6 +2,7 @@ package gov
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/pokt-network/posmint/codec"
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/types/module"
@@ -86,7 +87,8 @@ func (am AppModule) NewQuerierHandler() sdk.Querier {
 func (am AppModule) InitGenesis(ctx sdk.Ctx, data json.RawMessage) []abci.ValidatorUpdate {
 	var genesisState types.GenesisState
 	if ctx.AppVersion() == "" {
-		panic("must set app version in context, set with ctx.WithAppVersion(<version>)")
+		fmt.Println(fmt.Errorf("must set app version in context, set with ctx.WithAppVersion(<version>)").Error())
+		os.Exit(1)
 	}
 	if data == nil {
 		genesisState = types.DefaultGenesisState()

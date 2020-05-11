@@ -9,6 +9,7 @@ import (
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/multisig"
 	"gopkg.in/yaml.v2"
+	"os"
 )
 
 var (
@@ -102,12 +103,12 @@ type StdSignDoc struct {
 }
 
 // StdSignBytes returns the bytes to sign for a transaction.
-func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.Msg, memo string) []byte {
+func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.Msg, memo string) ([]byte, error) {
 	msgsBytes := msg.GetSignBytes()
 	var feeBytes json.RawMessage
 	feeBytes, err := fee.MarshalJSON()
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("could not marshal fee to json for StdSignBytes function: ", err.Error())
 	}
 	bz, err := ModuleCdc.MarshalJSON(StdSignDoc{
 		ChainID: chainID,
@@ -117,15 +118,15 @@ func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.Msg, mem
 		Entropy: entropy,
 	})
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("could not marshal bytes to json for StdSignDoc function: ", err.Error())
 	}
-	return sdk.MustSortJSON(bz)
+	return sdk.MustSortJSON(bz), nil
 }
 
 // StdSignature represents a sig
 type StdSignature struct {
 	posCrypto.PublicKey `json:"pub_key" yaml:"pub_key"` // technically optional if the public key is in the world state
-	Signature           []byte                          `json:"signature" yaml:"signature"`
+	Signature           []byte `json:"signature" yaml:"signature"`
 }
 
 // DefaultTxDecoder logic for standard transaction decoding
@@ -176,10 +177,15 @@ func (ss StdSignature) MarshalYAML() (interface{}, error) {
 }
 
 func NewTestTx(ctx sdk.Ctx, msgs sdk.Msg, priv posCrypto.PrivateKey, entropy int64, fee sdk.Coins) sdk.Tx {
-	signBytes := StdSignBytes(ctx.ChainID(), entropy, fee, msgs, "")
+	signBytes, err := StdSignBytes(ctx.ChainID(), entropy, fee, msgs, "")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 	sig, err := priv.Sign(signBytes)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	s := StdSignature{PublicKey: priv.PublicKey(), Signature: sig}
 	tx := NewStdTx(msgs, fee, s, "", entropy)

@@ -6,6 +6,7 @@ import (
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/auth/exported"
 	"github.com/pokt-network/posmint/x/auth/types"
+	"os"
 )
 
 // GetModuleAddress returns an address based on the module name
@@ -33,12 +34,12 @@ func (k Keeper) GetModuleAccountAndPermissions(ctx sdk.Ctx, moduleName string) (
 	if addr == nil {
 		return nil, []string{}
 	}
-
 	acc := k.GetAccount(ctx, addr)
 	if acc != nil {
 		macc, ok := acc.(exported.ModuleAccountI)
 		if !ok {
-			panic("account is not a module account")
+			fmt.Println("account that is retrieved is not a module account")
+			return types.ModuleAccount{}, []string{}
 		}
 		return macc, perms
 	}
@@ -127,7 +128,8 @@ func (k Keeper) SetAccount(ctx sdk.Ctx, acc exported.Account) {
 	store := ctx.KVStore(k.storeKey)
 	bz, err := k.cdc.MarshalBinaryBare(acc)
 	if err != nil {
-		panic(err)
+		ctx.Logger().Error(fmt.Errorf("error marshalling account %v err: %s", acc, err.Error()).Error())
+		os.Exit(1)
 	}
 	store.Set(types.AddressStoreKey(addr), bz)
 }
@@ -152,7 +154,8 @@ func (k Keeper) IterateAccounts(ctx sdk.Ctx, process func(exported.Account) (sto
 		val := iter.Value()
 		acc, err := k.decodeAccount(val)
 		if err != nil {
-			panic(err)
+			ctx.Logger().Error(fmt.Errorf("error while iterating accounts: unmarshalling account %v err: %s", val, err.Error()).Error())
+			continue
 		}
 		if process(acc) {
 			return
@@ -167,14 +170,13 @@ func (k Keeper) decodeAccount(bz []byte) (acc exported.Account, err error) {
 }
 
 // NewAccountWithAddress implements sdk.AuthKeeper.
-func (k Keeper) NewAccountWithAddress(ctx sdk.Ctx, addr sdk.Address) exported.Account {
+func (k Keeper) NewAccountWithAddress(ctx sdk.Ctx, addr sdk.Address) (exported.Account, error) {
 	acc := types.BaseAccount{}
 	err := acc.SetAddress(addr)
 	if err != nil {
-		// Handle w/ #870
-		panic(err)
+		return nil, fmt.Errorf("unable to create a new account with address %s", addr)
 	}
-	return &acc
+	return &acc, nil
 }
 
 // GetPubKey Returns the PublicKey of the account at address

@@ -10,13 +10,15 @@ import (
 	"github.com/tendermint/tendermint/node"
 	"github.com/tendermint/tendermint/rpc/client"
 	tmTypes "github.com/tendermint/tendermint/types"
+	"os"
 )
 
 // NewAnteHandler returns an AnteHandler that checks signatures and deducts fees from the first signer.
 func NewAnteHandler(ak keeper.Keeper) sdk.AnteHandler {
 	return func(ctx sdk.Ctx, tx sdk.Tx, txBz []byte, tmNode *node.Node, simulate bool) (newCtx sdk.Ctx, res sdk.Result, abort bool) {
 		if addr := ak.GetModuleAddress(types.FeeCollectorName); addr == nil {
-			panic(fmt.Sprintf("%s module account has not been set", types.FeeCollectorName))
+			ctx.Logger().Error(fmt.Sprintf("%s module account has not been set", types.FeeCollectorName))
+			os.Exit(1)
 		}
 		// all transactions must be of type auth.StdTx
 		stdTx, ok := tx.(StdTx)
@@ -66,7 +68,10 @@ func ValidateTransaction(ctx sdk.Ctx, k Keeper, stdTx StdTx, params Params, tmNo
 		return types.ErrDuplicateTx(ModuleName, hex.EncodeToString(txHash))
 	}
 	// get the sign bytes from the tx
-	signBytes := GetSignBytes(ctx.ChainID(), stdTx)
+	signBytes, err := GetSignBytes(ctx.ChainID(), stdTx)
+	if err != nil {
+		return sdk.ErrInternal(err.Error())
+	}
 	// get the fees from the tx
 	expectedFee := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, stdTx.GetMsg().GetFee()))
 	// test for public key type
@@ -165,7 +170,7 @@ func DeductFees(keeper keeper.Keeper, ctx sdk.Ctx, tx types.StdTx) sdk.Error {
 
 // GetSignBytes returns a slice of bytes to sign over for a given transaction
 // and an account.
-func GetSignBytes(chainID string, stdTx StdTx) []byte {
+func GetSignBytes(chainID string, stdTx StdTx) ([]byte, error) {
 	return StdSignBytes(
 		chainID, stdTx.Entropy, stdTx.Fee, stdTx.Msg, stdTx.Memo,
 	)

@@ -2,6 +2,7 @@ package baseapp
 
 import (
 	"fmt"
+	"os"
 
 	sdk "github.com/pokt-network/posmint/types"
 )
@@ -25,10 +26,12 @@ func NewRouter() *router { // nolint: golint
 // be alphanumeric.
 func (rtr *router) AddRoute(path string, h sdk.Handler) sdk.Router {
 	if !isAlphaNumeric(path) {
-		panic("route expressions can only contain alphanumeric characters")
+		fmt.Println("route expressions can only contain alphanumeric characters")
+		os.Exit(1)
 	}
 	if rtr.routes[path] != nil {
-		panic(fmt.Sprintf("route %s has already been initialized", path))
+		fmt.Println(fmt.Errorf("route %s has already been initialized", path))
+		os.Exit(1)
 	}
 
 	rtr.routes[path] = h
