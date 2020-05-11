@@ -67,7 +67,8 @@ func (bldr TxBuilder) WithChainID(chainID string) TxBuilder {
 func (bldr TxBuilder) WithFees(fees string) TxBuilder {
 	parsedFees, err := sdk.ParseCoins(fees)
 	if err != nil {
-		panic(err)
+		fmt.Println(fmt.Errorf("error adding fees to the tx builder: " + err.Error()))
+		return bldr
 	}
 
 	bldr.fees = parsedFees
@@ -96,7 +97,10 @@ func (bldr TxBuilder) BuildAndSign(address sdk.Address, privateKey crypto.Privat
 		return nil, errors.New(fmt.Sprintf("cant build and sign transaciton: the chainID is empty"))
 	}
 	entropy := common.RandInt64()
-	bytesToSign := StdSignBytes(bldr.chainID, entropy, bldr.fees, msg, bldr.memo)
+	bytesToSign, err := StdSignBytes(bldr.chainID, entropy, bldr.fees, msg, bldr.memo)
+	if err != nil {
+		return nil, err
+	}
 	sigBytes, err := privateKey.Sign(bytesToSign)
 	if err != nil {
 		return nil, err
@@ -118,7 +122,10 @@ func (bldr TxBuilder) BuildAndSignWithKeyBase(address sdk.Address, passphrase st
 		return nil, errors.New(fmt.Sprintf("cant build and sign transaciton: the chainID is empty"))
 	}
 	entropy := common.RandInt64()
-	bytesToSign := StdSignBytes(bldr.chainID, entropy, bldr.fees, msg, bldr.memo)
+	bytesToSign, err := StdSignBytes(bldr.chainID, entropy, bldr.fees, msg, bldr.memo)
+	if err != nil {
+		return nil, err
+	}
 	sigBytes, pk, err := bldr.keybase.Sign(address, passphrase, bytesToSign)
 	if err != nil {
 		return nil, err
@@ -141,7 +148,10 @@ func (bldr TxBuilder) SignMultisigTransaction(address sdk.Address, keys []crypto
 	t, err := bldr.txDecoder(txBytes)
 	tx := t.(StdTx)
 	// get the sign bytes from the transaction
-	bytesToSign := StdSignBytes(bldr.chainID, tx.Entropy, tx.Fee, tx.Msg, tx.Memo)
+	bytesToSign, err := StdSignBytes(bldr.chainID, tx.Entropy, tx.Fee, tx.Msg, tx.Memo)
+	if err != nil {
+		return nil, err
+	}
 	sigBytes, pubKey, err := bldr.keybase.Sign(address, passphrase, bytesToSign)
 	if err != nil {
 		return nil, err
@@ -181,7 +191,10 @@ func (bldr TxBuilder) BuildAndSignMultisigTransaction(address sdk.Address, publi
 	// bulid the transaction from scratch
 	entropy := common.RandInt64()
 	fee := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(100000)))
-	signBz := StdSignBytes(bldr.chainID, entropy, fee, m, bldr.memo)
+	signBz, err := StdSignBytes(bldr.chainID, entropy, fee, m, bldr.memo)
+	if err != nil {
+		return nil, err
+	}
 	sigBytes, _, err := bldr.keybase.Sign(address, passphrase, signBz)
 	if err != nil {
 		return nil, err

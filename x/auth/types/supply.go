@@ -52,7 +52,8 @@ func (supply Supply) Deflate(amount sdk.Coins) exported.SupplyI {
 func (supply Supply) String() string {
 	b, err := yaml.Marshal(supply)
 	if err != nil {
-		panic(err)
+		fmt.Println("error converting supply to string: " + err.Error())
+		return ""
 	}
 	return string(b)
 }

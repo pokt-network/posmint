@@ -5,6 +5,7 @@ import (
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/gov/types"
 	abci "github.com/tendermint/tendermint/abci/types"
+	"os"
 )
 
 // InitGenesis - Init store state from genesis data
@@ -12,15 +13,17 @@ func (k Keeper) InitGenesis(ctx sdk.Ctx, data types.GenesisState) []abci.Validat
 	k.SetParams(ctx, data.Params)
 	// validate acl
 	if err := k.GetACL(ctx).Validate(k.GetAllParamNames(ctx)); err != nil {
-		panic(err)
+		k.Logger(ctx).Error(err.Error())
+		os.Exit(1)
 	}
 	dao := k.GetDAOAccount(ctx)
 	if dao == nil {
-		panic(fmt.Sprintf("%s module account has not been set", types.DAOAccountName))
+		k.Logger(ctx).Error(fmt.Errorf("%s module account has not been set", types.DAOAccountName).Error())
+		os.Exit(1)
 	}
 	err := k.AuthKeeper.MintCoins(ctx, types.DAOAccountName, sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, data.DAOTokens)))
 	if err != nil {
-		panic(fmt.Sprintf("unable to set dao tokens: %s", err.Error()))
+		k.Logger(ctx).Error(fmt.Errorf("unable to set dao tokens: %s", err.Error()).Error())
 	}
 	return []abci.ValidatorUpdate{}
 }

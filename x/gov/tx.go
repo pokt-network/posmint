@@ -57,18 +57,19 @@ func UpgradeTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, fro
 func newTx(cdc *codec.Codec, msg sdk.Msg, fromAddr sdk.Address, tmNode client.Client, keybase keys.Keybase, passphrase string) (txBuilder auth.TxBuilder, cliCtx util.CLIContext) {
 	genDoc, err := tmNode.Genesis()
 	if err != nil {
-		panic(err)
+		return
 	}
 	chainID := genDoc.Genesis.ChainID
 	cliCtx = util.NewCLIContext(tmNode, fromAddr, passphrase).WithCodec(cdc)
 	cliCtx.BroadcastMode = util.BroadcastSync
 	account, err := cliCtx.GetAccount(fromAddr)
 	if err != nil {
-		panic(err)
+		return
 	}
 	fee := sdk.NewInt(types.GovFeeMap[msg.Type()])
 	if account.GetCoins().AmountOf(sdk.DefaultStakeDenom).LTE(fee) { // todo get stake denom
-		panic(fmt.Sprintf("insufficient funds: the fee needed is %v", fee))
+		err = fmt.Errorf("insufficient funds: the fee needed is %v", fee)
+		return
 	}
 	txBuilder = auth.NewTxBuilder(
 		auth.DefaultTxEncoder(cdc),
@@ -82,7 +83,7 @@ func newTx(cdc *codec.Codec, msg sdk.Msg, fromAddr sdk.Address, tmNode client.Cl
 func BuildAndSignMulti(cdc *codec.Codec, address sdk.Address, publicKey crypto.PublicKeyMultiSig, msg sdk.Msg, tmNode client.Client, keybase keys.Keybase, passphrase string) (txBytes []byte, err error) {
 	genDoc, err := tmNode.Genesis()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	txBuilder := auth.NewTxBuilder(
 		auth.DefaultTxEncoder(cdc),
@@ -95,7 +96,7 @@ func BuildAndSignMulti(cdc *codec.Codec, address sdk.Address, publicKey crypto.P
 func SignMulti(cdc *codec.Codec, fromAddr sdk.Address, tx []byte, keys []crypto.PublicKey, tmNode client.Client, keybase keys.Keybase, passphrase string) (txBytes []byte, err error) {
 	genDoc, err := tmNode.Genesis()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	txBuilder := auth.NewTxBuilder(
 		auth.DefaultTxEncoder(cdc),

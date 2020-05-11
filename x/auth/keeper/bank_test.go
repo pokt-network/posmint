@@ -32,7 +32,7 @@ func getCoinsByName(ctx sdk.Ctx, k Keeper, moduleName string) sdk.Coins {
 func TestSendCoins(t *testing.T) {
 	nAccs := int64(4)
 	ctx, keeper := createTestInput(t, false, initialPower, nAccs)
-	baseAcc := keeper.NewAccountWithAddress(ctx, types.NewModuleAddress("baseAcc"))
+	baseAcc, _ := keeper.NewAccountWithAddress(ctx, types.NewModuleAddress("baseAcc"))
 	err := holderAcc.SetCoins(initCoins)
 	require.NoError(t, err)
 	keeper.SetModuleAccount(ctx, holderAcc)
