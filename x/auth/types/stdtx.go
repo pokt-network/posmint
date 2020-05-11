@@ -108,7 +108,7 @@ func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.Msg, mem
 	var feeBytes json.RawMessage
 	feeBytes, err := fee.MarshalJSON()
 	if err != nil {
-		return nil, fmt.Errorf("could not marshal fee to json for StdSignBytes function: ", err.Error())
+		return nil, fmt.Errorf("could not marshal fee to json for StdSignBytes function: %v", err.Error())
 	}
 	bz, err := ModuleCdc.MarshalJSON(StdSignDoc{
 		ChainID: chainID,
@@ -118,7 +118,7 @@ func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.Msg, mem
 		Entropy: entropy,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("could not marshal bytes to json for StdSignDoc function: ", err.Error())
+		return nil, fmt.Errorf("could not marshal bytes to json for StdSignDoc function: %v", err.Error())
 	}
 	return sdk.MustSortJSON(bz), nil
 }
