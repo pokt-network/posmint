@@ -608,7 +608,7 @@ func handleQueryCustom(app *BaseApp, path []string, req abci.RequestQuery) (res 
 		return sdk.ErrInternal("cannot query with proof when height <= 1; please provide a valid height").QueryResult()
 	}
 	// new multistore for copy
-	newMS := app.cms.(*rootMulti.Store).CopyStore()
+	newMS := (*app.cms.(*rootMulti.Store).CopyStore()).(*rootMulti.Store)
 	err := newMS.LoadVersion(req.Height)
 	if err != nil {
 		return sdk.ErrInternal(
@@ -840,7 +840,7 @@ func (app *BaseApp) getState(mode runTxMode) *state {
 // a cache wrapped multi-store.
 func (app *BaseApp) txContext(ctx sdk.Ctx, txBytes []byte) (
 	sdk.Context, sdk.MultiStore) { // todo edit here!!!
-	newMS := store.MultiStore(app.cms.(store.CommitMultiStore).(*rootMulti.Store).CopyStore())
+	newMS := store.MultiStore((*app.cms.(store.CommitMultiStore).(*rootMulti.Store).CopyStore()).(*rootMulti.Store))
 	if newMS.TracingEnabled() {
 		newMS = newMS.SetTracingContext(
 			map[string]interface{}{

@@ -40,20 +40,7 @@ type Store struct {
 	traceContext types.TraceContext
 }
 
-var _ types.CommitMultiStore = (*Store)(nil)
-var _ types.Queryable = (*Store)(nil)
-
-// nolint
-func NewStore(db dbm.DB) *Store {
-	return &Store{
-		DB:           db,
-		storesParams: make(map[types.StoreKey]storeParams),
-		stores:       make(map[types.StoreKey]types.CommitStore),
-		keysByName:   make(map[string]types.StoreKey),
-	}
-}
-
-func (rs *Store) CopyStore() *Store {
+func (rs *Store) CopyStore() *types.Store {
 	newParams := make(map[types.StoreKey]storeParams)
 	for k, v := range rs.storesParams {
 		newParams[k] = v
@@ -70,7 +57,7 @@ func (rs *Store) CopyStore() *Store {
 	for k, v := range rs.traceContext {
 		newTraceCtx[k] = v
 	}
-	return &Store{
+	s := types.Store(&Store{
 		DB:           rs.DB,
 		lastCommitID: rs.lastCommitID,
 		pruningOpts:  rs.pruningOpts,
@@ -80,6 +67,20 @@ func (rs *Store) CopyStore() *Store {
 		lazyLoading:  rs.lazyLoading,
 		traceWriter:  rs.traceWriter,
 		traceContext: newTraceCtx,
+	})
+	return &s
+}
+
+var _ types.CommitMultiStore = (*Store)(nil)
+var _ types.Queryable = (*Store)(nil)
+
+// nolint
+func NewStore(db dbm.DB) *Store {
+	return &Store{
+		DB:           db,
+		storesParams: make(map[types.StoreKey]storeParams),
+		stores:       make(map[types.StoreKey]types.CommitStore),
+		keysByName:   make(map[string]types.StoreKey),
 	}
 }
 
