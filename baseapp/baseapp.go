@@ -10,6 +10,7 @@ package baseapp
 import (
 	"fmt"
 	"github.com/tendermint/tendermint/node"
+	tmStore "github.com/tendermint/tendermint/store"
 	"io"
 	"os"
 	"reflect"
@@ -146,6 +147,18 @@ func (app *BaseApp) AppVersion() string {
 // Logger returns the logger of the BaseApp.
 func (app *BaseApp) Logger() log.Logger {
 	return app.logger
+}
+
+func (app *BaseApp) Store() sdk.CommitMultiStore {
+	return app.cms
+}
+
+func (app *BaseApp) BlockStore() *tmStore.BlockStore {
+	return app.tmNode.BlockStore()
+}
+
+func (app *BaseApp) TMNode() *node.Node {
+	return app.tmNode
 }
 
 // SetCommitMultiStoreTracer sets the store tracer on the BaseApp's underlying
