@@ -190,7 +190,7 @@ func (c Context) PrevCtx(height int64) (Context, error) {
 		EvidenceHash:       blck.EvidenceHash,
 		ProposerAddress:    blck.ProposerAddress,
 	}
-	return NewContext((*ms).(MultiStore), header, false, c.logger).WithAppVersion(c.appVersion), nil
+	return NewContext((*ms).(MultiStore), header, false, c.logger).WithAppVersion(c.appVersion).WithBlockStore(c.blockstore), nil
 }
 
 func (c Context) WithBlockStore(bs *store.BlockStore) Context {
