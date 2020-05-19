@@ -21,7 +21,7 @@ var (
 type StdTx struct {
 	Msg       sdk.Msg      `json:"msg" yaml:"msg"`
 	Fee       sdk.Coins    `json:"fee" yaml:"fee"`
-	Signature StdSignature `json:"signatures" yaml:"signatures"`
+	Signature StdSignature `json:"signature" yaml:"signature"`
 	Memo      string       `json:"memo" yaml:"memo"`
 	Entropy   int64        `json:"entropy" yaml:"entropy"`
 }
@@ -126,7 +126,7 @@ func StdSignBytes(chainID string, entropy int64, fee sdk.Coins, msg sdk.Msg, mem
 // StdSignature represents a sig
 type StdSignature struct {
 	posCrypto.PublicKey `json:"pub_key" yaml:"pub_key"` // technically optional if the public key is in the world state
-	Signature           []byte `json:"signature" yaml:"signature"`
+	Signature           []byte                          `json:"signature" yaml:"signature"`
 }
 
 // DefaultTxDecoder logic for standard transaction decoding
