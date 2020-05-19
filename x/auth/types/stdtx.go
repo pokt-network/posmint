@@ -98,7 +98,7 @@ type StdSignDoc struct {
 	ChainID string          `json:"chain_id" yaml:"chain_id"`
 	Fee     json.RawMessage `json:"fee" yaml:"fee"`
 	Memo    string          `json:"memo" yaml:"memo"`
-	Msg     json.RawMessage `json:"msgs" yaml:"msgs"`
+	Msg     json.RawMessage `json:"msg" yaml:"msg"`
 	Entropy int64           `json:"entropy" yaml:"entropy"`
 }
 
