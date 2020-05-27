@@ -2,12 +2,11 @@ package mintkey
 
 import (
 	"fmt"
-	"github.com/tendermint/crypto/bcrypt"
+	"github.com/tendermint/tendermint/crypto"
+	"golang.org/x/crypto/scrypt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"github.com/tendermint/tendermint/crypto"
 )
 
 func BenchmarkBcryptGenerateFromPassword(b *testing.B) {
@@ -18,7 +17,7 @@ func BenchmarkBcryptGenerateFromPassword(b *testing.B) {
 			saltBytes := crypto.CRandBytes(16)
 			b.ResetTimer()
 			for i := 0; i < b.N; i++ {
-				_, err := bcrypt.GenerateFromPassword(saltBytes, passphrase, param)
+				_, err := scrypt.Key(passphrase, saltBytes, n, r, p, klen)
 				require.Nil(b, err)
 			}
 		})
