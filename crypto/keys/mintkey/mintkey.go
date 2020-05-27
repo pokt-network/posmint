@@ -8,11 +8,11 @@ import (
 	"encoding/json"
 	"fmt"
 	posCrypto "github.com/pokt-network/posmint/crypto"
-	"github.com/tendermint/crypto/bcrypt"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/armor"
 	"github.com/tendermint/tendermint/crypto/xsalsa20symmetric"
 	cmn "github.com/tendermint/tendermint/libs/common"
+	"golang.org/x/crypto/scrypt"
 	"strconv"
 )
 
@@ -130,14 +130,15 @@ func EncryptArmorPrivKey(privKey posCrypto.PrivateKey, passphrase, hint string) 
 // encrypted priv key.
 func encryptPrivKey(privKey posCrypto.PrivateKey, passphrase string) (saltBytes []byte, encBytes []byte) {
 	saltBytes = crypto.CRandBytes(16)
-	key, err := bcrypt.GenerateFromPassword(saltBytes, []byte(passphrase), BcryptSecurityParameter)
+	//scrypt.Key([]byte(passphrase),saltBytes, 32768, 8, 1, 32)
+	key, err := scrypt.Key([]byte(passphrase), saltBytes, 32768, 8, 1, 32)
 	if err != nil {
 		cmn.Exit("Error generating bcrypt key from passphrase: " + err.Error())
 	}
-	key = crypto.Sha256(key) // get 32 bytes
-	privKeyBytes := privKey.RawBytes()
+	//key = crypto.Sha256(key) // get 32 bytes
+	privKeyBytes := privKey.RawString()
 	//encrypt using AES
-	encBytes, err = EncryptAESGCM(key, privKeyBytes)
+	encBytes, err = EncryptAESGCM(key, []byte(privKeyBytes))
 	if err != nil {
 		cmn.Exit("Error encrypting bytes: " + err.Error())
 	}
@@ -205,11 +206,12 @@ func compatibilityUnarmor(armorStr string, passphrase string) (posCrypto.Private
 }
 
 func decryptPrivKey(saltBytes []byte, encBytes []byte, passphrase string) (privKey posCrypto.PrivateKey, err error) {
-	key, err := bcrypt.GenerateFromPassword(saltBytes, []byte(passphrase), BcryptSecurityParameter)
+
+	key, err := scrypt.Key([]byte(passphrase), saltBytes, 32768, 8, 1, 32)
 	if err != nil {
 		cmn.Exit("Error generating bcrypt key from passphrase: " + err.Error())
 	}
-	key = crypto.Sha256(key) // Get 32 bytes
+	//key = crypto.Sha256(key) // Get 32 bytes
 	//decrypt using AES
 	privKeyBytes, err := DecryptAESGCM(key, encBytes)
 	if err != nil {
@@ -221,6 +223,7 @@ func decryptPrivKey(saltBytes []byte, encBytes []byte, passphrase string) (privK
 			return
 		}
 	}
+	privKeyBytes, _ = hex.DecodeString(string(privKeyBytes))
 	pk, err := posCrypto.NewPrivateKeyBz(privKeyBytes)
 	if err != nil {
 		fmt.Println("Checking if Pre RC 0.3.0 Key")
