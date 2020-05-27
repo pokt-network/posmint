@@ -10,7 +10,6 @@ import (
 	posCrypto "github.com/pokt-network/posmint/crypto"
 	"github.com/tendermint/tendermint/crypto"
 	"github.com/tendermint/tendermint/crypto/armor"
-	"github.com/tendermint/tendermint/crypto/xsalsa20symmetric"
 	cmn "github.com/tendermint/tendermint/libs/common"
 	"golang.org/x/crypto/scrypt"
 	"strconv"
@@ -20,7 +19,12 @@ const (
 	blockTypePrivKey = "TENDERMINT PRIVATE KEY"
 	blockTypeKeyInfo = "TENDERMINT KEY INFO"
 	blockTypePubKey  = "TENDERMINT PUBLIC KEY"
-	defaultKDF       = "bcrypt"
+	defaultKDF       = "scrypt"
+	//Scrypt params
+	n    = 32768
+	r    = 8
+	p    = 1
+	klen = 32
 )
 
 // Make bcrypt security parameter var, so it can be changed within the lcd test
@@ -130,12 +134,10 @@ func EncryptArmorPrivKey(privKey posCrypto.PrivateKey, passphrase, hint string) 
 // encrypted priv key.
 func encryptPrivKey(privKey posCrypto.PrivateKey, passphrase string) (saltBytes []byte, encBytes []byte) {
 	saltBytes = crypto.CRandBytes(16)
-	//scrypt.Key([]byte(passphrase),saltBytes, 32768, 8, 1, 32)
-	key, err := scrypt.Key([]byte(passphrase), saltBytes, 32768, 8, 1, 32)
+	key, err := scrypt.Key([]byte(passphrase), saltBytes, n, r, p, klen)
 	if err != nil {
 		cmn.Exit("Error generating bcrypt key from passphrase: " + err.Error())
 	}
-	//key = crypto.Sha256(key) // get 32 bytes
 	privKeyBytes := privKey.RawString()
 	//encrypt using AES
 	encBytes, err = EncryptAESGCM(key, []byte(privKeyBytes))
@@ -152,14 +154,10 @@ func UnarmorDecryptPrivKey(armorStr string, passphrase string) (posCrypto.Privat
 	//trying to unmarshal to ArmoredJson Struct
 	err := json.Unmarshal([]byte(armorStr), &armoredJson)
 	if err != nil {
-		//if the unmarshal fails that could mean the armor in the keybase could be in the old format.
-		//[RBM]
-		fmt.Println("Checking if Pre RC 0.3.0 armored")
-		//check the pre RC 0.3.0 unarmor
-		return compatibilityUnarmor(armorStr, passphrase)
+		return privKey, err
 	}
 	// check the ArmoredJson for the correct parameters on kdf and salt
-	if armoredJson.Kdf != "bcrypt" {
+	if armoredJson.Kdf != "scrypt" {
 		return privKey, fmt.Errorf("Unrecognized KDF type: %v", armoredJson.Kdf)
 	}
 	if armoredJson.Salt == "" {
@@ -180,60 +178,21 @@ func UnarmorDecryptPrivKey(armorStr string, passphrase string) (posCrypto.Privat
 	return privKey, err
 }
 
-//compatibilityUnarmor - used to unarmor pre RC 0.3.0 keys in keybase or exported, this was the old UnarmorDecryptPrivKey
-//[RBM]
-func compatibilityUnarmor(armorStr string, passphrase string) (posCrypto.PrivateKey, error) {
-	var privKey posCrypto.PrivateKey
-	blockType, header, encBytes, err := armor.DecodeArmor(armorStr)
-	if err != nil {
-		return privKey, err
-	}
-	if blockType != blockTypePrivKey {
-		return privKey, fmt.Errorf("Unrecognized armor type: %v", blockType)
-	}
-	if header["kdf"] != "bcrypt" {
-		return privKey, fmt.Errorf("Unrecognized KDF type: %v", header["KDF"])
-	}
-	if header["salt"] == "" {
-		return privKey, fmt.Errorf("Missing salt bytes")
-	}
-	saltBytes, err := hex.DecodeString(header["salt"])
-	if err != nil {
-		return privKey, fmt.Errorf("Error decoding salt: %v", err.Error())
-	}
-	privKey, err = decryptPrivKey(saltBytes, encBytes, passphrase)
-	return privKey, err
-}
-
 func decryptPrivKey(saltBytes []byte, encBytes []byte, passphrase string) (privKey posCrypto.PrivateKey, err error) {
 
-	key, err := scrypt.Key([]byte(passphrase), saltBytes, 32768, 8, 1, 32)
+	key, err := scrypt.Key([]byte(passphrase), saltBytes, n, r, p, klen)
 	if err != nil {
 		cmn.Exit("Error generating bcrypt key from passphrase: " + err.Error())
 	}
-	//key = crypto.Sha256(key) // Get 32 bytes
 	//decrypt using AES
 	privKeyBytes, err := DecryptAESGCM(key, encBytes)
 	if err != nil {
-		fmt.Println("Checking if Pre RC 0.3.0 encrypted")
-		//[RBM]
-		//Compatibility with pre RC 0.3.0 keys encrypted using salsa20
-		privKeyBytes, err = xsalsa20symmetric.DecryptSymmetric(encBytes, key)
-		if err != nil {
-			return
-		}
+		return privKey, err
 	}
 	privKeyBytes, _ = hex.DecodeString(string(privKeyBytes))
 	pk, err := posCrypto.NewPrivateKeyBz(privKeyBytes)
 	if err != nil {
-		fmt.Println("Checking if Pre RC 0.3.0 Key")
-		//[RBM]
-		//Compatibility with pre RC 0.3.0 keys using amino bytes
-		pk, err2 := posCrypto.PrivKeyFromBytes(privKeyBytes)
-		if err2 != nil {
-			return
-		}
-		return pk, err2
+		return pk, err
 	}
 	return pk, err
 }
