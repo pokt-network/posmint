@@ -21,7 +21,7 @@ const (
 type MsgChangeParam struct {
 	FromAddress sdk.Address `json:"address"`
 	ParamKey    string      `json:"param_key"`
-	ParamVal    interface{} `json:"param_value"`
+	ParamVal    []byte      `json:"param_value"`
 }
 
 // Route provides router key for msg
@@ -59,6 +59,22 @@ func (msg MsgChangeParam) ValidateBasic() sdk.Error {
 	}
 	return nil
 }
+
+//----------------------------------------------------------------------------------------------------------------------
+//// MsgChangeParamValue Auxiliary interface for wrapping different interface field in governance parameters
+//type ParamValue interface{
+//	Value() interface{}
+//}
+//var _ ParamValue = MsgChangeParamValue{} // ensure implements interface at compile time
+//
+//
+//type MsgChangeParamValue struct{
+//	V interface{} `json:"value"`
+//}
+//
+//func (m MsgChangeParamValue) Value() interface{}{
+//	return m.V
+//}
 
 //----------------------------------------------------------------------------------------------------------------------
 

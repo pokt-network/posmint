@@ -1,27 +1,30 @@
 package types
 
 import (
+	"fmt"
 	"github.com/pokt-network/posmint/types"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestMsgChangeParam_ValidateBasic(t *testing.T) {
+	cdc := makeTestCodec()
+	bytes, _ := cdc.MarshalJSON(false)
 	m := MsgChangeParam{
 		FromAddress: getRandomValidatorAddress(),
 		ParamKey:    "bank/sendenabled",
-		ParamVal:    false,
+		ParamVal:    bytes,
 	}
 	assert.Nil(t, m.ValidateBasic())
 	m = MsgChangeParam{
 		FromAddress: getRandomValidatorAddress(),
 		ParamKey:    "",
-		ParamVal:    false,
+		ParamVal:    bytes,
 	}
 	assert.NotNil(t, m.ValidateBasic())
 	m = MsgChangeParam{
 		ParamKey: "bank/sendenabled",
-		ParamVal: false,
+		ParamVal: bytes,
 	}
 	assert.NotNil(t, m.ValidateBasic())
 	m = MsgChangeParam{
@@ -29,6 +32,23 @@ func TestMsgChangeParam_ValidateBasic(t *testing.T) {
 		ParamKey:    "bank/sendenabled",
 	}
 	assert.NotNil(t, m.ValidateBasic())
+}
+
+func TestAminoPrimitive(t *testing.T) {
+	cdc := makeTestCodec()
+	bytesbool, _ := cdc.MarshalJSON(false)
+	bytesint, _ := cdc.MarshalJSON(int64(23))
+	assert.NotNil(t, bytesbool)
+	fmt.Println(string(bytesbool))
+	assert.NotNil(t, bytesint)
+	fmt.Println(string(bytesint))
+	var b bool
+	var i int64
+	err := cdc.UnmarshalJSON(bytesbool, &b)
+	assert.Nil(t, err)
+
+	err = cdc.UnmarshalJSON(bytesint, &i)
+	assert.Nil(t, err)
 }
 
 func TestMsgDAOTransfer_ValidateBasic(t *testing.T) {
