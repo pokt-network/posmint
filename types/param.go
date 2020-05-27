@@ -124,6 +124,15 @@ func (s Subspace) GetIfExists(ctx Ctx, key []byte, ptr interface{}) {
 	}
 }
 
+func (s Subspace) GetIfExistsRaw(ctx Ctx, key []byte) []byte {
+	store := s.kvStore(ctx)
+	bz := store.Get(key)
+	if bz == nil {
+		return nil
+	}
+	return bz
+}
+
 // GetWithSubkey returns a parameter with a given key and a subkey.
 func (s Subspace) GetWithSubkey(ctx Ctx, key, subkey []byte, ptr interface{}) {
 	s.Get(ctx, concatKeys(key, subkey), ptr)

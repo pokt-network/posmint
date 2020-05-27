@@ -1,6 +1,7 @@
 package gov
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/pokt-network/posmint/codec"
 	"github.com/pokt-network/posmint/crypto"
@@ -13,13 +14,18 @@ import (
 )
 
 func ChangeParamsTx(cdc *codec.Codec, tmNode client.Client, keybase keys.Keybase, fromAddress sdk.Address, aclKey string, paramValue interface{}, passphrase string) (*sdk.TxResponse, error) {
+	valueBytes, err := json.Marshal(paramValue)
+	if err != nil {
+		return nil, err
+	}
+
 	msg := types.MsgChangeParam{
 		FromAddress: fromAddress,
 		ParamKey:    aclKey,
-		ParamVal:    paramValue,
+		ParamVal:    valueBytes,
 	}
 	txBuilder, cliCtx := newTx(cdc, msg, fromAddress, tmNode, keybase, passphrase)
-	err := msg.ValidateBasic()
+	err = msg.ValidateBasic()
 	if err != nil {
 		return nil, err
 	}

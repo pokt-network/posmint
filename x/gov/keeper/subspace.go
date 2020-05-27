@@ -60,6 +60,17 @@ func (k Keeper) GetAllParamNames(ctx sdk.Ctx) (paramNames map[string]bool) {
 	return
 }
 
+func (k Keeper) GetAllParamNameValue(ctx sdk.Ctx) (paramNames map[string]string) {
+	paramNames = make(map[string]string)
+	for _, space := range k.spaces {
+		keys := space.GetAllParamKeys(ctx)
+		for _, key := range keys {
+			paramNames[space.Name()+"/"+key] = string(space.GetIfExistsRaw(ctx, []byte(key)))
+		}
+	}
+	return
+}
+
 func (k Keeper) ModifyParam(ctx sdk.Ctx, aclKey string, paramValue interface{}, owner sdk.Address) sdk.Result {
 	if err := k.VerifyACL(ctx, aclKey, owner); err != nil {
 		return err.Result()
