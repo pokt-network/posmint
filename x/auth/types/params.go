@@ -17,14 +17,20 @@ const (
 var (
 	KeyMaxMemoCharacters = []byte("MaxMemoCharacters")
 	KeyTxSigLimit        = []byte("TxSigLimit")
+	KeyFeeMultiplier     = []byte("FeeMultipliers")
+	DefaultFeeMultiplier = FeeMultipliers{
+		FeeMultis: nil,
+		Default:   1,
+	}
 )
 
 var _ sdk.ParamSet = &Params{}
 
 // Params defines the parameters for the auth module.
 type Params struct {
-	MaxMemoCharacters uint64 `json:"max_memo_characters" yaml:"max_memo_characters"`
-	TxSigLimit        uint64 `json:"tx_sig_limit" yaml:"tx_sig_limit"`
+	MaxMemoCharacters uint64         `json:"max_memo_characters" yaml:"max_memo_characters"`
+	TxSigLimit        uint64         `json:"tx_sig_limit" yaml:"tx_sig_limit"`
+	FeeMultiplier     FeeMultipliers `json:"fee_multipliers"`
 }
 
 // ParamKeyTable for auth module
@@ -39,6 +45,7 @@ func (p *Params) ParamSetPairs() sdk.ParamSetPairs {
 	return sdk.ParamSetPairs{
 		{KeyMaxMemoCharacters, &p.MaxMemoCharacters},
 		{KeyTxSigLimit, &p.TxSigLimit},
+		{KeyFeeMultiplier, &p.FeeMultiplier},
 	}
 }
 
@@ -54,6 +61,7 @@ func DefaultParams() Params {
 	return Params{
 		MaxMemoCharacters: DefaultMaxMemoCharacters,
 		TxSigLimit:        DefaultTxSigLimit,
+		FeeMultiplier:     DefaultFeeMultiplier,
 	}
 }
 
@@ -63,5 +71,6 @@ func (p Params) String() string {
 	sb.WriteString("Params: \n")
 	sb.WriteString(fmt.Sprintf("ACLKey: %d\n", p.MaxMemoCharacters))
 	sb.WriteString(fmt.Sprintf("TxSigLimit: %d\n", p.TxSigLimit))
+	sb.WriteString(fmt.Sprintf("FeeMultiplier: %v\n", p.FeeMultiplier))
 	return sb.String()
 }
