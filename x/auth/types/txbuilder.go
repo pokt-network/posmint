@@ -3,9 +3,10 @@ package types
 import (
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/pokt-network/posmint/crypto"
 	"github.com/tendermint/tendermint/libs/common"
-	"strings"
 
 	crkeys "github.com/pokt-network/posmint/crypto/keys"
 	sdk "github.com/pokt-network/posmint/types"
@@ -90,9 +91,6 @@ func (bldr TxBuilder) WithMemo(memo string) TxBuilder {
 // BuildAndSign builds a single message to be signed, and signs a transaction
 // with the built message given a address, private key, and a set of messages.
 func (bldr TxBuilder) BuildAndSign(address sdk.Address, privateKey crypto.PrivateKey, msg sdk.Msg) ([]byte, error) {
-	if bldr.keybase == nil {
-		return nil, errors.New(fmt.Sprintf("cant build and sign transaciton: the keybase is nil"))
-	}
 	if bldr.chainID == "" {
 		return nil, errors.New(fmt.Sprintf("cant build and sign transaciton: the chainID is empty"))
 	}
