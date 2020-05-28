@@ -99,6 +99,7 @@ func createTestACL() govTypes.ACL {
 		acl := govTypes.ACL(make([]govTypes.ACLPair, 0))
 		acl.SetOwner("auth/MaxMemoCharacters", getRandomValidatorAddress())
 		acl.SetOwner("auth/TxSigLimit", getRandomValidatorAddress())
+		acl.SetOwner("auth/FeeMultipliers", getRandomValidatorAddress())
 		acl.SetOwner("gov/daoOwner", getRandomValidatorAddress())
 		acl.SetOwner("gov/acl", getRandomValidatorAddress())
 		acl.SetOwner("gov/upgrade", getRandomValidatorAddress())

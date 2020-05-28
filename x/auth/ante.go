@@ -73,7 +73,7 @@ func ValidateTransaction(ctx sdk.Ctx, k Keeper, stdTx StdTx, params Params, tmNo
 		return sdk.ErrInternal(err.Error())
 	}
 	// get the fees from the tx
-	expectedFee := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, stdTx.GetMsg().GetFee()))
+	expectedFee := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, k.GetParams(ctx).FeeMultiplier.GetFee(stdTx.Msg)))
 	// test for public key type
 	p, ok := pk.(posCrypto.PublicKeyMultiSig)
 	// if standard public key
