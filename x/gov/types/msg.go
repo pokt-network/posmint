@@ -61,22 +61,6 @@ func (msg MsgChangeParam) ValidateBasic() sdk.Error {
 }
 
 //----------------------------------------------------------------------------------------------------------------------
-//// MsgChangeParamValue Auxiliary interface for wrapping different interface field in governance parameters
-//type ParamValue interface{
-//	Value() interface{}
-//}
-//var _ ParamValue = MsgChangeParamValue{} // ensure implements interface at compile time
-//
-//
-//type MsgChangeParamValue struct{
-//	V interface{} `json:"value"`
-//}
-//
-//func (m MsgChangeParamValue) Value() interface{}{
-//	return m.V
-//}
-
-//----------------------------------------------------------------------------------------------------------------------
 
 // MsgDAOTransfer structure for changing governance parameters
 type MsgDAOTransfer struct {
