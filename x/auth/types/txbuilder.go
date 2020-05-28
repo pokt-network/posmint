@@ -137,7 +137,7 @@ func (bldr TxBuilder) BuildAndSignWithKeyBase(address sdk.Address, passphrase st
 	return bldr.txEncoder(NewStdTx(msg, bldr.fees, sig, bldr.memo, entropy))
 }
 
-func (bldr TxBuilder) SignMultisigTransaction(address sdk.Address, keys []crypto.PublicKey, passphrase string, txBytes []byte) (signedTx []byte, err error) {
+func (bldr TxBuilder) SignMultisigTransaction(address sdk.Address, keys []crypto.PublicKey, passphrase string, txBytes []byte, fees int64) (signedTx []byte, err error) {
 	if bldr.keybase == nil {
 		return nil, errors.New(fmt.Sprintf("cant build and sign transaciton: the keybase is nil"))
 	}
@@ -177,11 +177,12 @@ func (bldr TxBuilder) SignMultisigTransaction(address sdk.Address, keys []crypto
 	}
 	// replace the old multi-signature with the new multi-signature (containing the additional signature)
 	tx.Signature = sig
+	tx.Fee = tx.Fee.Add(sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(fees))))
 	// encode using the standard encoder
 	return bldr.TxEncoder()(tx)
 }
 
-func (bldr TxBuilder) BuildAndSignMultisigTransaction(address sdk.Address, publicKey crypto.PublicKeyMultiSig, m sdk.Msg, passphrase string) (signedTx []byte, err error) {
+func (bldr TxBuilder) BuildAndSignMultisigTransaction(address sdk.Address, publicKey crypto.PublicKeyMultiSig, m sdk.Msg, passphrase string, fees int64) (signedTx []byte, err error) {
 	if bldr.keybase == nil {
 		return nil, errors.New(fmt.Sprintf("cant build and sign transaciton: the keybase is nil"))
 	}
@@ -190,7 +191,7 @@ func (bldr TxBuilder) BuildAndSignMultisigTransaction(address sdk.Address, publi
 	}
 	// bulid the transaction from scratch
 	entropy := common.RandInt64()
-	fee := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(100000)))
+	fee := sdk.NewCoins(sdk.NewCoin(sdk.DefaultStakeDenom, sdk.NewInt(fees)))
 	signBz, err := StdSignBytes(bldr.chainID, entropy, fee, m, bldr.memo)
 	if err != nil {
 		return nil, err
