@@ -174,7 +174,12 @@ func (s Subspace) checkType(store KVStore, key []byte, param interface{}) {
 		pty = pty.Elem()
 	}
 
-	if pty != ty && !pty.Implements(ty) {
+	if pty.Kind() == reflect.Interface {
+		if pty != ty && !pty.Implements(ty) {
+			panic("Type mismatch with registered table")
+		}
+	}
+	if pty != ty {
 		panic("Type mismatch with registered table")
 	}
 }
