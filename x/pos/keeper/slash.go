@@ -116,7 +116,10 @@ func (k Keeper) handleDoubleSign(ctx sdk.Ctx, addr crypto.Address, infractionHei
 			sdk.NewAttribute(types.AttributeKeyReason, types.AttributeValueDoubleSign),
 		),
 	)
-	k.slash(ctx, address, distributionHeight, power, fraction)
+	err = k.slash(ctx, address, distributionHeight, power, fraction)
+	if err != nil {
+		ctx.Logger().Error(err.Error())
+	}
 
 	// JailValidator validator if not already jailed
 	if !validator.IsJailed() {
@@ -258,7 +261,10 @@ func (k Keeper) handleValidatorSignature(ctx sdk.Ctx, addr crypto.Address, power
 					sdk.NewAttribute(types.AttributeKeyJailed, address.String()),
 				),
 			)
-			k.slash(ctx, address, distributionHeight, power, k.SlashFractionDowntime(ctx))
+			err := k.slash(ctx, address, distributionHeight, power, k.SlashFractionDowntime(ctx))
+			if err != nil {
+				ctx.Logger().Error(err.Error())
+			}
 			k.JailValidator(ctx, address)
 			signInfo.JailedUntil = ctx.BlockHeader().Time.Add(k.DowntimeJailDuration(ctx))
 			// We need to reset the counter & array so that the validator won't be immediately slashed for downtime upon restaking.
@@ -319,7 +325,10 @@ func (k Keeper) burnValidators(ctx sdk.Ctx) {
 		address := sdk.Address(types.AddressFromKey(iterator.Key()))
 		amino.MustUnmarshalBinaryBare(iterator.Value(), &severity)
 		val := k.mustGetValidator(ctx, address)
-		k.slash(ctx, sdk.Address(address), ctx.BlockHeight(), val.ConsensusPower(), severity)
+		err := k.slash(ctx, sdk.Address(address), ctx.BlockHeight(), val.ConsensusPower(), severity)
+		if err != nil {
+			ctx.Logger().Error(err.Error())
+		}
 		// remove from the burn store
 		store.Delete(iterator.Key())
 	}
