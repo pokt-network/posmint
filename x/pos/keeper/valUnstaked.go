@@ -88,7 +88,7 @@ func (k Keeper) getMatureValidators(ctx sdk.Ctx) (matureValsAddrs []sdk.Address)
 	return matureValsAddrs
 }
 
-// Unstakes all the unstaking validators that have finished their unstaking period
+// unstakeAllMatureValidators -  Unstake all the unstaking validators that have finished their unstaking period
 func (k Keeper) unstakeAllMatureValidators(ctx sdk.Ctx) {
 	store := ctx.KVStore(k.storeKey)
 	unstakingValidatorsIterator := k.unstakingValidatorsIterator(ctx, ctx.BlockHeader().Time)
@@ -99,18 +99,16 @@ func (k Keeper) unstakeAllMatureValidators(ctx sdk.Ctx) {
 		for _, valAddr := range unstakingVals {
 			val, found := k.GetValidator(ctx, valAddr)
 			if !found {
-				panic("validator in the unstaking queue was not found")
+				ctx.Logger().Error("validator in the unstaking queue was not found, possible forced unstake?")
 			}
 			err := k.ValidateValidatorFinishUnstaking(ctx, val)
 			if err != nil {
-				panic(err)
+				ctx.Logger().Error("Could not finish unstaking mature validator: " + err.Error())
+				continue
 			}
-			err = k.FinishUnstakingValidator(ctx, val)
-			if err != nil {
-				panic(err)
-			}
+			_ = k.FinishUnstakingValidator(ctx, val)
+			k.DeleteValidator(ctx, valAddr)
 		}
-		key := unstakingValidatorsIterator.Key()
-		store.Delete(key)
+		store.Delete(unstakingValidatorsIterator.Key())
 	}
 }

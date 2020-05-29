@@ -3,7 +3,6 @@ package keeper
 import (
 	"fmt"
 	sdk "github.com/pokt-network/posmint/types"
-	"github.com/pokt-network/posmint/x/pos/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 )
@@ -46,22 +45,11 @@ func BeginBlocker(ctx sdk.Ctx, req abci.RequestBeginBlock, k Keeper) {
 	}
 }
 
-// Called every block, update validator set
+// EndBlocker - Called at the end of every block, update validator set
 func EndBlocker(ctx sdk.Ctx, k Keeper) []abci.ValidatorUpdate {
-	// Calculate validator set changes.
 	// NOTE: UpdateTendermintValidators has to come before unstakeAllMatureValidators.
 	validatorUpdates := k.UpdateTendermintValidators(ctx)
-	matureValidators := k.getMatureValidators(ctx)
 	// Unstake all mature validators from the unstakeing queue.
 	k.unstakeAllMatureValidators(ctx)
-	for _, valAddr := range matureValidators {
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				types.EventTypeCompleteUnstaking,
-				sdk.NewAttribute(types.AttributeKeyValidator, valAddr.String()),
-			),
-		)
-	}
-
 	return validatorUpdates
 }
