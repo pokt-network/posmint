@@ -708,7 +708,11 @@ func TestSlash(t *testing.T) {
 				fraction = keeper.SlashFractionDoubleSign(context)
 			}
 
-			keeper.slash(context, sdk.Address(cryptoAddr), infractionHeight, test.args.power, fraction)
+			err := keeper.slash(context, sdk.Address(cryptoAddr), infractionHeight, test.args.power, fraction)
+			if err != nil {
+				context.Logger().Error(err.Error())
+				t.Fail()
+			}
 			validator, found := keeper.GetValidator(context, sdk.Address(cryptoAddr))
 			if !found {
 				t.Fail()
