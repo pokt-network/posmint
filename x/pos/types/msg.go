@@ -61,15 +61,9 @@ type MsgBeginUnstake struct {
 	Address sdk.Address `json:"validator_address" yaml:"validator_address"`
 }
 
-<<<<<<< HEAD
 // GetSigner return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgBeginUnstake) GetSigner() sdk.Address {
 	return msg.Address
-=======
-// GetSigners return address(es) that must sign over msg.GetSignBytes()
-func (msg MsgBeginUnstake) GetSigners() []sdk.Address {
-	return []sdk.Address{sdk.Address(msg.Address)}
->>>>>>> add getMsg method to Msg interface
 }
 
 // GetSignBytes returns the message bytes to sign over.
@@ -112,7 +106,6 @@ func (msg MsgUnjail) Type() string { return "unjail" }
 // GetFee get fee for msg
 func (msg MsgUnjail) GetFee() sdk.Int {
 	return sdk.NewInt(PosFeeMap[msg.Type()])
-<<<<<<< HEAD
 }
 
 // GetSigner return address(es) that must sign over msg.GetSignBytes()
@@ -120,15 +113,6 @@ func (msg MsgUnjail) GetSigner() sdk.Address {
 	return msg.ValidatorAddr
 }
 
-=======
-}
-
-// GetSigners return address(es) that must sign over msg.GetSignBytes()
-func (msg MsgUnjail) GetSigners() []sdk.Address {
-	return []sdk.Address{sdk.Address(msg.ValidatorAddr)}
-}
-
->>>>>>> add getMsg method to Msg interface
 // GetSignBytes returns the message bytes to sign over.
 func (msg MsgUnjail) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
@@ -163,15 +147,9 @@ func (msg MsgSend) GetFee() sdk.Int {
 	return sdk.NewInt(PosFeeMap[msg.Type()])
 }
 
-<<<<<<< HEAD
 // GetSigner return address(es) that must sign over msg.GetSignBytes()
 func (msg MsgSend) GetSigner() sdk.Address {
 	return msg.FromAddress
-=======
-// GetSigners return address(es) that must sign over msg.GetSignBytes()
-func (msg MsgSend) GetSigners() []sdk.Address {
-	return []sdk.Address{sdk.Address(msg.FromAddress)}
->>>>>>> add getMsg method to Msg interface
 }
 
 // GetSignBytes returns the message bytes to sign over.
