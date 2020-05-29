@@ -1,9 +1,9 @@
 package types
 
 const (
-	DAOTransferFee    = 100000
-	MsgChangeParamFee = 100000
-	MsgUpgradeFee     = 100000
+	DAOTransferFee    = 10000
+	MsgChangeParamFee = 10000
+	MsgUpgradeFee     = 10000
 )
 
 var (
