@@ -88,10 +88,6 @@ type BaseApp struct {
 	// TODO: Move this in the future to baseapp param store on main store.
 	consensusParams *abci.ConsensusParams
 
-	// The minimum gas prices a validator is willing to accept for processing a
-	// transaction. This is mainly used for DoS and spam prevention.
-	minGasPrices sdk.DecCoins
-
 	// flag for sealing options and parameters to a BaseApp
 	sealed bool
 
@@ -292,10 +288,6 @@ func (app *BaseApp) initFromMainStore(baseKey *sdk.KVStoreKey) error {
 	return nil
 }
 
-func (app *BaseApp) setMinGasPrices(gasPrices sdk.DecCoins) {
-	app.minGasPrices = gasPrices
-}
-
 func (app *BaseApp) setHaltHeight(haltHeight uint64) {
 	app.haltHeight = haltHeight
 }
@@ -323,7 +315,7 @@ func (app *BaseApp) IsSealed() bool { return app.sealed }
 // It is called by InitChain() and Commit()
 func (app *BaseApp) setCheckState(header abci.Header) { // todo <- modified here
 	ms := app.cms
-	context := sdk.NewContext(ms, header, true, app.logger).WithMinGasPrices(app.minGasPrices).WithAppVersion(app.appVersion)
+	context := sdk.NewContext(ms, header, true, app.logger).WithAppVersion(app.appVersion)
 	if app.tmNode != nil {
 		context = context.WithBlockStore(app.tmNode.BlockStore())
 	}
@@ -339,7 +331,7 @@ func (app *BaseApp) setCheckState(header abci.Header) { // todo <- modified here
 // and deliverState is set nil on Commit().
 func (app *BaseApp) setDeliverState(header abci.Header) { // todo <- modified here
 	ms := app.cms
-	context := sdk.NewContext(ms, header, true, app.logger).WithMinGasPrices(app.minGasPrices).WithAppVersion(app.appVersion)
+	context := sdk.NewContext(ms, header, true, app.logger).WithAppVersion(app.appVersion)
 	if app.tmNode != nil {
 		context = context.WithBlockStore(app.tmNode.BlockStore())
 	}
@@ -635,7 +627,7 @@ func handleQueryCustom(app *BaseApp, path []string, req abci.RequestQuery) (res 
 	// cache wrap the commit-multistore for safety
 	ctx := sdk.NewContext(
 		newMS, app.checkState.ctx.BlockHeader(), true, app.logger,
-	).WithMinGasPrices(app.minGasPrices).WithBlockStore(app.checkState.ctx.BlockStore()).WithAppVersion(app.appVersion)
+	).WithBlockStore(app.checkState.ctx.BlockStore()).WithAppVersion(app.appVersion)
 
 	// Passes the rest of the path as an argument to the querier.
 	//
