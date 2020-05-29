@@ -2,9 +2,6 @@
 package baseapp
 
 import (
-	"fmt"
-	"os"
-
 	dbm "github.com/tendermint/tm-db"
 
 	"github.com/pokt-network/posmint/store"
@@ -17,17 +14,6 @@ import (
 // SetPruning sets a pruning option on the multistore associated with the app
 func SetPruning(opts sdk.PruningOptions) func(*BaseApp) {
 	return func(bap *BaseApp) { bap.cms.SetPruning(opts) }
-}
-
-// SetMinGasPrices returns an option that sets the minimum gas prices on the app.
-func SetMinGasPrices(gasPricesStr string) func(*BaseApp) {
-	gasPrices, err := sdk.ParseDecCoins(gasPricesStr)
-	if err != nil {
-		fmt.Println(fmt.Errorf("invalid minimum gas prices: %v", err))
-		os.Exit(1)
-	}
-
-	return func(bap *BaseApp) { bap.setMinGasPrices(gasPrices) }
 }
 
 // SetHaltHeight returns a BaseApp option function that sets the halt block height.

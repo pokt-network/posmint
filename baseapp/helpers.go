@@ -30,7 +30,7 @@ func (app *BaseApp) Deliver(tx sdk.Tx) (result sdk.Result) {
 func (app *BaseApp) NewContext(isCheckTx bool, header abci.Header) sdk.Context {
 	if isCheckTx {
 		return sdk.NewContext(app.checkState.ms, header, true, app.logger).
-			WithMinGasPrices(app.minGasPrices).WithAppVersion(app.appVersion)
+			WithAppVersion(app.appVersion)
 	}
 
 	return sdk.NewContext(app.deliverState.ms, header, false, app.logger).WithAppVersion(app.appVersion)
