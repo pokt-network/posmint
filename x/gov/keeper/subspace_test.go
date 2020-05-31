@@ -4,6 +4,7 @@ import (
 	sdk "github.com/pokt-network/posmint/types"
 	"github.com/pokt-network/posmint/x/gov/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/tendermint/go-amino"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"testing"
 )
@@ -12,7 +13,8 @@ func TestModifyParam(t *testing.T) {
 	addr := getRandomValidatorAddress()
 	var aclKey = types.NewACLKey(types.ModuleName, string(types.DAOOwnerKey))
 	ctx, k := createTestKeeperAndContext(t, false)
-	res := k.ModifyParam(ctx, aclKey, addr, k.GetACL(ctx).GetOwner(aclKey))
+	jbyte, _ := amino.MarshalJSON(addr)
+	res := k.ModifyParam(ctx, aclKey, jbyte, k.GetACL(ctx).GetOwner(aclKey))
 	assert.Zero(t, res.Code)
 	s, ok := k.GetSubspace(types.DefaultParamspace)
 	assert.True(t, ok)
