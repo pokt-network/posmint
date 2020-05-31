@@ -71,7 +71,7 @@ func (k Keeper) GetAllParamNameValue(ctx sdk.Ctx) (paramNames map[string]string)
 	return
 }
 
-func (k Keeper) ModifyParam(ctx sdk.Ctx, aclKey string, paramValue interface{}, owner sdk.Address) sdk.Result {
+func (k Keeper) HandleUpgrade(ctx sdk.Ctx, aclKey string, paramValue interface{}, owner sdk.Address) sdk.Result {
 	if err := k.VerifyACL(ctx, aclKey, owner); err != nil {
 		return err.Result()
 	}
@@ -101,6 +101,51 @@ func (k Keeper) ModifyParam(ctx sdk.Ctx, aclKey string, paramValue interface{}, 
 	if aclKey == types.NewACLKey(types.ModuleName, string(types.UpgradeKey)) {
 		u, ok := paramValue.(types.Upgrade)
 		if !ok {
+			ctx.Logger().Error(fmt.Sprintf("unable to convert %v to upgrade, can't emit event about upgrade", paramValue))
+			return sdk.Result{Events: ctx.EventManager().Events()}
+		}
+		ctx.EventManager().EmitEvent(sdk.NewEvent(
+			types.EventUpgrade,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeyAction, fmt.Sprintf("UPGRADE CONFIRMED: %s at height %v", u.UpgradeVersion(), u.UpgradeHeight())),
+			sdk.NewAttribute(sdk.AttributeKeySender, owner.String()),
+		))
+	}
+	return sdk.Result{Events: ctx.EventManager().Events()}
+}
+
+func (k Keeper) ModifyParam(ctx sdk.Ctx, aclKey string, paramValue []byte, owner sdk.Address) sdk.Result {
+	if err := k.VerifyACL(ctx, aclKey, owner); err != nil {
+		return err.Result()
+	}
+	subspaceName, paramKey := types.SplitACLKey(aclKey)
+	space, ok := k.spaces[subspaceName]
+	if !ok {
+		k.Logger(ctx).Error(types.ErrSubspaceNotFound(types.ModuleName, subspaceName).Error())
+		os.Exit(1)
+	}
+	space.Update(ctx, []byte(paramKey), paramValue)
+	k.spaces[subspaceName] = space
+	// create the event
+	ctx.EventManager().EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			types.EventParamChange,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(sdk.AttributeKeyAction, fmt.Sprintf("modified: %s to: %v", aclKey, paramValue)),
+			sdk.NewAttribute(sdk.AttributeKeySender, owner.String()),
+		),
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.AttributeValueCategory),
+			sdk.NewAttribute(sdk.AttributeKeySender, owner.String()),
+		),
+	})
+	// if upgrade, emit separate upgrade event
+	if aclKey == types.NewACLKey(types.ModuleName, string(types.UpgradeKey)) {
+		u := types.Upgrade{}
+
+		err := k.cdc.UnmarshalJSON(paramValue, u)
+		if err != nil {
 			ctx.Logger().Error(fmt.Sprintf("unable to convert %v to upgrade, can't emit event about upgrade", paramValue))
 			return sdk.Result{Events: ctx.EventManager().Events()}
 		}
