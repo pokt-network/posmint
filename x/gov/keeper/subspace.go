@@ -140,21 +140,5 @@ func (k Keeper) ModifyParam(ctx sdk.Ctx, aclKey string, paramValue []byte, owner
 			sdk.NewAttribute(sdk.AttributeKeySender, owner.String()),
 		),
 	})
-	// if upgrade, emit separate upgrade event
-	if aclKey == types.NewACLKey(types.ModuleName, string(types.UpgradeKey)) {
-		u := types.Upgrade{}
-
-		err := k.cdc.UnmarshalJSON(paramValue, u)
-		if err != nil {
-			ctx.Logger().Error(fmt.Sprintf("unable to convert %v to upgrade, can't emit event about upgrade", paramValue))
-			return sdk.Result{Events: ctx.EventManager().Events()}
-		}
-		ctx.EventManager().EmitEvent(sdk.NewEvent(
-			types.EventUpgrade,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-			sdk.NewAttribute(sdk.AttributeKeyAction, fmt.Sprintf("UPGRADE CONFIRMED: %s at height %v", u.UpgradeVersion(), u.UpgradeHeight())),
-			sdk.NewAttribute(sdk.AttributeKeySender, owner.String()),
-		))
-	}
 	return sdk.Result{Events: ctx.EventManager().Events()}
 }
