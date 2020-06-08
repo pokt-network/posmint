@@ -6,7 +6,7 @@ require (
 	github.com/gogo/protobuf v1.3.1
 	github.com/magiconair/properties v1.8.1
 	github.com/pkg/errors v0.8.1
-	github.com/pokt-network/tendermint v0.32.11-0.20200529220336-c238eec5d1bb // indirect
+	github.com/pokt-network/tendermint v0.32.11-0.20200608163547-1ea15de2dead // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/tendermint/go-amino v0.15.0
 	github.com/tendermint/iavl v0.12.4
