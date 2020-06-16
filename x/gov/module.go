@@ -123,6 +123,7 @@ func (am AppModule) BeginBlock(ctx sdk.Ctx, req abci.RequestBeginBlock) {
 			ctx.Logger().Error(err.Error())
 			os.Exit(1)
 		}
+		select {}
 	}
 }
 
