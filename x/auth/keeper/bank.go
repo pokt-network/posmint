@@ -222,3 +222,7 @@ func (k Keeper) GetCoins(ctx sdk.Ctx, addr sdk.Address) sdk.Coins {
 func (k Keeper) HasCoins(ctx sdk.Ctx, addr sdk.Address, amt sdk.Coins) bool {
 	return k.GetCoins(ctx, addr).IsAllGTE(amt)
 }
+
+func (k Keeper) GetFee(ctx sdk.Ctx, msg sdk.Msg) sdk.Int {
+	return k.GetParams(ctx).FeeMultiplier.GetFee(msg)
+}
