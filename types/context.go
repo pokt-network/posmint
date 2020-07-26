@@ -155,40 +155,24 @@ func (c Context) PrevCtx(height int64) (Context, error) {
 	if err != nil {
 		return Context{}, err
 	}
-	blck := c.blockstore.LoadBlock(height)
-	if blck == nil {
+	commit := c.blockstore.LoadSeenCommit(height)
+	if commit == nil {
 		return Context{}, errors.New("block at height not found")
 	}
-	hash := blck.LastBlockID.Hash
+	hash := commit.BlockID.Hash
 	if hash == nil {
-		hash = blck.ConsensusHash
+		hash = commit.Hash()
 	}
 	var header = abci.Header{
-		Version: abci.Version{
-			Block: blck.Version.Block.Uint64(),
-			App:   blck.Version.App.Uint64(),
-		},
-		ChainID:  blck.ChainID,
-		Height:   blck.Height,
-		Time:     blck.Time,
-		NumTxs:   blck.NumTxs,
-		TotalTxs: blck.TotalTxs,
+		ChainID: c.ChainID(),
+		Height:  height,
 		LastBlockId: abci.BlockID{
 			Hash: hash,
 			PartsHeader: abci.PartSetHeader{
-				Total: int32(blck.LastBlockID.PartsHeader.Total),
-				Hash:  blck.Hash(),
+				Total: int32(commit.BlockID.PartsHeader.Total),
+				Hash:  commit.Hash(),
 			},
 		},
-		LastCommitHash:     blck.LastCommitHash,
-		DataHash:           blck.DataHash,
-		ValidatorsHash:     blck.ValidatorsHash,
-		NextValidatorsHash: blck.NextValidatorsHash,
-		ConsensusHash:      blck.ConsensusHash,
-		AppHash:            blck.AppHash,
-		LastResultsHash:    blck.LastResultsHash,
-		EvidenceHash:       blck.EvidenceHash,
-		ProposerAddress:    blck.ProposerAddress,
 	}
 	return NewContext((*ms).(MultiStore), header, false, c.logger).WithAppVersion(c.appVersion).WithBlockStore(c.blockstore), nil
 }
